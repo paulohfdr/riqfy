@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiqFy — Metas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css?v=26">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="sidebar-root"></div>
+<div class="main">
+  <div id="topbar-root"></div>
+  <div class="content">
+
+    <div class="summary-cards cols-5">
+      <div class="summary-card"><div class="card-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div><div><div class="card-label">Total de metas</div><div class="card-value" id="cv-total">0</div></div></div>
+      <div class="summary-card"><div class="card-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg></div><div><div class="card-label">Metas concluídas</div><div class="card-value positive" id="cv-concluidas">0</div></div></div>
+      <div class="summary-card"><div class="card-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div><div class="card-label">Valor planejado</div><div class="card-value" id="cv-planejado">R$ 0,00</div></div></div>
+      <div class="summary-card"><div class="card-icon yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" x2="21" y1="22" y2="22"/><line x1="6" x2="6" y1="18" y2="11"/><line x1="10" x2="10" y1="18" y2="11"/><line x1="14" x2="14" y1="18" y2="11"/><line x1="18" x2="18" y1="18" y2="11"/><polygon points="12 2 20 7 4 7"/></svg></div><div><div class="card-label">Valor acumulado</div><div class="card-value" id="cv-acumulado">R$ 0,00</div></div></div>
+      <div class="summary-card"><div class="card-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div><div><div class="card-label">Progresso médio</div><div class="card-value" id="cv-progresso">0,0%</div></div></div>
+    </div>
+
+    <div class="chart-grid" style="margin-bottom:20px">
+      <div class="chart-card">
+        <h3>Evolução das metas</h3>
+        <div class="chart-container" style="height:200px"><canvas id="chart-evolucao"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Status de progresso</h3>
+        <div id="status-progresso"></div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Lista de metas</h3>
+        <button class="btn btn-primary" onclick="abrirModal()">+ Nova meta</button>
+      </div>
+      <table style="table-layout:fixed;min-width:900px">
+        <colgroup>
+          <col style="width:auto">
+          <col style="width:110px">
+          <col style="width:110px">
+          <col style="width:150px">
+          <col style="width:130px">
+          <col style="width:120px">
+          <col style="width:210px">
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Título</th>
+            <th style="min-width:110px">Valor alvo</th>
+            <th style="min-width:100px">Valor atual</th>
+            <th style="min-width:140px">Progresso</th>
+            <th style="min-width:130px">Data limite</th>
+            <th style="text-align:center;min-width:120px">Status</th>
+            <th style="text-align:right;min-width:150px">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-metas">
+          <tr class="empty-row"><td colspan="7">Nenhuma meta cadastrada.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nova/Editar Meta -->
+<div class="modal-overlay hidden" id="modal-meta">
+  <div class="modal">
+    <h2 id="modal-titulo">Nova meta</h2>
+    <input type="hidden" id="edit-id">
+    <div class="form-group">
+      <label>Título *</label>
+      <input type="text" id="f-titulo" placeholder="Ex: Reserva de emergência">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Valor alvo (R$) *</label>
+        <input type="text" id="f-valor-alvo" placeholder="0,00" inputmode="numeric" autocomplete="off" oninput="mascaraMoeda(this)">
+      </div>
+      <div class="form-group">
+        <label>Data limite *</label>
+        <input type="date" id="f-data">
+      </div>
+    </div>
+    <div class="form-group" id="grupo-status" style="display:none">
+      <label>Status</label>
+      <select id="f-status">
+        <option value="em_andamento">Em andamento</option>
+        <option value="concluida">Concluída</option>
+        <option value="cancelada">Cancelada</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-meta')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvar()">Salvar meta</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Aportar -->
+<div class="modal-overlay hidden" id="modal-aporte">
+  <div class="modal" style="max-width:380px">
+    <h2>Aportar valor</h2>
+    <input type="hidden" id="aporte-meta-id">
+    <div style="background:#f0fdf4;border-radius:10px;padding:12px;margin-bottom:16px">
+      <div style="font-size:12px;color:#64748b">Meta</div>
+      <div style="font-weight:600" id="aporte-meta-nome"></div>
+      <div style="font-size:13px;color:#16a34a;margin-top:4px">
+        <span id="aporte-atual"></span> / <span id="aporte-alvo"></span>
+      </div>
+      <div class="progress-bar" style="margin-top:8px"><div class="progress-fill" id="aporte-prog" style="width:0%"></div></div>
+    </div>
+    <div class="form-group">
+      <label>Valor do aporte (R$) *</label>
+      <input type="number" id="f-aporte-valor" placeholder="0,00" min="0.01" step="0.01">
+    </div>
+    <div class="form-group">
+      <label>Observação</label>
+      <input type="text" id="f-aporte-obs" placeholder="Opcional">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-aporte')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarAporte()">Confirmar aporte</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js?v=21"></script>
+<script>
+let chartEv;
+
+(async () => {
+  const u = await checkAuth();
+  if (!u) return;
+  document.getElementById('sidebar-root').innerHTML = renderSidebar('/metas');
+  document.getElementById('topbar-root').innerHTML = renderTopbar();
+  document.getElementById('bottom-nav-root').innerHTML = renderBottomNav('/metas');
+  renderUserBadge(u);
+  carregar();
+})();
+
+async function carregar() {
+  const [metas, resumo] = await Promise.all([apiFetch('/metas'), apiFetch('/metas/resumo')]);
+  if (!metas || !resumo) return;
+
+  document.getElementById('cv-total').textContent = resumo.total;
+  document.getElementById('cv-concluidas').textContent = resumo.concluidas;
+  document.getElementById('cv-planejado').textContent = fmtBRL(resumo.valor_planejado);
+  document.getElementById('cv-acumulado').textContent = fmtBRL(resumo.valor_acumulado);
+  const progMedio = resumo.valor_planejado > 0 ? (resumo.valor_acumulado / resumo.valor_planejado * 100).toFixed(1) : '0.0';
+  document.getElementById('cv-progresso').textContent = progMedio + '%';
+
+  renderTabela(metas);
+  renderStatusProgresso(metas);
+  renderEvolucao(metas);
+}
+
+function renderTabela(metas) {
+  const tb = document.getElementById('tbody-metas');
+  if (!metas.length) { tb.innerHTML = '<tr class="empty-row"><td colspan="7">Nenhuma meta cadastrada.</td></tr>'; return; }
+  const statusLabel = { em_andamento:'Em andamento', concluida:'Concluída', cancelada:'Cancelada' };
+  const statusClass = { em_andamento:'badge-blue', concluida:'badge-green', cancelada:'badge-red' };
+  tb.innerHTML = metas.map(m => {
+    const pct = m.valor_alvo > 0 ? Math.min(100, (m.valor_atual / m.valor_alvo * 100)).toFixed(1) : 0;
+    return `
+      <tr>
+        <td style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.titulo}</td>
+        <td style="white-space:nowrap">${fmtBRL(m.valor_alvo)}</td>
+        <td style="white-space:nowrap">${fmtBRL(m.valor_atual)}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:${pct}%"></div></div>
+            <span style="font-size:12px;color:#64748b;flex-shrink:0;width:36px;text-align:right">${pct}%</span>
+          </div>
+        </td>
+        <td style="white-space:nowrap">${fmtData(m.data_limite)}</td>
+        <td style="text-align:center"><span class="badge ${statusClass[m.status]}">${statusLabel[m.status]}</span></td>
+        <td class="td-actions" style="justify-content:flex-end;overflow:visible;white-space:nowrap">
+          <button class="btn btn-primary btn-sm" onclick="abrirAporte(${m.id})">Aportar</button>
+          <button class="btn btn-info btn-sm" onclick="editar(${m.id})">Editar</button>
+          <button class="btn btn-danger btn-sm" onclick="excluir(${m.id})">Excluir</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderStatusProgresso(metas) {
+  const el = document.getElementById('status-progresso');
+  if (!metas.length) { el.innerHTML = '<p style="color:#94a3b8;padding:16px">Nenhuma meta cadastrada.</p>'; return; }
+  el.innerHTML = metas.map(m => {
+    const pct = m.valor_alvo > 0 ? Math.min(100, (m.valor_atual / m.valor_alvo * 100)).toFixed(1) : 0;
+    return `
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px">
+          <span style="font-weight:500">${m.titulo}</span>
+          <span style="color:#64748b">${pct}%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderEvolucao(metas) {
+  if (chartEv) chartEv.destroy();
+  if (!metas.length) return;
+  chartEv = new Chart(document.getElementById('chart-evolucao'), {
+    type: 'bar',
+    data: {
+      labels: metas.map(m => m.titulo.length > 12 ? m.titulo.slice(0,12)+'…' : m.titulo),
+      datasets: [
+        { label: 'Acumulado', data: metas.map(m=>m.valor_atual), backgroundColor: '#16a34a' },
+        { label: 'Alvo', data: metas.map(m=>m.valor_alvo), backgroundColor: '#e2e8f0' }
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'top'} }, scales:{ x:{stacked:false}, y:{beginAtZero:true} } }
+  });
+}
+
+function abrirModal(dados=null) {
+  document.getElementById('modal-titulo').textContent = dados ? 'Editar meta' : 'Nova meta';
+  document.getElementById('edit-id').value = dados?.id || '';
+  document.getElementById('f-titulo').value = dados?.titulo || '';
+  document.getElementById('f-valor-alvo').value = dados?.valor_alvo ? fmtMoedaInput(dados.valor_alvo) : '';
+  document.getElementById('f-data').value = dados ? String(dados.data_limite).substring(0, 10) : '';
+  document.getElementById('f-status').value = dados?.status || 'em_andamento';
+  document.getElementById('grupo-status').style.display = dados ? 'block' : 'none';
+  openModal('modal-meta');
+}
+
+async function salvar() {
+  const id = document.getElementById('edit-id').value;
+  const body = {
+    titulo: document.getElementById('f-titulo').value.trim(),
+    valor_alvo: parseMoeda(document.getElementById('f-valor-alvo').value),
+    data_limite: document.getElementById('f-data').value,
+    status: document.getElementById('f-status').value
+  };
+  if (!body.titulo || !body.valor_alvo || !body.data_limite) { toast('Preencha os campos obrigatórios.','error'); return; }
+  try {
+    if (id) await apiFetch(`/metas/${id}`, { method:'PUT', body:JSON.stringify(body) });
+    else await apiFetch('/metas', { method:'POST', body:JSON.stringify(body) });
+    toast(id ? 'Meta atualizada!' : 'Meta criada!');
+    closeModal('modal-meta');
+    carregar();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+async function editar(id) {
+  const metas = await apiFetch('/metas') || [];
+  const m = metas.find(x => x.id === id);
+  if (m) abrirModal(m);
+}
+
+async function excluir(id) {
+  const metas2 = await apiFetch('/metas') || [];
+  const item = metas2.find(x => x.id === id);
+  confirmarExclusao(item?.titulo || 'esta meta', async () => {
+    try { await apiFetch(`/metas/${id}`, { method:'DELETE' }); toast('Meta excluída!'); carregar(); }
+    catch(e) { toast(e.message,'error'); }
+  });
+}
+
+async function abrirAporte(id) {
+  const metas = await apiFetch('/metas') || [];
+  const m = metas.find(x => x.id === id);
+  if (!m) return;
+  const pct = m.valor_alvo > 0 ? Math.min(100, (m.valor_atual / m.valor_alvo * 100)).toFixed(1) : 0;
+  document.getElementById('aporte-meta-id').value = id;
+  document.getElementById('aporte-meta-nome').textContent = m.titulo;
+  document.getElementById('aporte-atual').textContent = fmtBRL(m.valor_atual);
+  document.getElementById('aporte-alvo').textContent = fmtBRL(m.valor_alvo);
+  document.getElementById('aporte-prog').style.width = pct + '%';
+  document.getElementById('f-aporte-valor').value = '';
+  document.getElementById('f-aporte-obs').value = '';
+  openModal('modal-aporte');
+}
+
+function mascaraMoeda(el) {
+  let v = el.value.replace(/\D/g, '').replace(/^0+/, '') || '0';
+  v = v.padStart(3, '0');
+  const cents = v.slice(-2);
+  const reais = v.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  el.value = reais + ',' + cents;
+}
+
+function parseMoeda(str) {
+  if (!str) return 0;
+  return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+}
+
+function fmtMoedaInput(num) {
+  if (!num && num !== 0) return '';
+  const [r, c] = parseFloat(num).toFixed(2).split('.');
+  return r.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + c;
+}
+
+async function confirmarAporte() {
+  const id = document.getElementById('aporte-meta-id').value;
+  const valor = document.getElementById('f-aporte-valor').value;
+  const obs = document.getElementById('f-aporte-obs').value;
+  if (!valor || valor <= 0) { toast('Informe um valor válido.','error'); return; }
+  try {
+    await apiFetch(`/metas/${id}/aportar`, { method:'POST', body:JSON.stringify({ valor: Number(valor), observacao: obs }) });
+    toast('Aporte realizado!');
+    closeModal('modal-aporte');
+    carregar();
+  } catch(e) { toast(e.message,'error'); }
+}
+</script>
+<div id="bottom-nav-root"></div>
+</body>
+</html>

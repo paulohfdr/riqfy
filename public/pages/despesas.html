@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiqFy — Despesas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css?v=26">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.toggle-track {
+  display: inline-flex; align-items: center;
+  width: 44px; height: 24px; border-radius: 12px;
+  background: #e2e8f0; position: relative;
+  transition: background 0.2s; flex-shrink: 0;
+  border: none; cursor: pointer; padding: 0;
+}
+.toggle-track.on { background: #22c55e; }
+.toggle-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  transition: transform 0.2s; pointer-events: none;
+}
+.toggle-track.on .toggle-thumb { transform: translateX(20px); }
+.toggle-row {
+  display: flex; align-items: center; gap: 10px; padding: 6px 0;
+}
+.toggle-text { font-size: 13px; color: #94a3b8; transition: color 0.2s; }
+.toggle-track.on ~ .toggle-text { color: #22c55e; font-weight: 600; }
+.toggle-hint { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+</style>
+</head>
+<body>
+<div id="sidebar-root"></div>
+<div class="main">
+  <div id="topbar-root"></div>
+  <div class="content">
+
+    <div class="filter-bar">
+      <label>Mês e ano</label>
+      <select id="sel-mes" onchange="carregar()"></select>
+      <select id="sel-ano" onchange="carregar()"></select>
+    </div>
+
+    <div class="summary-cards cols-5">
+      <div class="summary-card">
+        <div class="card-icon red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg></div>
+        <div><div class="card-label">Total do Mês</div><div class="card-value negative" id="cv-total">R$ 0,00</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/><path d="M7 15h.01M11 15h2"/></svg></div>
+        <div><div class="card-label">Cartão de crédito</div><div class="card-value" id="cv-credito">R$ 0,00</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+        <div><div class="card-label">Pix</div><div class="card-value" id="cv-pix">R$ 0,00</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></div>
+        <div><div class="card-label">Débito</div><div class="card-value" id="cv-debito">R$ 0,00</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+        <div><div class="card-label">Lançamentos</div><div class="card-value" id="cv-qtd">0</div></div>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:20px">
+      <h3>Despesas por categoria</h3>
+      <div class="chart-container" style="height:200px"><canvas id="chart-cat"></canvas></div>
+    </div>
+
+    <div class="chart-grid" style="margin-bottom:20px">
+      <div class="chart-card">
+        <h3>Forma de pagamento</h3>
+        <div class="chart-container" style="height:200px"><canvas id="chart-forma"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Distribuição por categoria</h3>
+        <div class="chart-container" style="height:200px"><canvas id="chart-dist"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Lista de despesas</h3>
+        <div class="table-actions">
+          <button class="btn btn-danger" onclick="abrirModal()">+ Nova Despesa</button>
+          <button class="btn btn-warning" onclick="apagarSelecionados()">🗑 Apagar em massa</button>
+        </div>
+      </div>
+      <table style="table-layout:fixed;min-width:900px">
+        <colgroup>
+          <col style="width:40px">
+          <col style="width:auto">
+          <col style="width:110px">
+          <col style="width:150px">
+          <col style="width:120px">
+          <col style="width:90px">
+          <col style="width:80px">
+          <col style="width:100px">
+          <col style="width:160px">
+        </colgroup>
+        <thead>
+          <tr>
+            <th style="padding:10px 8px"><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
+            <th>Descrição</th>
+            <th style="min-width:110px">Valor do Mês</th>
+            <th style="min-width:150px">Vencimento</th>
+            <th style="min-width:120px">Categoria</th>
+            <th style="min-width:90px">Forma</th>
+            <th style="text-align:center;min-width:80px">Parcela</th>
+            <th style="text-align:center;min-width:100px">Recorrente</th>
+            <th style="text-align:right;min-width:130px">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-despesas">
+          <tr class="empty-row"><td colspan="9">Nenhuma despesa cadastrada neste período.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <h2 id="modal-titulo">Nova Despesa</h2>
+    <input type="hidden" id="edit-id">
+    <div class="form-group">
+      <label>Descrição *</label>
+      <input type="text" id="f-descricao" placeholder="Ex: Aluguel">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Valor (R$) *</label>
+        <input type="text" id="f-valor" placeholder="0,00" inputmode="numeric" autocomplete="off" oninput="mascaraMoeda(this)">
+      </div>
+      <div class="form-group">
+        <label>Vencimento *</label>
+        <input type="date" id="f-vencimento">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Categoria</label>
+        <select id="f-categoria"><option value="">Sem categoria</option></select>
+      </div>
+      <div class="form-group">
+        <label>Forma de pagamento</label>
+        <select id="f-forma">
+          <option value="credito">Crédito</option>
+          <option value="debito">Débito</option>
+          <option value="dinheiro">Dinheiro</option>
+          <option value="pix">Pix</option>
+        </select>
+      </div>
+    </div>
+    <div id="grupo-parcelas" class="form-group" style="display:none">
+      <label>Total de parcelas</label>
+      <input type="number" id="f-parcelas" value="1" min="1" max="72">
+    </div>
+    <div class="form-group">
+      <label>Recorrência mensal</label>
+      <input type="hidden" id="f-recorrente" value="false">
+      <div class="toggle-row">
+        <button type="button" class="toggle-track" id="toggle-rec" onclick="toggleRecorrente()">
+          <span class="toggle-thumb"></span>
+        </button>
+        <span class="toggle-text" id="toggle-rec-label">Desativado</span>
+      </div>
+      <div class="toggle-hint">Quando ativo, o lançamento se repete todo mês automaticamente</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-danger" onclick="salvar()">Salvar despesa</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js?v=21"></script>
+<script>
+let chartCat, chartForma, chartDist;
+
+(async () => {
+  const u = await checkAuth();
+  if (!u) return;
+  document.getElementById('sidebar-root').innerHTML = renderSidebar('/despesas');
+  document.getElementById('topbar-root').innerHTML = renderTopbar();
+  document.getElementById('bottom-nav-root').innerHTML = renderBottomNav('/despesas');
+  renderUserBadge(u);
+  const cats = await apiFetch('/categorias?tipo=despesa') || [];
+  const sel = document.getElementById('f-categoria');
+  cats.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+  preencherFiltroMesAno('sel-mes', 'sel-ano', carregar);
+
+  document.getElementById('f-forma').addEventListener('change', function() {
+    const gp = document.getElementById('grupo-parcelas');
+    if (this.value === 'credito') {
+      gp.style.display = 'block';
+    } else {
+      gp.style.display = 'none';
+      document.getElementById('f-parcelas').value = 1;
+    }
+  });
+})();
+
+async function carregar() {
+  const mes = document.getElementById('sel-mes').value;
+  const ano = document.getElementById('sel-ano').value;
+  const [lista, resumo] = await Promise.all([
+    apiFetch(`/despesas?mes=${mes}&ano=${ano}`),
+    apiFetch(`/despesas/resumo?mes=${mes}&ano=${ano}`)
+  ]);
+  if (!lista || !resumo) return;
+  document.getElementById('cv-total').textContent = fmtBRL(resumo.total);
+  document.getElementById('cv-credito').textContent = fmtBRL(resumo.credito);
+  document.getElementById('cv-pix').textContent = fmtBRL(resumo.pix);
+  document.getElementById('cv-debito').textContent = fmtBRL(resumo.debito);
+  document.getElementById('cv-qtd').textContent = resumo.qtd;
+  renderTabela(lista);
+  renderCharts(resumo, lista);
+}
+
+function renderTabela(lista) {
+  const tb = document.getElementById('tbody-despesas');
+  if (!lista.length) { tb.innerHTML = '<tr class="empty-row"><td colspan="9">Nenhuma despesa cadastrada neste período.</td></tr>'; return; }
+  const formaLabel = { pix: 'Pix', credito: 'Crédito', debito: 'Débito', dinheiro: 'Dinheiro', parcelado: 'parcelado' };
+  tb.innerHTML = lista.map(d => `
+    <tr>
+      <td style="padding:12px 8px"><input type="checkbox" class="chk-item" value="${d.id}"></td>
+      <td style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.descricao}</td>
+      <td style="color:#dc2626;font-weight:600;white-space:nowrap">${fmtBRL(d.valor)}</td>
+      <td style="white-space:nowrap">${fmtData(d.vencimento)}</td>
+      <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${d.categoria_nome ? `<span class="badge" style="background:${d.categoria_cor}22;color:${d.categoria_cor}">${d.categoria_nome}</span>` : '—'}</td>
+      <td style="white-space:nowrap">${formaLabel[d.forma_pagamento] || d.forma_pagamento}</td>
+      <td style="text-align:center">${d.total_parcelas > 1 ? `${d.parcela_atual}/${d.total_parcelas}` : '1/1'}</td>
+      <td style="text-align:center">${d.recorrente ? '<span class="badge badge-blue">Sim</span>' : 'Não'}</td>
+      <td class="td-actions" style="justify-content:flex-end;overflow:visible;white-space:nowrap">
+        <button class="btn btn-info btn-sm" onclick="editar(${d.id})">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="excluir(${d.id})">Excluir</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderCharts(resumo, lista) {
+  if (chartCat) chartCat.destroy();
+  if (chartForma) chartForma.destroy();
+  if (chartDist) chartDist.destroy();
+
+  const cat = resumo.porCategoria;
+  if (cat.length) {
+    chartCat = new Chart(document.getElementById('chart-cat'), {
+      type: 'bar',
+      data: { labels: cat.map(c => c.nome||'Sem cat'), datasets: [{ data: cat.map(c=>c.total), backgroundColor: cat.map(c=>c.cor||'#94a3b8') }] },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+    });
+    chartDist = new Chart(document.getElementById('chart-dist'), {
+      type: 'doughnut',
+      data: { labels: cat.map(c=>c.nome||'Sem cat'), datasets:[{ data:cat.map(c=>c.total), backgroundColor:cat.map(c=>c.cor||'#94a3b8'), borderWidth:0 }] },
+      options: { responsive:true, maintainAspectRatio:false, cutout:'60%' }
+    });
+  }
+
+  chartForma = new Chart(document.getElementById('chart-forma'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Pix','Crédito','Débito','Outros'],
+      datasets:[{ data:[resumo.pix, resumo.credito, resumo.debito, resumo.total - resumo.pix - resumo.credito - resumo.debito], backgroundColor:['#16a34a','#2563eb','#7c3aed','#94a3b8'], borderWidth:0 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'60%' }
+  });
+}
+
+function abrirModal(dados=null) {
+  document.getElementById('modal-titulo').textContent = dados ? 'Editar Despesa' : 'Nova Despesa';
+  document.getElementById('edit-id').value = dados?.id || '';
+  document.getElementById('f-descricao').value = dados?.descricao || '';
+  document.getElementById('f-valor').value = dados?.valor ? fmtMoedaInput(dados.valor) : '';
+  document.getElementById('f-vencimento').value = dados ? String(dados.vencimento).substring(0, 10) : new Date().toISOString().split('T')[0];
+  document.getElementById('f-categoria').value = dados?.categoria_id || '';
+  const forma = dados?.forma_pagamento || 'credito';
+  document.getElementById('f-forma').value = forma;
+  const gp = document.getElementById('grupo-parcelas');
+  gp.style.display = forma === 'credito' ? 'block' : 'none';
+  document.getElementById('f-parcelas').value = dados?.total_parcelas || 1;
+  setRecorrente(dados ? !!dados.recorrente : false);
+  openModal('modal-overlay');
+}
+function fecharModal() { closeModal('modal-overlay'); }
+
+async function salvar() {
+  const id = document.getElementById('edit-id').value;
+  const body = {
+    descricao: document.getElementById('f-descricao').value.trim(),
+    valor: parseMoeda(document.getElementById('f-valor').value),
+    vencimento: document.getElementById('f-vencimento').value,
+    categoria_id: document.getElementById('f-categoria').value || null,
+    forma_pagamento: document.getElementById('f-forma').value,
+    total_parcelas: document.getElementById('f-parcelas').value,
+    recorrente: document.getElementById('f-recorrente').value === 'true'
+  };
+  if (!body.descricao || !body.valor || !body.vencimento) { toast('Preencha os campos obrigatórios.', 'error'); return; }
+  try {
+    if (id) await apiFetch(`/despesas/${id}`, { method:'PUT', body:JSON.stringify(body) });
+    else await apiFetch('/despesas', { method:'POST', body:JSON.stringify(body) });
+    toast(id ? 'Despesa atualizada!' : 'Despesa cadastrada!');
+    fecharModal();
+    carregar();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function editar(id) {
+  const lista = await apiFetch(`/despesas?mes=${document.getElementById('sel-mes').value}&ano=${document.getElementById('sel-ano').value}`);
+  const d = lista?.find(x => x.id === id);
+  if (d) abrirModal(d);
+}
+
+async function excluir(id) {
+  const lista2 = await apiFetch(`/despesas?mes=${document.getElementById('sel-mes').value}&ano=${document.getElementById('sel-ano').value}`);
+  const item = lista2?.find(x => x.id === id);
+  confirmarExclusao(item?.descricao || 'esta despesa', async () => {
+    try { await apiFetch(`/despesas/${id}`, { method:'DELETE' }); toast('Despesa excluída!'); carregar(); }
+    catch(e) { toast(e.message, 'error'); }
+  });
+}
+
+function toggleAll(chk) { document.querySelectorAll('.chk-item').forEach(c => c.checked = chk.checked); }
+
+function mascaraMoeda(el) {
+  let v = el.value.replace(/\D/g, '').replace(/^0+/, '') || '0';
+  v = v.padStart(3, '0');
+  const cents = v.slice(-2);
+  const reais = v.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  el.value = reais + ',' + cents;
+}
+
+function parseMoeda(str) {
+  if (!str) return 0;
+  return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+}
+
+function fmtMoedaInput(num) {
+  if (!num && num !== 0) return '';
+  const [r, c] = parseFloat(num).toFixed(2).split('.');
+  return r.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + c;
+}
+
+function setRecorrente(val) {
+  document.getElementById('f-recorrente').value = String(val);
+  document.getElementById('toggle-rec').classList.toggle('on', val);
+  const lbl = document.getElementById('toggle-rec-label');
+  lbl.textContent = val ? 'Ativado' : 'Desativado';
+  lbl.style.color  = val ? '#2563eb' : '#94a3b8';
+  lbl.style.fontWeight = val ? '600' : '400';
+}
+
+function toggleRecorrente() {
+  setRecorrente(document.getElementById('f-recorrente').value !== 'true');
+}
+
+async function apagarSelecionados() {
+  const ids = [...document.querySelectorAll('.chk-item:checked')].map(c=>parseInt(c.value));
+  if (!ids.length) { toast('Selecione ao menos uma despesa.','error'); return; }
+  confirmarExclusao(`${ids.length} despesa(s) selecionada(s)`, async () => {
+    try { await apiFetch('/despesas', { method:'DELETE', body:JSON.stringify({ids}) }); toast(`${ids.length} despesa(s) excluída(s)!`); carregar(); }
+    catch(e) { toast(e.message,'error'); }
+  });
+}
+</script>
+<div id="bottom-nav-root"></div>
+</body>
+</html>

@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiqFy — Usuários</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css?v=26">
+</head>
+<body>
+<div id="sidebar-root"></div>
+<div class="main">
+  <div id="topbar-root"></div>
+  <div class="content">
+
+    <div class="summary-cards cols-3" style="margin-bottom:20px">
+      <div class="summary-card"><div class="card-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div><div class="card-label">Total de usuários</div><div class="card-value" id="cv-total">0</div></div></div>
+      <div class="summary-card"><div class="card-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div><div class="card-label">Controle de acesso</div><div class="card-value" style="font-size:14px">Ativo</div></div></div>
+      <div class="summary-card"><div class="card-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg></div><div><div class="card-label">Gestão de perfis</div><div class="card-value" style="font-size:14px">Admin</div></div></div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Lista de usuários</h3>
+        <button class="btn btn-primary" onclick="abrirModal()">+ Novo usuário</button>
+      </div>
+      <table>
+        <thead>
+          <tr><th>Usuário</th><th>E-mail</th><th>Nível</th><th>Status</th><th>Ações</th></tr>
+        </thead>
+        <tbody id="tbody-users">
+          <tr class="empty-row"><td colspan="5">Nenhum usuário encontrado.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Novo/Editar -->
+<div class="modal-overlay hidden" id="modal-user">
+  <div class="modal">
+    <h2 id="modal-titulo">Novo usuário</h2>
+    <input type="hidden" id="edit-id">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nome completo *</label>
+        <input type="text" id="f-nome" placeholder="Ex: Paulo Reis">
+      </div>
+      <div class="form-group">
+        <label>Username *</label>
+        <input type="text" id="f-username" placeholder="paulo.reis">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>E-mail *</label>
+      <input type="email" id="f-email" placeholder="paulo@email.com">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nível de acesso</label>
+        <select id="f-nivel">
+          <option value="suporte">Suporte</option>
+          <option value="administrador">Administrador</option>
+        </select>
+      </div>
+      <div class="form-group" id="grupo-status" style="display:none">
+        <label>Status</label>
+        <select id="f-status">
+          <option value="ativo">Ativo</option>
+          <option value="inativo">Inativo</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group" id="grupo-senha">
+      <label>Senha *</label>
+      <input type="password" id="f-senha" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-user')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvar()">Salvar usuário</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Resetar Senha -->
+<div class="modal-overlay hidden" id="modal-senha">
+  <div class="modal" style="max-width:360px">
+    <h2>Resetar senha</h2>
+    <input type="hidden" id="reset-id">
+    <div class="form-group">
+      <label>Nova senha *</label>
+      <input type="password" id="f-nova-senha" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-senha')">Cancelar</button>
+      <button class="btn btn-warning" onclick="confirmarReset()">Resetar senha</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js?v=21"></script>
+<script>
+(async () => {
+  const u = await checkAuth();
+  if (!u) return;
+  document.getElementById('sidebar-root').innerHTML = renderSidebar('/usuarios');
+  document.getElementById('topbar-root').innerHTML = renderTopbar();
+  document.getElementById('bottom-nav-root').innerHTML = renderBottomNav('/usuarios');
+  renderUserBadge(u);
+  if (u.nivel !== 'administrador') {
+    document.querySelector('.content').innerHTML = '<div style="text-align:center;padding:60px;color:#64748b"><p style="font-size:18px">Acesso restrito a administradores.</p></div>';
+    return;
+  }
+  carregar();
+})();
+
+async function carregar() {
+  const lista = await apiFetch('/usuarios') || [];
+  document.getElementById('cv-total').textContent = lista.length;
+  const tb = document.getElementById('tbody-users');
+  if (!lista.length) { tb.innerHTML = '<tr class="empty-row"><td colspan="5">Nenhum usuário.</td></tr>'; return; }
+  tb.innerHTML = lista.map(u => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:34px;height:34px;border-radius:50%;background:#0f1f3d;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px">${u.nome.charAt(0).toUpperCase()}</div>
+          <div>
+            <div style="font-weight:500">${u.nome}</div>
+            <div style="font-size:12px;color:#64748b">@${u.username}</div>
+          </div>
+        </div>
+      </td>
+      <td style="color:#2563eb">${u.email}</td>
+      <td><span class="badge ${u.nivel==='administrador'?'badge-blue':'badge-gray'}">${u.nivel}</span></td>
+      <td><span class="badge ${u.status==='ativo'?'badge-green':'badge-red'}">${u.status}</span></td>
+      <td class="td-actions">
+        <button class="btn btn-info btn-sm" onclick="editar(${u.id})">Editar</button>
+        <button class="btn btn-warning btn-sm" onclick="abrirReset(${u.id})">Resetar senha</button>
+        <button class="btn btn-sm" style="background:#f1f5f9;color:#475569" onclick="toggleStatus(${u.id},'${u.status}')">${u.status==='ativo'?'Inativar':'Ativar'}</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function abrirModal(dados=null) {
+  document.getElementById('modal-titulo').textContent = dados ? 'Editar usuário' : 'Novo usuário';
+  document.getElementById('edit-id').value = dados?.id || '';
+  document.getElementById('f-nome').value = dados?.nome || '';
+  document.getElementById('f-username').value = dados?.username || '';
+  document.getElementById('f-email').value = dados?.email || '';
+  document.getElementById('f-nivel').value = dados?.nivel || 'suporte';
+  document.getElementById('f-status').value = dados?.status || 'ativo';
+  document.getElementById('grupo-senha').style.display = dados ? 'none' : 'block';
+  document.getElementById('grupo-status').style.display = dados ? 'block' : 'none';
+  document.getElementById('f-username').disabled = !!dados;
+  openModal('modal-user');
+}
+
+async function salvar() {
+  const id = document.getElementById('edit-id').value;
+  const body = {
+    nome: document.getElementById('f-nome').value.trim(),
+    username: document.getElementById('f-username').value.trim(),
+    email: document.getElementById('f-email').value.trim(),
+    nivel: document.getElementById('f-nivel').value,
+    status: document.getElementById('f-status').value,
+    senha: document.getElementById('f-senha').value
+  };
+  if (!body.nome || !body.email) { toast('Preencha os campos obrigatórios.','error'); return; }
+  if (!id && !body.senha) { toast('Informe uma senha.','error'); return; }
+  try {
+    if (id) await apiFetch(`/usuarios/${id}`, { method:'PUT', body:JSON.stringify(body) });
+    else await apiFetch('/usuarios', { method:'POST', body:JSON.stringify(body) });
+    toast(id ? 'Usuário atualizado!' : 'Usuário criado!');
+    closeModal('modal-user');
+    carregar();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+async function editar(id) {
+  const lista = await apiFetch('/usuarios') || [];
+  const u = lista.find(x => x.id === id);
+  if (u) abrirModal(u);
+}
+
+function abrirReset(id) {
+  document.getElementById('reset-id').value = id;
+  document.getElementById('f-nova-senha').value = '';
+  openModal('modal-senha');
+}
+
+async function confirmarReset() {
+  const id = document.getElementById('reset-id').value;
+  const nova = document.getElementById('f-nova-senha').value;
+  if (!nova || nova.length < 6) { toast('Senha deve ter ao menos 6 caracteres.','error'); return; }
+  try {
+    await apiFetch(`/usuarios/${id}/resetar-senha`, { method:'POST', body:JSON.stringify({ nova_senha: nova }) });
+    toast('Senha resetada!');
+    closeModal('modal-senha');
+  } catch(e) { toast(e.message,'error'); }
+}
+
+function abrirMinhaSenha() {
+  document.getElementById('f-senha-atual').value = '';
+  document.getElementById('f-senha-nova').value = '';
+  document.getElementById('f-senha-conf').value = '';
+  openModal('modal-minha-senha');
+}
+
+async function salvarMinhaSenha() {
+  const atual = document.getElementById('f-senha-atual').value;
+  const nova = document.getElementById('f-senha-nova').value;
+  const conf = document.getElementById('f-senha-conf').value;
+  if (!atual || !nova) { toast('Preencha todos os campos.', 'error'); return; }
+  if (nova.length < 6) { toast('A nova senha deve ter ao menos 6 caracteres.', 'error'); return; }
+  if (nova !== conf) { toast('As senhas não coincidem.', 'error'); return; }
+  try {
+    const me = await apiFetch('/auth/me');
+    await apiFetch(`/usuarios/${me.usuario.id}/resetar-senha`, { method:'POST', body:JSON.stringify({ nova_senha: nova }) });
+    toast('Senha alterada com sucesso!');
+    closeModal('modal-minha-senha');
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+async function toggleStatus(id, status) {
+  const novo = status === 'ativo' ? 'inativo' : 'ativo';
+  try {
+    await apiFetch(`/usuarios/${id}/status`, { method:'PUT', body:JSON.stringify({ status: novo }) });
+    toast(`Usuário ${novo}!`);
+    carregar();
+  } catch(e) { toast(e.message,'error'); }
+}
+</script>
+
+<!-- Modal Alterar Minha Senha -->
+<div class="modal-overlay hidden" id="modal-minha-senha">
+  <div class="modal" style="max-width:380px">
+    <h2>Alterar minha senha</h2>
+    <div class="form-group">
+      <label>Senha atual *</label>
+      <input type="password" id="f-senha-atual" placeholder="••••••••">
+    </div>
+    <div class="form-group">
+      <label>Nova senha *</label>
+      <input type="password" id="f-senha-nova" placeholder="Mínimo 6 caracteres">
+    </div>
+    <div class="form-group">
+      <label>Confirmar nova senha *</label>
+      <input type="password" id="f-senha-conf" placeholder="Repita a nova senha">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-minha-senha')">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarMinhaSenha()">Salvar senha</button>
+    </div>
+  </div>
+</div>
+<div id="bottom-nav-root"></div>
+</body>
+</html>

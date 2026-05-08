@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiqFy — Relatórios</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css?v=26">
+<style>
+.filter-panel {
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.filter-panel-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.filter-panel-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #94a3b8;
+  min-width: 82px;
+  white-space: nowrap;
+}
+.filter-panel-sep {
+  width: 100%;
+  height: 1px;
+  background: #f1f5f9;
+}
+.fi {
+  padding: 7px 10px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #fff;
+  color: #1e293b;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.fi:focus { outline: none; border-color: #00296b; }
+.fi:hover { border-color: #00296b; }
+.fi-label { font-size: 12px; color: #64748b; white-space: nowrap; }
+.btn-apply {
+  padding: 7px 18px;
+  background: #00296b;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn-apply:hover { opacity: 0.88; }
+.export-wrap {
+  position: relative;
+  display: inline-flex;
+}
+.btn-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: #f8fafc;
+  color: #374151;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-export:hover { background: #e2e8f0; border-color: #94a3b8; }
+.btn-export .chevron { margin-left: 2px; opacity: 0.55; transition: transform 0.15s; }
+.export-wrap.open .btn-export { background: #e2e8f0; border-color: #94a3b8; }
+.export-wrap.open .chevron { transform: rotate(180deg); }
+.export-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  min-width: 170px;
+  z-index: 50;
+  overflow: hidden;
+}
+.export-wrap.open .export-dropdown { display: block; }
+.export-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+  transition: background 0.1s;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.export-option:hover { background: #f1f5f9; }
+.export-option + .export-option { border-top: 1px solid #f1f5f9; }
+.export-option svg { flex-shrink: 0; color: #64748b; }
+
+/* ===== PRINT / PDF ===== */
+.pdf-header { display: none; }
+@media print {
+  #sidebar-root, #topbar-root, #bottom-nav-root,
+  .filter-panel, .export-wrap, .toast-container,
+  div[style*="margin-bottom:18px"] { display: none !important; }
+  body { background: #fff !important; }
+  .main { margin-left: 0 !important; }
+  .content { padding: 16px !important; }
+  .pdf-header { display: flex !important; }
+  .summary-cards { grid-template-columns: repeat(4,1fr) !important; }
+  .summary-card, .table-card { break-inside: avoid; box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+  table { min-width: unset !important; }
+  .tfoot-total td { background: #f8fafc !important; }
+}
+th.sortable {
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+th.sortable:hover { color: #00296b; }
+th.sortable .si { margin-left: 4px; font-style: normal; font-size: 10px; opacity: 0.35; }
+th.sortable.asc .si::after  { content: '▲'; opacity: 1; }
+th.sortable.desc .si::after { content: '▼'; opacity: 1; }
+th.sortable:not(.asc):not(.desc) .si::after { content: '⇅'; }
+.tfoot-total td {
+  font-weight: 700;
+  font-size: 13px;
+  background: #f8fafc;
+  border-top: 2px solid #e2e8f0;
+}
+.card-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+@media (max-width: 1024px) {
+  .filter-panel-tag { min-width: unset; }
+  .filter-panel { padding: 14px; gap: 10px; }
+}
+</style>
+</head>
+<body>
+<div id="sidebar-root"></div>
+<div class="main">
+  <div id="topbar-root"></div>
+  <div class="content">
+
+    <!-- Cabeçalho visível apenas no PDF -->
+    <div class="pdf-header" style="align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #00296b">
+      <div>
+        <div style="font-size:18px;font-weight:700;color:#00296b">RiqFy — Relatório de Despesas</div>
+        <div style="font-size:12px;color:#64748b;margin-top:4px" id="pdf-periodo"></div>
+      </div>
+      <div style="text-align:right;font-size:11px;color:#94a3b8" id="pdf-meta"></div>
+    </div>
+
+    <div style="margin-bottom:18px">
+      <h2 style="font-size:18px;font-weight:700;color:#0f172a">Relatório de Despesas</h2>
+      <p style="font-size:13px;color:#64748b;margin-top:3px">Análise detalhada com filtros por período, categoria e forma de pagamento</p>
+    </div>
+
+    <!-- Painel de Filtros -->
+    <div class="filter-panel">
+
+      <!-- Filtro rápido: Mês + Ano -->
+      <div class="filter-panel-row">
+        <span class="filter-panel-tag">Filtro Rápido</span>
+        <span class="fi-label">Mês</span>
+        <select id="sel-mes" class="fi" onchange="onMesAnoChange()"></select>
+        <span class="fi-label">Ano</span>
+        <select id="sel-ano" class="fi" onchange="onMesAnoChange()"></select>
+      </div>
+
+      <div class="filter-panel-sep"></div>
+
+      <!-- Filtro avançado: intervalo de datas -->
+      <div class="filter-panel-row">
+        <span class="filter-panel-tag">Intervalo</span>
+        <span class="fi-label">De</span>
+        <input type="date" id="f-data-ini" class="fi">
+        <span class="fi-label">Até</span>
+        <input type="date" id="f-data-fim" class="fi">
+        <button class="btn-apply" onclick="aplicarIntervalo()">Aplicar</button>
+      </div>
+
+      <div class="filter-panel-sep"></div>
+
+      <!-- Filtros locais -->
+      <div class="filter-panel-row">
+        <span class="filter-panel-tag">Filtrar por</span>
+        <span class="fi-label">Categoria</span>
+        <select id="sel-cat" class="fi" onchange="filtrarLocal()">
+          <option value="">Todas</option>
+        </select>
+        <span class="fi-label">Forma</span>
+        <select id="sel-forma" class="fi" onchange="filtrarLocal()">
+          <option value="">Todos</option>
+          <option value="pix">Pix</option>
+          <option value="credito">Crédito</option>
+          <option value="debito">Débito</option>
+          <option value="parcelado">Parcelado</option>
+        </select>
+        <span class="fi-label">Tipo</span>
+        <select id="sel-tipo" class="fi" onchange="filtrarLocal()">
+          <option value="">Todos</option>
+          <option value="recorrente">Recorrente</option>
+          <option value="nao_recorrente">Não recorrente</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="summary-cards cols-4">
+      <div class="summary-card">
+        <div class="card-icon red">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+        </div>
+        <div>
+          <div class="card-label">Total do Período</div>
+          <div class="card-value negative" id="cv-total">R$ 0,00</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon blue">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+        </div>
+        <div>
+          <div class="card-label">Lançamentos</div>
+          <div class="card-value" id="cv-qtd">0</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon yellow">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div style="min-width:0">
+          <div class="card-label">Maior Despesa</div>
+          <div class="card-value" id="cv-maior">R$ 0,00</div>
+          <div class="card-sub" id="cv-maior-nome">—</div>
+        </div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </div>
+        <div>
+          <div class="card-label">Média por Lançamento</div>
+          <div class="card-value" id="cv-media">R$ 0,00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabela Detalhada -->
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Lançamentos do Período</h3>
+        <div class="table-actions">
+          <div class="export-wrap" id="export-wrap">
+            <button class="btn-export" onclick="toggleExportMenu()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Exportar
+              <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="export-dropdown">
+              <button class="export-option" onclick="exportarCSV()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+                Exportar CSV
+              </button>
+              <button class="export-option" onclick="exportarPDF()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                Exportar PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th class="sortable" data-col="vencimento" onclick="sortBy('vencimento')">Data/Venc. <i class="si"></i></th>
+              <th class="sortable" data-col="descricao" onclick="sortBy('descricao')">Descrição <i class="si"></i></th>
+              <th class="sortable" data-col="categoria_nome" onclick="sortBy('categoria_nome')">Categoria <i class="si"></i></th>
+              <th class="sortable" data-col="forma_pagamento" onclick="sortBy('forma_pagamento')">Forma <i class="si"></i></th>
+              <th>Parcela</th>
+              <th class="sortable" data-col="recorrente" onclick="sortBy('recorrente')">Recorrente <i class="si"></i></th>
+              <th class="sortable" data-col="valor" onclick="sortBy('valor')" style="text-align:right">Valor <i class="si"></i></th>
+            </tr>
+          </thead>
+          <tbody id="tbody-rel">
+            <tr class="empty-row"><td colspan="7">Selecione um período para visualizar os lançamentos.</td></tr>
+          </tbody>
+          <tfoot id="tfoot-rel"></tfoot>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="/js/app.js?v=21"></script>
+<script>
+const FORMA_LABELS = { pix:'Pix', credito:'Crédito', debito:'Débito', dinheiro:'Dinheiro', parcelado:'Parcelado' };
+const MESES_FULL   = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+let rawDesp  = [];
+let filtrados = [];
+let sortCol  = 'vencimento';
+let sortDir  = 'asc';
+let dataIniAtiva = null;
+let dataFimAtiva = null;
+
+(async () => {
+  const u = await checkAuth();
+  if (!u) return;
+  document.getElementById('sidebar-root').innerHTML = renderSidebar('/relatorios');
+  document.getElementById('topbar-root').innerHTML  = renderTopbar();
+  document.getElementById('bottom-nav-root').innerHTML = renderBottomNav('/relatorios');
+  renderUserBadge(u);
+
+  const mesAtual = new Date().getMonth() + 1;
+  const anoAtual = new Date().getFullYear();
+
+  const selMes = document.getElementById('sel-mes');
+  const selAno = document.getElementById('sel-ano');
+  MESES_FULL.forEach((m, i) => {
+    selMes.innerHTML += `<option value="${i+1}"${i+1===mesAtual?' selected':''}>${m}</option>`;
+  });
+  [anoAtual-1, anoAtual, anoAtual+1].forEach(a => {
+    selAno.innerHTML += `<option value="${a}"${a===anoAtual?' selected':''}>${a}</option>`;
+  });
+
+  sincronizarDateInputs(mesAtual, anoAtual);
+  await carregar([{ mes: mesAtual, ano: anoAtual }]);
+})();
+
+function sincronizarDateInputs(mes, ano) {
+  const primeiroDia = `${ano}-${String(mes).padStart(2,'0')}-01`;
+  const ultimoDia   = new Date(ano, mes, 0).toISOString().split('T')[0];
+  document.getElementById('f-data-ini').value = primeiroDia;
+  document.getElementById('f-data-fim').value = ultimoDia;
+  dataIniAtiva = primeiroDia;
+  dataFimAtiva = ultimoDia;
+}
+
+async function onMesAnoChange() {
+  const mes = parseInt(document.getElementById('sel-mes').value);
+  const ano = parseInt(document.getElementById('sel-ano').value);
+  sincronizarDateInputs(mes, ano);
+  await carregar([{ mes, ano }]);
+}
+
+async function aplicarIntervalo() {
+  const dataIni = document.getElementById('f-data-ini').value;
+  const dataFim = document.getElementById('f-data-fim').value;
+  if (!dataIni || !dataFim) { toast('Preencha as duas datas.', 'error'); return; }
+  if (dataIni > dataFim) { toast('Data inicial não pode ser maior que a final.', 'error'); return; }
+
+  const ini = new Date(dataIni + 'T00:00:00');
+  const fim = new Date(dataFim + 'T00:00:00');
+  const periodos = [];
+  let cur = new Date(ini.getFullYear(), ini.getMonth(), 1);
+  while (cur <= fim) {
+    periodos.push({ mes: cur.getMonth() + 1, ano: cur.getFullYear() });
+    cur.setMonth(cur.getMonth() + 1);
+  }
+
+  // Sync mês/ano selector para o mês inicial
+  const selMes = document.getElementById('sel-mes');
+  const selAno = document.getElementById('sel-ano');
+  selMes.value = ini.getMonth() + 1;
+  if ([...selAno.options].some(o => parseInt(o.value) === ini.getFullYear())) {
+    selAno.value = ini.getFullYear();
+  }
+
+  dataIniAtiva = dataIni;
+  dataFimAtiva = dataFim;
+  await carregar(periodos, dataIni, dataFim);
+}
+
+async function carregar(periodos, dataIni = null, dataFim = null) {
+  try {
+    const resultados = await Promise.all(
+      periodos.map(p => apiFetch(`/despesas?mes=${p.mes}&ano=${p.ano}`))
+    );
+    let dados = resultados.flat().filter(Boolean);
+
+    if (dataIni && dataFim) {
+      dados = dados.filter(d => {
+        const dt = d.vencimento ? d.vencimento.slice(0, 10) : null;
+        return dt && dt >= dataIni && dt <= dataFim;
+      });
+    }
+
+    rawDesp = dados;
+    popularCategorias();
+    filtrarLocal();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function popularCategorias() {
+  const sel  = document.getElementById('sel-cat');
+  const prev = sel.value;
+  const cats = [...new Map(
+    rawDesp.filter(d => d.categoria_nome).map(d => [d.categoria_nome, d.categoria_nome])
+  ).values()].sort();
+  sel.innerHTML = '<option value="">Todas</option>' +
+    cats.map(c => `<option value="${c}"${c===prev?' selected':''}>${c}</option>`).join('');
+}
+
+function filtrarLocal() {
+  const cat   = document.getElementById('sel-cat').value;
+  const forma = document.getElementById('sel-forma').value;
+  const tipo  = document.getElementById('sel-tipo').value;
+
+  filtrados = rawDesp.filter(d =>
+    (!cat   || d.categoria_nome === cat) &&
+    (!forma || d.forma_pagamento === forma) &&
+    (!tipo  || (tipo === 'recorrente' ? !!d.recorrente : !d.recorrente))
+  );
+
+  renderCards(filtrados);
+  renderTabela(filtrados);
+}
+
+function renderCards(lista) {
+  const total = lista.reduce((s, d) => s + (d.valor || 0), 0);
+  const qtd   = lista.length;
+  const maior = lista.reduce((m, d) => (d.valor || 0) > (m?.valor || 0) ? d : m, null);
+  const media = qtd > 0 ? total / qtd : 0;
+
+  document.getElementById('cv-total').textContent      = fmtBRL(total);
+  document.getElementById('cv-qtd').textContent        = qtd;
+  document.getElementById('cv-maior').textContent      = maior ? fmtBRL(maior.valor) : 'R$ 0,00';
+  document.getElementById('cv-maior-nome').textContent = maior ? maior.descricao : '—';
+  document.getElementById('cv-media').textContent      = fmtBRL(media);
+}
+
+function sortBy(col) {
+  sortDir = sortCol === col ? (sortDir === 'asc' ? 'desc' : 'asc') : 'asc';
+  sortCol = col;
+  document.querySelectorAll('th.sortable').forEach(th => {
+    th.classList.remove('asc', 'desc');
+    if (th.dataset.col === col) th.classList.add(sortDir);
+  });
+  renderTabela(filtrados);
+}
+
+function renderTabela(lista) {
+  const sorted = [...lista].sort((a, b) => {
+    let av = a[sortCol] ?? '';
+    let bv = b[sortCol] ?? '';
+    if (sortCol === 'valor')      { av = parseFloat(av) || 0; bv = parseFloat(bv) || 0; }
+    if (sortCol === 'recorrente') { av = av ? 1 : 0; bv = bv ? 1 : 0; }
+    if (av < bv) return sortDir === 'asc' ? -1 : 1;
+    if (av > bv) return sortDir === 'asc' ?  1 : -1;
+    return 0;
+  });
+
+  const tb = document.getElementById('tbody-rel');
+  const tf = document.getElementById('tfoot-rel');
+
+  if (!sorted.length) {
+    tb.innerHTML = '<tr class="empty-row"><td colspan="7">Nenhum lançamento no período.</td></tr>';
+    tf.innerHTML = '';
+    return;
+  }
+
+  tb.innerHTML = sorted.map(d => `
+    <tr>
+      <td style="white-space:nowrap">${fmtData(d.vencimento)}</td>
+      <td style="font-weight:500">${d.descricao}</td>
+      <td>${d.categoria_nome
+        ? `<span class="badge" style="background:${d.categoria_cor||'#e2e8f0'}22;color:${d.categoria_cor||'#475569'}">${d.categoria_nome}</span>`
+        : '<span class="badge badge-gray">—</span>'
+      }</td>
+      <td>${FORMA_LABELS[d.forma_pagamento] || d.forma_pagamento || '—'}</td>
+      <td>${d.total_parcelas > 1 ? `${d.parcela_atual}/${d.total_parcelas}` : '—'}</td>
+      <td>${d.recorrente
+        ? '<span class="badge badge-blue">Sim</span>'
+        : '<span style="color:#94a3b8;font-size:12px">Não</span>'
+      }</td>
+      <td style="text-align:right;color:#dc2626;font-weight:600;white-space:nowrap">${fmtBRL(d.valor)}</td>
+    </tr>
+  `).join('');
+
+  const total = sorted.reduce((s, d) => s + (d.valor || 0), 0);
+  tf.innerHTML = `
+    <tr class="tfoot-total">
+      <td colspan="6" style="text-align:right;color:#64748b;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;padding-right:16px">
+        Total — ${sorted.length} lançamento${sorted.length !== 1 ? 's' : ''}
+      </td>
+      <td style="text-align:right;color:#dc2626;white-space:nowrap;padding:12px 16px">${fmtBRL(total)}</td>
+    </tr>
+  `;
+}
+
+function toggleExportMenu() {
+  document.getElementById('export-wrap').classList.toggle('open');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#export-wrap')) {
+    document.getElementById('export-wrap')?.classList.remove('open');
+  }
+});
+
+function exportarCSV() {
+  document.getElementById('export-wrap').classList.remove('open');
+  if (!filtrados.length) { toast('Nenhum dado para exportar.', 'error'); return; }
+  const headers = ['Data/Vencimento','Descrição','Categoria','Forma','Parcela','Recorrente','Valor'];
+  const rows = filtrados.map(d => [
+    d.vencimento ? d.vencimento.slice(0, 10) : '',
+    `"${(d.descricao || '').replace(/"/g, '""')}"`,
+    `"${d.categoria_nome || ''}"`,
+    FORMA_LABELS[d.forma_pagamento] || d.forma_pagamento || '',
+    d.total_parcelas > 1 ? `${d.parcela_atual}/${d.total_parcelas}` : '1/1',
+    d.recorrente ? 'Sim' : 'Não',
+    String(d.valor || 0).replace('.', ',')
+  ]);
+  const csv  = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'relatorio_despesas.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV exportado com sucesso!');
+}
+
+function exportarPDF() {
+  document.getElementById('export-wrap').classList.remove('open');
+  if (!filtrados.length) { toast('Nenhum dado para exportar.', 'error'); return; }
+  const dataIni = document.getElementById('f-data-ini').value;
+  const dataFim = document.getElementById('f-data-fim').value;
+  const fmtDt = v => v ? v.split('-').reverse().join('/') : '';
+  const periodo = dataIni === dataFim
+    ? fmtDt(dataIni)
+    : `${fmtDt(dataIni)} a ${fmtDt(dataFim)}`;
+  document.getElementById('pdf-periodo').textContent = 'Período: ' + periodo;
+  document.getElementById('pdf-meta').innerHTML =
+    'Gerado em ' + new Date().toLocaleDateString('pt-BR') +
+    ' às ' + new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) +
+    '<br>' + filtrados.length + ' lançamento' + (filtrados.length !== 1 ? 's' : '');
+  window.print();
+}
+</script>
+<div id="bottom-nav-root"></div>
+</body>
+</html>

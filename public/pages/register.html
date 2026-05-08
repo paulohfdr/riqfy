@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiqFy — Criar conta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body { font-family:'DM Sans',sans-serif; min-height:100vh; background:#00296b; display:flex; align-items:center; justify-content:center; padding:20px; }
+.card { background:#fff; border-radius:20px; width:100%; max-width:480px; padding:40px; box-shadow:0 25px 60px rgba(0,0,0,0.4); }
+.logo { text-align:center; margin-bottom:28px; }
+.logo img { height:56px; width:auto; }
+h1 { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:#00296b; text-align:center; margin-bottom:6px; }
+.subtitle { font-size:13px; color:#64748b; text-align:center; margin-bottom:28px; }
+.form-group { margin-bottom:16px; }
+.form-group label { display:block; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#374151; margin-bottom:6px; }
+.form-group input { width:100%; padding:11px 14px; border:1.5px solid #d1d5db; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; color:#1e293b; background:#fff; outline:none; transition:all 0.2s; }
+.form-group input:focus { border-color:#00296b; box-shadow:0 0 0 3px rgba(0,41,107,0.08); }
+.divider { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#94a3b8; text-align:center; margin:20px 0 16px; position:relative; }
+.divider::before,.divider::after { content:''; position:absolute; top:50%; width:38%; height:1px; background:#e2e8f0; }
+.divider::before { left:0; } .divider::after { right:0; }
+.btn { width:100%; background:#00296b; color:#fff; border:none; padding:14px; border-radius:50px; font-family:'Syne',sans-serif; font-size:14px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer; margin-top:8px; transition:all 0.2s; }
+.btn:hover { background:#003580; transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,41,107,0.3); }
+.btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; box-shadow:none; }
+.error-msg { background:#fee2e2; color:#991b1b; padding:10px 14px; border-radius:10px; font-size:13px; margin-bottom:16px; display:none; border:1px solid #fca5a5; }
+.success-msg { background:#dcfce7; color:#166534; padding:16px; border-radius:10px; font-size:14px; margin-bottom:16px; display:none; border:1px solid #86efac; text-align:center; }
+.slug-preview { font-size:12px; color:#64748b; margin-top:4px; }
+.slug-preview span { font-family:monospace; background:#f1f5f9; padding:2px 6px; border-radius:4px; color:#00296b; font-weight:600; }
+.login-link { text-align:center; margin-top:20px; font-size:13px; color:#64748b; }
+.login-link a { color:#00296b; font-weight:600; text-decoration:none; }
+.plano-badge { display:inline-flex; align-items:center; gap:6px; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:8px 14px; font-size:12px; color:#166534; margin-bottom:20px; width:100%; }
+.plano-badge strong { color:#166534; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">
+    <img src="/img/logo_login.svg" alt="RiqFy">
+  </div>
+  <h1>Criar conta gratuita</h1>
+  <p class="subtitle">Comece a controlar suas finanças agora mesmo</p>
+
+  <div class="plano-badge">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+    Plano <strong>Free</strong> incluído: 1 usuário · 50 lançamentos/mês · Sem cartão de crédito
+  </div>
+
+  <div class="error-msg" id="error-msg"></div>
+  <div class="success-msg" id="success-msg"></div>
+
+  <div class="divider">Dados da empresa</div>
+
+  <div class="form-group">
+    <label>Nome da empresa *</label>
+    <input type="text" id="nome_empresa" placeholder="Ex: Finanças Pessoais" oninput="gerarSlugPreview()">
+    <div class="slug-preview" id="slug-preview"></div>
+  </div>
+
+  <div class="divider">Dados do administrador</div>
+
+  <div class="form-group">
+    <label>Seu nome *</label>
+    <input type="text" id="nome_admin" placeholder="Ex: João Silva">
+  </div>
+
+  <div class="form-group">
+    <label>Email *</label>
+    <input type="email" id="email" placeholder="joao@empresa.com">
+  </div>
+
+  <div class="form-group">
+    <label>Nome de usuário *</label>
+    <input type="text" id="username" placeholder="joaosilva" autocomplete="username">
+  </div>
+
+  <div class="form-group">
+    <label>Senha *</label>
+    <input type="password" id="senha" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+  </div>
+
+  <button class="btn" id="btn-register" onclick="registrar()">CRIAR MINHA CONTA</button>
+
+  <div class="login-link">Já tem conta? <a href="/login">Fazer login →</a></div>
+</div>
+
+<script>
+function slugify(str) {
+  return str.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40);
+}
+
+function gerarSlugPreview() {
+  const nome = document.getElementById('nome_empresa').value;
+  const preview = document.getElementById('slug-preview');
+  if (!nome) { preview.innerHTML = ''; return; }
+  const slug = slugify(nome);
+  preview.innerHTML = 'Código da empresa: <span>' + slug + '</span>';
+}
+
+async function registrar() {
+  const nome_empresa = document.getElementById('nome_empresa').value.trim();
+  const nome_admin   = document.getElementById('nome_admin').value.trim();
+  const email        = document.getElementById('email').value.trim();
+  const username     = document.getElementById('username').value.trim();
+  const senha        = document.getElementById('senha').value;
+  const errEl        = document.getElementById('error-msg');
+  const okEl         = document.getElementById('success-msg');
+  const btn          = document.getElementById('btn-register');
+
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+
+  if (!nome_empresa || !nome_admin || !email || !username || !senha)
+    return showError('Preencha todos os campos obrigatórios.');
+  if (senha.length < 6)
+    return showError('A senha deve ter pelo menos 6 caracteres.');
+
+  btn.textContent = 'Criando conta...';
+  btn.disabled = true;
+
+  try {
+    const r = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome_empresa, nome_admin, email, username, senha })
+    });
+    const data = await r.json();
+    if (!r.ok) {
+      showError(data.erro || 'Erro ao criar conta.');
+      btn.textContent = 'CRIAR MINHA CONTA';
+      btn.disabled = false;
+      return;
+    }
+    okEl.innerHTML = '✓ Conta criada! Seu código de empresa é <strong>' + data.slug + '</strong>.<br>Redirecionando para o login...';
+    okEl.style.display = 'block';
+    setTimeout(() => { window.location.href = '/login'; }, 3000);
+  } catch {
+    showError('Erro de conexão.');
+    btn.textContent = 'CRIAR MINHA CONTA';
+    btn.disabled = false;
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById('error-msg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+document.getElementById('senha').addEventListener('keydown', e => {
+  if (e.key === 'Enter') registrar();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiqFy — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  min-height: 100vh;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+body::before { display: none; }
+
+.login-wrapper {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* ─── CARD ─── */
+.login-card {
+  display: flex;
+  width: 820px;
+  height: 480px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+}
+
+/* ─── PAINEL ESQUERDO ─── */
+.panel-left {
+  flex: 1;
+  background: #1a1a1a;
+  padding: 52px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.panel-left h1 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 32px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 36px;
+  letter-spacing: -0.5px;
+}
+
+.error-msg {
+  background: rgba(220,38,38,0.18);
+  color: #fca5a5;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  display: none;
+  border: 1px solid rgba(220,38,38,0.3);
+}
+
+.error-msg.shake {
+  animation: shake 0.4s ease;
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-8px); }
+  40%      { transform: translateX(8px); }
+  60%      { transform: translateX(-5px); }
+  80%      { transform: translateX(5px); }
+}
+
+.form-group { margin-bottom: 16px; }
+
+.form-group label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 7px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.input-wrap { position: relative; }
+
+.input-wrap svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  color: rgba(255,255,255,0.35);
+  pointer-events: none;
+}
+
+.input-wrap input {
+  width: 100%;
+  padding: 13px 14px 13px 42px;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  color: #ffffff;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.input-wrap input::placeholder { color: rgba(255,255,255,0.35); }
+
+.input-wrap input:focus {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,100,0,0.6);
+  box-shadow: 0 0 0 3px rgba(255,100,0,0.12);
+}
+
+.btn-login {
+  width: 100%;
+  background: #FF6400;
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.2s;
+}
+
+.btn-login:hover {
+  background: #ff7a1a;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255,100,0,0.4);
+}
+
+.btn-login:active  { transform: translateY(0); box-shadow: none; }
+.btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.hint {
+  margin-top: 20px;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255,255,255,0.4);
+}
+
+/* ─── PAINEL DIREITO ─── */
+.panel-right {
+  width: 300px;
+  flex-shrink: 0;
+  background: #f7f7f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 36px;
+  position: relative;
+  overflow: hidden;
+  text-align: center;
+}
+
+/* Círculos decorativos */
+.panel-right::before {
+  content: '';
+  position: absolute;
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  background: rgba(255,100,0,0.06);
+  top: -120px;
+  right: -120px;
+  pointer-events: none;
+}
+
+.panel-right::after {
+  content: '';
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  background: rgba(255,100,0,0.04);
+  bottom: -100px;
+  left: -100px;
+  pointer-events: none;
+}
+
+.panel-right .deco-circle {
+  position: absolute;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: rgba(255,100,0,0.04);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.panel-right .logo-wrap {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 24px;
+}
+
+.panel-right .logo-wrap img {
+  height: 90px;
+  width: auto;
+  display: block;
+}
+
+.panel-right h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 26px;
+  font-weight: 800;
+  color: #1a1a1a;
+  position: relative;
+  z-index: 2;
+  margin-bottom: 10px;
+  letter-spacing: -0.3px;
+}
+
+.panel-right p {
+  font-size: 14px;
+  color: #8a8a8a;
+  line-height: 1.6;
+  position: relative;
+  z-index: 2;
+  max-width: 200px;
+  text-align: center;
+}
+
+/* ─── RESPONSIVO ─── */
+@media (max-width: 680px) {
+  .login-card {
+    flex-direction: column-reverse;
+    width: 90vw;
+    height: auto;
+    border-radius: 18px;
+  }
+
+  .panel-right {
+    width: 100%;
+    padding: 28px 24px;
+  }
+
+  .panel-right .logo-wrap img { height: 60px; }
+  .panel-right h2 { font-size: 20px; margin-bottom: 6px; }
+  .panel-right p  { font-size: 13px; }
+
+  .panel-left {
+    padding: 36px 28px 40px;
+  }
+
+  .panel-left h1 { font-size: 26px; margin-bottom: 28px; }
+}
+</style>
+</head>
+<body>
+
+<div class="login-wrapper">
+  <div class="login-card">
+
+    <!-- PAINEL ESQUERDO: formulário -->
+    <div class="panel-left">
+      <h1>Login</h1>
+
+      <div class="error-msg" id="error-msg"></div>
+
+<div class="form-group">
+        <label>Usuário ou Email</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" id="username" placeholder="Seu usuário ou email" autocomplete="username">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Senha</label>
+        <div class="input-wrap">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="senha" placeholder="Sua senha" autocomplete="current-password">
+        </div>
+      </div>
+
+      <button class="btn-login" id="btn-login" onclick="fazerLogin()">ENTRAR</button>
+
+      <p class="hint">Demo: admin / admin123</p>
+    </div>
+
+    <!-- PAINEL DIREITO: boas-vindas -->
+    <div class="panel-right">
+      <div class="deco-circle"></div>
+
+      <div class="logo-wrap">
+        <img src="/img/logo_riqfy.svg" alt="RiqFy">
+      </div>
+
+      <h2>Bem-vindo!</h2>
+      <p>Controle suas finanças com inteligência.</p>
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.getElementById('username').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('senha').focus();
+});
+
+document.getElementById('senha').addEventListener('keydown', e => {
+  if (e.key === 'Enter') fazerLogin();
+});
+
+async function fazerLogin() {
+  const username = document.getElementById('username').value.trim();
+  const senha    = document.getElementById('senha').value;
+  const err      = document.getElementById('error-msg');
+  const btn      = document.getElementById('btn-login');
+
+  err.style.display = 'none';
+  err.classList.remove('shake');
+
+  if (!username || !senha) { showError('Preencha usuário e senha.'); return; }
+
+  btn.textContent = 'Entrando...';
+  btn.disabled = true;
+
+  try {
+    const r = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, senha })
+    });
+    const data = await r.json();
+    if (!r.ok) {
+      showError(data.erro || 'Usuário ou senha incorretos.');
+      btn.textContent = 'ENTRAR';
+      btn.disabled = false;
+      return;
+    }
+    window.location.href = '/dashboard';
+  } catch {
+    showError('Erro de conexão. Verifique se o servidor está rodando.');
+    btn.textContent = 'ENTRAR';
+    btn.disabled = false;
+  }
+}
+
+function showError(msg) {
+  const err = document.getElementById('error-msg');
+  err.textContent = msg;
+  err.style.display = 'block';
+  void err.offsetWidth; // reflow para reiniciar animação
+  err.classList.add('shake');
+}
+
+fetch('/api/auth/me').then(r => { if (r.ok) window.location.href = '/dashboard'; });
+</script>
+</body>
+</html>

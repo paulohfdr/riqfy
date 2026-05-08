@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiqFy — Admin Master</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;font-size:14px;color:#1e293b;background:#f1f5f9;min-height:100vh}
+.topbar{background:#00296b;color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+.topbar img{height:32px}
+.topbar h1{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:.02em}
+.topbar .badge{background:rgba(253,197,0,0.2);border:1px solid rgba(253,197,0,0.4);color:#fdc500;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.05em}
+.content{padding:24px;max-width:1200px;margin:0 auto}
+.auth-card{background:#fff;border-radius:16px;padding:40px;max-width:400px;margin:60px auto;box-shadow:0 4px 20px rgba(0,0,0,0.1);text-align:center}
+.auth-card h2{font-family:'Syne',sans-serif;font-size:20px;color:#00296b;margin-bottom:8px}
+.auth-card p{font-size:13px;color:#64748b;margin-bottom:24px}
+.auth-card input{width:100%;padding:12px 14px;border:1.5px solid #d1d5db;border-radius:10px;font-size:14px;outline:none;margin-bottom:12px;transition:border-color .2s}
+.auth-card input:focus{border-color:#00296b}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:opacity .15s}
+.btn:hover{opacity:.88}
+.btn-primary{background:#00296b;color:#fff}
+.btn-danger{background:#dc2626;color:#fff}
+.btn-warning{background:#f59e0b;color:#fff}
+.btn-success{background:#16a34a;color:#fff}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-block{width:100%;justify-content:center;padding:12px}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid #e2e8f0}
+.stat-label{font-size:12px;color:#64748b;margin-bottom:4px}
+.stat-value{font-size:24px;font-weight:700;color:#0f172a}
+.stat-value.green{color:#16a34a} .stat-value.blue{color:#2563eb} .stat-value.yellow{color:#ca8a04}
+.table-card{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid #e2e8f0;overflow-x:auto}
+.table-header{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2e8f0;gap:8px;flex-wrap:wrap}
+.table-header h3{font-size:15px;font-weight:700}
+table{width:100%;border-collapse:collapse;min-width:700px}
+th{padding:10px 16px;text-align:left;font-size:11px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;background:#f8fafc;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+td{padding:12px 16px;font-size:13px;border-bottom:1px solid #f1f5f9;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbff}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-green{background:#dcfce7;color:#166534}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-blue{background:#dbeafe;color:#1e40af}
+.badge-yellow{background:#fef9c3;color:#854d0e}
+.badge-gray{background:#f1f5f9;color:#475569}
+.actions{display:flex;gap:6px;align-items:center}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal{position:relative;z-index:1001;overflow:hidden;max-height:90vh;overflow-y:auto}
+.modal-overlay.hidden{display:none}
+.modal{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:440px}
+.modal h2{font-size:17px;font-weight:700;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
+.form-group select{width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #e2e8f0}
+.btn-cancel{background:#f1f5f9;color:#475569;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500}
+.toast-container{position:fixed;top:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{background:#1e293b;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;min-width:220px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,.2);animation:slideIn .2s}
+.toast.success{background:#166534} .toast.error{background:#991b1b}
+@keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
+#main-content{display:none}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <img src="/img/logo_bg_azul.svg" alt="RiqFy">
+  <h1>Admin Master</h1>
+  <span class="badge">PAINEL INTERNO</span>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+    <span style="font-size:12px;color:rgba(255,255,255,.5)" id="admin-info"></span>
+    <button onclick="sair()" style="background:#dc2626;color:#fff;border:none;padding:7px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500">Sair</button>
+  </div>
+</div>
+
+<!-- Auth -->
+<div id="auth-section">
+  <div class="auth-card">
+    <h2>🔐 Acesso restrito</h2>
+    <p>Este painel é exclusivo para administradores do sistema RiqFy.</p>
+    <input type="text" id="master-user" placeholder="Usuário" autocomplete="off">
+    <input type="password" id="master-pwd" placeholder="Senha" autocomplete="off">
+    <button class="btn btn-primary btn-block" onclick="autenticar()">ENTRAR</button>
+    <p id="auth-error" style="color:#dc2626;font-size:12px;margin-top:10px;display:none"></p>
+  </div>
+</div>
+
+<!-- Conteúdo principal -->
+<div id="main-content">
+  <div class="content">
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Tenants cadastrados</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="search" placeholder="Buscar..." oninput="filtrar()" style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;width:200px">
+          <button class="btn btn-primary btn-sm" onclick="carregar()">↻ Atualizar</button>
+          <button class="btn btn-success btn-sm" onclick="abrirNovaEmpresa()">+ Novo usuário</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Código de acesso</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Criado em</th>
+            <th style="text-align:right">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-tenants"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal novo usuário -->
+<div class="modal-overlay hidden" id="modal-nova-empresa">
+  <div class="modal" style="max-width:420px">
+    <h2>Novo usuário</h2>
+    <div id="nova-empresa-error" style="background:#fee2e2;color:#991b1b;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none"></div>
+    <div class="form-group">
+      <label>Nome completo *</label>
+      <input type="text" id="ne-nome-admin" placeholder="João Silva" style="width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none">
+    </div>
+    <div class="form-group">
+      <label>Email *</label>
+      <input type="email" id="ne-email" placeholder="joao@email.com" style="width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none">
+    </div>
+    <div class="form-group">
+      <label>Usuário *</label>
+      <input type="text" id="ne-username" placeholder="joao" oninput="previewSlug()" style="width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none">
+      <div id="ne-slug-preview" style="font-size:12px;color:#64748b;margin-top:4px"></div>
+    </div>
+    <div class="form-group">
+      <label>Senha *</label>
+      <input type="password" id="ne-senha" placeholder="Mínimo 6 caracteres" style="width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="document.getElementById('modal-nova-empresa').classList.add('hidden')">Cancelar</button>
+      <button class="btn btn-success" id="btn-criar-empresa" onclick="criarEmpresa()">Criar acesso</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal confirmar exclusão -->
+<div class="modal-overlay hidden" id="modal-apagar">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <div style="width:52px;height:52px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+    </div>
+    <h2 style="font-size:16px;margin-bottom:8px">Apagar usuário</h2>
+    <p style="font-size:13px;color:#64748b;margin-bottom:8px">Tem certeza que deseja apagar</p>
+    <p style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:8px" id="apagar-nome"></p>
+    <p style="font-size:12px;color:#dc2626;margin-bottom:24px">Todos os dados financeiros serão perdidos e esta ação não pode ser desfeita.</p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn-cancel" onclick="document.getElementById('modal-apagar').classList.add('hidden')">Cancelar</button>
+      <button class="btn btn-danger" id="btn-confirmar-apagar">Sim, apagar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal detalhes -->
+<div class="modal-overlay hidden" id="modal-detalhes">
+  <div class="modal" style="max-width:500px">
+    <h2>Detalhes do tenant</h2>
+    <div id="detalhes-content" style="font-size:13px;line-height:1.8"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="document.getElementById('modal-detalhes').classList.add('hidden')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+let masterPwd  = '';
+let masterUser = '';
+let todosOsTenants = [];
+
+['master-user', 'master-pwd'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') autenticar();
+  });
+});
+
+async function autenticar() {
+  const user = document.getElementById('master-user').value.trim();
+  const pwd  = document.getElementById('master-pwd').value;
+  const r = await fetch('/api/admin/auth', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ usuario: user, senha: pwd })
+  });
+  if (!r.ok) {
+    const el = document.getElementById('auth-error');
+    el.textContent = 'Usuário ou senha incorretos.';
+    el.style.display = 'block';
+    return;
+  }
+  masterUser = user;
+  masterPwd  = pwd;
+  sessionStorage.setItem('masterUser', user);
+  sessionStorage.setItem('masterPwd', pwd);
+  document.getElementById('auth-section').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+  document.getElementById('admin-info').textContent = 'Autenticado como ' + user;
+  carregar();
+}
+
+function api(url, opts) {
+  opts = opts || {};
+  opts.headers = Object.assign({
+    'Content-Type': 'application/json',
+    'x-master-user': masterUser,
+    'x-master-password': masterPwd
+  }, opts.headers || {});
+  return fetch('/api/admin' + url, opts).then(r => r.json());
+}
+
+async function carregar() {
+  todosOsTenants = await api('/tenants');
+  renderStats(todosOsTenants);
+  renderTabela(todosOsTenants);
+}
+
+function renderStats(tenants) {
+  const total = tenants.length;
+  const ativos = tenants.filter(t => t.status === 'ativo').length;
+  const suspensos = tenants.filter(t => t.status === 'suspenso').length;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total de usuários</div><div class="stat-value blue">${total}</div></div>
+    <div class="stat-card"><div class="stat-label">Ativos</div><div class="stat-value green">${ativos}</div></div>
+    <div class="stat-card"><div class="stat-label">Suspensos</div><div class="stat-value" style="color:#dc2626">${suspensos}</div></div>
+  `;
+}
+
+function statusBadge(s) {
+  const map = { ativo: 'badge-green', suspenso: 'badge-red', cancelado: 'badge-gray' };
+  return `<span class="badge ${map[s] || 'badge-gray'}">${s}</span>`;
+}
+
+function planoBadge(p) {
+  const map = { Free: 'badge-gray', Pro: 'badge-blue', Family: 'badge-yellow' };
+  return `<span class="badge ${map[p] || 'badge-gray'}">${p}</span>`;
+}
+
+function fmtDate(d) {
+  if (!d) return '—';
+  return d.split(' ')[0].split('-').reverse().join('/');
+}
+
+function renderTabela(tenants) {
+  const tbody = document.getElementById('tbody-tenants');
+  if (!tenants.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:32px">Nenhum tenant cadastrado.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = tenants.map(t => `
+    <tr>
+      <td><strong>${t.nome}</strong></td>
+      <td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px">${t.slug}</code></td>
+      <td style="color:#64748b">${t.email_admin}</td>
+      <td>${statusBadge(t.status)}</td>
+      <td style="color:#64748b">${fmtDate(t.criado_em)}</td>
+      <td>
+        <div class="actions" style="justify-content:flex-end">
+          <button class="btn btn-sm btn-primary" onclick="verDetalhes(${t.id})">Detalhes</button>
+          ${t.status === 'ativo'
+            ? `<button class="btn btn-sm btn-danger" onclick="mudarStatus(${t.id},'suspenso','${t.nome}')">Suspender</button>`
+            : `<button class="btn btn-sm btn-success" onclick="mudarStatus(${t.id},'ativo','${t.nome}')">Ativar</button>`
+          }
+          <button class="btn btn-sm btn-danger" onclick="apagarUsuario(${t.id},'${t.nome.replace(/'/g,"\\'")}')">Apagar</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function filtrar() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtrados = todosOsTenants.filter(t =>
+    t.nome.toLowerCase().includes(q) || t.slug.includes(q) || t.email_admin.toLowerCase().includes(q)
+  );
+  renderTabela(filtrados);
+}
+
+
+async function mudarStatus(id, status, nome) {
+  if (!confirm(`${status === 'suspenso' ? 'Suspender' : 'Ativar'} o tenant "${nome}"?`)) return;
+  const r = await api('/tenants/' + id + '/status', {
+    method: 'PUT',
+    body: JSON.stringify({ status })
+  });
+  if (r.ok) { toast(`Tenant ${status === 'ativo' ? 'ativado' : 'suspenso'}!`); carregar(); }
+  else toast(r.erro || 'Erro', 'error');
+}
+
+async function verDetalhes(id) {
+  const t = await api('/tenants/' + id);
+  document.getElementById('detalhes-content').innerHTML = `
+    <table style="width:100%;border-collapse:collapse">
+      ${[
+        ['ID', t.id],
+        ['Nome', t.nome],
+        ['Slug', `<code style="background:#f1f5f9;padding:2px 6px;border-radius:4px">${t.slug}</code>`],
+        ['Email admin', t.email_admin],
+        ['Plano', t.plano_nome + (t.max_lancamentos_mes === -1 ? ' (ilimitado)' : ` (${t.max_lancamentos_mes} lanç/mês)`)],
+        ['Status', statusBadge(t.status)],
+        ['Criado em', fmtDate(t.criado_em)],
+        ['Expira em', t.expira_em ? fmtDate(t.expira_em) : '—'],
+        ['Preço', 'R$ ' + (t.preco || 0).toFixed(2) + '/mês'],
+        ['Máx. usuários', t.max_usuarios === -1 ? 'Ilimitado' : t.max_usuarios],
+      ].map(([k, v]) => `
+        <tr style="border-bottom:1px solid #f1f5f9">
+          <td style="padding:8px 0;color:#64748b;font-weight:500;width:140px">${k}</td>
+          <td style="padding:8px 0">${v}</td>
+        </tr>
+      `).join('')}
+    </table>
+  `;
+  document.getElementById('modal-detalhes').classList.remove('hidden');
+}
+
+
+function slugify(str) {
+  return str.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40);
+}
+
+function previewSlug() {
+  const username = document.getElementById('ne-username').value;
+  const el = document.getElementById('ne-slug-preview');
+  el.innerHTML = username ? 'Código de acesso: <code style="background:#f1f5f9;padding:1px 5px;border-radius:4px">' + slugify(username) + '</code>' : '';
+}
+
+function abrirNovaEmpresa() {
+  ['ne-nome-admin','ne-email','ne-username','ne-senha'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('ne-slug-preview').innerHTML = '';
+  document.getElementById('nova-empresa-error').style.display = 'none';
+  document.getElementById('modal-nova-empresa').classList.remove('hidden');
+}
+
+async function criarEmpresa() {
+  const btn    = document.getElementById('btn-criar-empresa');
+  const errEl  = document.getElementById('nova-empresa-error');
+  const nome   = document.getElementById('ne-nome-admin').value.trim();
+  const email  = document.getElementById('ne-email').value.trim();
+  const username = document.getElementById('ne-username').value.trim();
+  const senha  = document.getElementById('ne-senha').value;
+
+  errEl.style.display = 'none';
+  if (!nome || !email || !username || !senha) {
+    errEl.textContent = 'Preencha todos os campos.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  btn.textContent = 'Criando...';
+  btn.disabled = true;
+
+  try {
+    const r = await fetch('/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, email, username, senha })
+    });
+    const data = await r.json();
+    if (!r.ok) {
+      errEl.textContent = data.erro || 'Erro ao criar acesso.';
+      errEl.style.display = 'block';
+      btn.textContent = 'Criar acesso';
+      btn.disabled = false;
+      return;
+    }
+    toast('Usuário "' + nome + '" criado! Código: ' + data.slug);
+    document.getElementById('modal-nova-empresa').classList.add('hidden');
+    btn.textContent = 'Criar acesso';
+    btn.disabled = false;
+    carregar();
+  } catch(e) {
+    errEl.textContent = 'Erro de conexão.';
+    errEl.style.display = 'block';
+    btn.textContent = 'Criar acesso';
+    btn.disabled = false;
+  }
+}
+
+function toast(msg, tipo) {
+  tipo = tipo || 'success';
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = 'toast ' + tipo;
+  t.innerHTML = '<span>' + (tipo === 'success' ? '✓' : '✕') + '</span><span>' + msg + '</span>';
+  c.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+async function apagarUsuario(id, nome) {
+  if (!confirm('Apagar o usuário "' + nome + '"?\n\nTodos os dados financeiros serão perdidos. Esta ação não pode ser desfeita.')) return;
+  const r = await api('/tenants/' + id, { method: 'DELETE' });
+  if (r.ok) { toast('Usuário "' + nome + '" apagado.'); carregar(); }
+  else toast(r.erro || 'Erro ao apagar', 'error');
+}
+
+function sair() {
+  sessionStorage.removeItem('masterUser');
+  sessionStorage.removeItem('masterPwd');
+  masterUser = '';
+  masterPwd  = '';
+  document.getElementById('main-content').style.display = 'none';
+  document.getElementById('auth-section').style.display = 'block';
+  document.getElementById('master-user').value = '';
+  document.getElementById('master-pwd').value  = '';
+  document.getElementById('admin-info').textContent = '';
+}
+
+// Auto-auth se sessionStorage tiver as credenciais
+const savedUser = sessionStorage.getItem('masterUser');
+const savedPwd  = sessionStorage.getItem('masterPwd');
+if (savedUser && savedPwd) {
+  document.getElementById('master-user').value = savedUser;
+  document.getElementById('master-pwd').value  = savedPwd;
+  autenticar();
+}
+</script>
+</body>
+</html>

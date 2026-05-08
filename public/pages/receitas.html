@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RiqFy — Receitas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/main.css?v=26">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.toggle-track {
+  display: inline-flex; align-items: center;
+  width: 44px; height: 24px; border-radius: 12px;
+  background: #e2e8f0; position: relative;
+  transition: background 0.2s; flex-shrink: 0;
+  border: none; cursor: pointer; padding: 0;
+}
+.toggle-track.on { background: #22c55e; }
+#toggle-recebido.on { background: #f59e0b; }
+.toggle-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  transition: transform 0.2s; pointer-events: none;
+}
+.toggle-track.on .toggle-thumb { transform: translateX(20px); }
+.toggle-row {
+  display: flex; align-items: center; gap: 10px; padding: 6px 0;
+}
+.toggle-hint { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+.badge-recebido {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  cursor: pointer; border: none; transition: opacity 0.15s;
+  white-space: nowrap;
+}
+.badge-recebido:hover { opacity: 0.8; }
+.badge-recebido.sim { background: #dcfce7; color: #166534; }
+.badge-recebido.nao { background: #fef9c3; color: #854d0e; }
+</style>
+</head>
+<body>
+<div id="sidebar-root"></div>
+<div class="main">
+  <div id="topbar-root"></div>
+  <div class="content">
+
+    <div class="filter-bar">
+      <label>Mês e ano</label>
+      <select id="sel-mes" onchange="carregar()"></select>
+      <select id="sel-ano" onchange="carregar()"></select>
+    </div>
+
+    <div class="summary-cards cols-3">
+      <div class="summary-card">
+        <div class="card-icon green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+        <div><div class="card-label">Total de Receitas</div><div class="card-value positive" id="cv-total">R$ 0,00</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="10" width="5" height="10" rx="1"/><rect x="9.5" y="4" width="5" height="16" rx="1"/><rect x="17" y="7" width="5" height="13" rx="1"/></svg></div>
+        <div><div class="card-label">Quantidade de Receitas</div><div class="card-value" id="cv-qtd">0</div></div>
+      </div>
+      <div class="summary-card">
+        <div class="card-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/></svg></div>
+        <div><div class="card-label">Mês selecionado</div><div class="card-value" id="cv-mes">—</div></div>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:20px">
+      <h3>Receitas por categoria</h3>
+      <div class="chart-container" style="height:200px"><canvas id="chart-cat"></canvas></div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-header">
+        <h3>Lista de Receitas</h3>
+        <div class="table-actions">
+          <button class="btn btn-primary" onclick="abrirModal()">+ Nova Receita</button>
+          <button class="btn btn-warning" onclick="apagarSelecionados()">🗑 Apagar em massa</button>
+        </div>
+      </div>
+      <table style="table-layout:fixed;min-width:760px">
+        <colgroup>
+          <col style="width:40px">
+          <col style="width:auto">
+          <col style="width:110px">
+          <col style="width:130px">
+          <col style="width:120px">
+          <col style="width:120px">
+          <col style="width:140px">
+        </colgroup>
+        <thead>
+          <tr>
+            <th style="padding:10px 8px"><input type="checkbox" id="chk-all" onchange="toggleAll(this)"></th>
+            <th>Descrição</th>
+            <th style="min-width:110px">Valor</th>
+            <th style="min-width:130px">Data</th>
+            <th style="min-width:120px">Categoria</th>
+            <th style="min-width:120px">Status</th>
+            <th style="text-align:right;min-width:130px">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="tbody-receitas">
+          <tr class="empty-row"><td colspan="7">Nenhuma receita cadastrada neste período.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Nova/Editar Receita -->
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal">
+    <h2 id="modal-titulo">Nova Receita</h2>
+    <input type="hidden" id="edit-id">
+    <div class="form-group">
+      <label>Descrição *</label>
+      <input type="text" id="f-descricao" placeholder="Ex: Salário de março">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Valor (R$) *</label>
+        <input type="text" id="f-valor" placeholder="0,00" inputmode="numeric" autocomplete="off" oninput="mascaraMoeda(this)">
+      </div>
+      <div class="form-group">
+        <label>Data *</label>
+        <input type="date" id="f-data">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Categoria</label>
+      <select id="f-categoria"><option value="">Sem categoria</option></select>
+    </div>
+    <div class="form-group">
+      <label>Recorrência mensal</label>
+      <input type="hidden" id="f-recorrente" value="false">
+      <div class="toggle-row">
+        <button type="button" class="toggle-track" id="toggle-rec" onclick="toggleRecorrente()">
+          <span class="toggle-thumb"></span>
+        </button>
+        <span id="toggle-rec-label" style="font-size:13px;color:#94a3b8">Desativado</span>
+      </div>
+      <div class="toggle-hint">Quando ativo, a receita se repete todo mês automaticamente</div>
+    </div>
+    <div class="form-group">
+      <label>Pagamento pendente</label>
+      <input type="hidden" id="f-recebido" value="true">
+      <div class="toggle-row">
+        <button type="button" class="toggle-track" id="toggle-recebido" onclick="togglePendenteModal()">
+          <span class="toggle-thumb"></span>
+        </button>
+        <span id="toggle-recebido-label" style="font-size:13px;color:#8a8a8a">Desativado</span>
+      </div>
+      <div class="toggle-hint">Ative para registrar uma receita ainda não recebida (a receber)</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvar()">Salvar receita</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/app.js?v=21"></script>
+<script>
+let chartCat;
+let categorias = [];
+
+(async () => {
+  const u = await checkAuth();
+  if (!u) return;
+  document.getElementById('sidebar-root').innerHTML = renderSidebar('/receitas');
+  document.getElementById('topbar-root').innerHTML = renderTopbar();
+  document.getElementById('bottom-nav-root').innerHTML = renderBottomNav('/receitas');
+  renderUserBadge(u);
+  categorias = await apiFetch('/categorias?tipo=receita') || [];
+  const sel = document.getElementById('f-categoria');
+  categorias.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+  preencherFiltroMesAno('sel-mes', 'sel-ano', carregar);
+})();
+
+async function carregar() {
+  const mes = document.getElementById('sel-mes').value;
+  const ano = document.getElementById('sel-ano').value;
+  document.getElementById('cv-mes').textContent = `${mes}/${ano}`;
+  const [lista, resumo] = await Promise.all([
+    apiFetch(`/receitas?mes=${mes}&ano=${ano}`),
+    apiFetch(`/receitas/resumo?mes=${mes}&ano=${ano}`)
+  ]);
+  if (!lista || !resumo) return;
+  document.getElementById('cv-total').textContent = fmtBRL(resumo.total);
+  document.getElementById('cv-qtd').textContent = resumo.qtd;
+  renderTabela(lista);
+  renderChart(resumo.porCategoria);
+}
+
+function renderTabela(lista) {
+  const tb = document.getElementById('tbody-receitas');
+  if (!lista.length) {
+    tb.innerHTML = '<tr class="empty-row"><td colspan="7">Nenhuma receita cadastrada neste período.</td></tr>';
+    return;
+  }
+  tb.innerHTML = lista.map(r => `
+    <tr>
+      <td style="padding:12px 8px"><input type="checkbox" class="chk-item" value="${r.id}"></td>
+      <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><span style="font-weight:500">${r.descricao}</span>${r.recorrente ? ' <span class="badge badge-blue">Recorrente</span>' : ''}</td>
+      <td style="white-space:nowrap"><span style="color:#22c55e;font-weight:600">${fmtBRL(r.valor)}</span></td>
+      <td style="white-space:nowrap">${fmtData(r.data)}</td>
+      <td style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.categoria_nome ? `<span class="badge" style="background:${r.categoria_cor}22;color:${r.categoria_cor}">${r.categoria_nome}</span>` : '<span class="badge badge-gray">—</span>'}</td>
+      <td>
+        <button class="badge-recebido ${r.recebido ? 'sim' : 'nao'}" onclick="toggleRecebido(${r.id}, ${r.recebido ? 1 : 0})">
+          ${r.recebido ? '✓ Recebido' : '○ Pendente'}
+        </button>
+      </td>
+      <td class="td-actions" style="justify-content:flex-end;overflow:visible;white-space:nowrap">
+        <button class="btn btn-info btn-sm" onclick="editar(${r.id})">Editar</button>
+        <button class="btn btn-danger btn-sm" onclick="excluir(${r.id})">Excluir</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function renderChart(dados) {
+  if (chartCat) chartCat.destroy();
+  if (!dados.length) return;
+  chartCat = new Chart(document.getElementById('chart-cat'), {
+    type: 'bar',
+    data: {
+      labels: dados.map(d => d.nome || 'Sem categoria'),
+      datasets: [{ data: dados.map(d => d.total), backgroundColor: dados.map(d => d.cor || '#94a3b8') }]
+    },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { callback: v => fmtBRL(v) } } } }
+  });
+}
+
+async function toggleRecebido(id, atual) {
+  try {
+    const novoStatus = atual === 1 ? 0 : 1;
+    await apiFetch(`/receitas/${id}/recebido`, { method: 'PATCH', body: JSON.stringify({ recebido: novoStatus }) });
+    carregar();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function abrirModal(dados = null) {
+  document.getElementById('modal-titulo').textContent = dados ? 'Editar Receita' : 'Nova Receita';
+  document.getElementById('edit-id').value = dados?.id || '';
+  document.getElementById('f-descricao').value = dados?.descricao || '';
+  document.getElementById('f-valor').value = dados?.valor ? fmtMoedaInput(dados.valor) : '';
+  document.getElementById('f-data').value = dados ? String(dados.data).substring(0, 10) : new Date().toISOString().split('T')[0];
+  document.getElementById('f-categoria').value = dados?.categoria_id || '';
+  setRecorrente(!!dados?.recorrente);
+  // Toggle "pendente": ON quando recebido=0, OFF quando recebido=1 (padrão)
+  const isPendente = dados ? Number(dados.recebido) === 0 : false;
+  setPendente(isPendente);
+  openModal('modal-overlay');
+}
+
+function fecharModal() { closeModal('modal-overlay'); }
+
+async function salvar() {
+  const id = document.getElementById('edit-id').value;
+  const body = {
+    descricao: document.getElementById('f-descricao').value.trim(),
+    valor: parseMoeda(document.getElementById('f-valor').value),
+    data: document.getElementById('f-data').value,
+    categoria_id: document.getElementById('f-categoria').value || null,
+    recorrente: document.getElementById('f-recorrente').value === 'true',
+    recebido: document.getElementById('f-recebido').value === 'true'
+  };
+  if (!body.descricao || !body.valor || !body.data) { toast('Preencha os campos obrigatórios.', 'error'); return; }
+  try {
+    if (id) await apiFetch(`/receitas/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+    else await apiFetch('/receitas', { method: 'POST', body: JSON.stringify(body) });
+    toast(id ? 'Receita atualizada!' : 'Receita cadastrada!');
+    fecharModal();
+    carregar();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function mascaraMoeda(el) {
+  let v = el.value.replace(/\D/g, '').replace(/^0+/, '') || '0';
+  v = v.padStart(3, '0');
+  const cents = v.slice(-2);
+  const reais = v.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  el.value = reais + ',' + cents;
+}
+
+function parseMoeda(str) {
+  if (!str) return 0;
+  return parseFloat(str.replace(/\./g, '').replace(',', '.')) || 0;
+}
+
+function fmtMoedaInput(num) {
+  if (!num && num !== 0) return '';
+  const [r, c] = parseFloat(num).toFixed(2).split('.');
+  return r.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + c;
+}
+
+function setRecorrente(val) {
+  document.getElementById('f-recorrente').value = String(val);
+  document.getElementById('toggle-rec').classList.toggle('on', val);
+  const lbl = document.getElementById('toggle-rec-label');
+  lbl.textContent = val ? 'Ativado' : 'Desativado';
+  lbl.style.color = val ? '#22c55e' : '#8a8a8a';
+  lbl.style.fontWeight = val ? '600' : '400';
+}
+
+function toggleRecorrente() {
+  setRecorrente(document.getElementById('f-recorrente').value !== 'true');
+}
+
+// isPendente=true → recebido=false (0); isPendente=false → recebido=true (1, padrão)
+function setPendente(isPendente) {
+  document.getElementById('f-recebido').value = isPendente ? 'false' : 'true';
+  document.getElementById('toggle-recebido').classList.toggle('on', isPendente);
+  const lbl = document.getElementById('toggle-recebido-label');
+  lbl.textContent = isPendente ? 'Ativado' : 'Desativado';
+  lbl.style.color = isPendente ? '#f59e0b' : '#8a8a8a';
+  lbl.style.fontWeight = isPendente ? '600' : '400';
+}
+
+function togglePendenteModal() {
+  setPendente(document.getElementById('f-recebido').value !== 'false');
+}
+
+async function editar(id) {
+  const lista = await apiFetch(`/receitas?mes=${document.getElementById('sel-mes').value}&ano=${document.getElementById('sel-ano').value}`);
+  const r = lista?.find(x => x.id === id);
+  if (r) abrirModal(r);
+}
+
+async function excluir(id) {
+  if (!confirm('Excluir esta receita?')) return;
+  try {
+    await apiFetch(`/receitas/${id}`, { method: 'DELETE' });
+    toast('Receita excluída!');
+    carregar();
+  } catch(e) { toast(e.message, 'error'); }
+}
+
+function toggleAll(chk) {
+  document.querySelectorAll('.chk-item').forEach(c => c.checked = chk.checked);
+}
+
+async function apagarSelecionados() {
+  const ids = [...document.querySelectorAll('.chk-item:checked')].map(c => parseInt(c.value));
+  if (!ids.length) { toast('Selecione ao menos uma receita.', 'error'); return; }
+  confirmarExclusao(`${ids.length} receita(s) selecionada(s)`, async () => {
+    try {
+      await apiFetch('/receitas', { method: 'DELETE', body: JSON.stringify({ ids }) });
+      toast(`${ids.length} receita(s) excluída(s)!`);
+      carregar();
+    } catch(e) { toast(e.message, 'error'); }
+  });
+}
+</script>
+<div id="bottom-nav-root"></div>
+</body>
+</html>
