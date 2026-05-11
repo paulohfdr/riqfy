@@ -13,7 +13,8 @@ router.get('/', async (req, res) => {
     const tid = db.tenantId;
 
     const receitas = await db.get(
-      'SELECT COALESCE(SUM(valor),0) as total FROM receitas WHERE MONTH(data)=? AND YEAR(data)=? AND tenant_id=?',
+      `SELECT COALESCE(SUM(valor),0) as total FROM receitas
+       WHERE mes_recebimento=? AND ano_recebimento=? AND tenant_id=? AND status='recebida'`,
       [mes, ano, tid]
     ) || { total: 0 };
 
@@ -24,8 +25,9 @@ router.get('/', async (req, res) => {
     ) || { total: 0, parcelas: 0, recorrencias: 0 };
 
     const evolucao = await db.all(
-      `SELECT LPAD(MONTH(data),2,'0') as mes, COALESCE(SUM(valor),0) as total
-       FROM receitas WHERE YEAR(data)=? AND tenant_id=? GROUP BY MONTH(data), LPAD(MONTH(data),2,'0') ORDER BY MONTH(data)`,
+      `SELECT LPAD(mes_recebimento,2,'0') as mes, COALESCE(SUM(valor),0) as total
+       FROM receitas WHERE ano_recebimento=? AND tenant_id=? AND status='recebida'
+       GROUP BY mes_recebimento ORDER BY mes_recebimento`,
       [ano, tid]
     );
 
@@ -60,7 +62,7 @@ router.get('/', async (req, res) => {
     const aReceber = await db.all(
       `SELECT r.*, c.nome as categoria_nome, c.cor as categoria_cor FROM receitas r
        LEFT JOIN categorias c ON r.categoria_id = c.id
-       WHERE r.tenant_id=? AND r.recebido=0
+       WHERE r.tenant_id=? AND r.status='pendente'
        ORDER BY r.data ASC LIMIT 20`,
       [tid]
     );

@@ -34,8 +34,12 @@ const schemas = {
     data: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required()
       .messages({ 'string.pattern.base': 'Data inválida (use AAAA-MM-DD)' }),
     categoria_id: Joi.number().integer().positive().allow(null, '').default(null),
-    recorrente: Joi.boolean().default(false),
-    recebido: Joi.boolean().default(true)
+    recorrente: Joi.boolean().default(false)
+  }),
+
+  receber: Joi.object({
+    data_recebimento: Joi.string().pattern(/^\d{4}-\d{2}-\d{2}$/).required()
+      .messages({ 'string.pattern.base': 'Data de recebimento inválida (use AAAA-MM-DD)' })
   }),
 
   despesa: Joi.object({

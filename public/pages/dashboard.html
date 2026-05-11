@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/main.css?v=26">
+<link rel="stylesheet" href="/css/main.css?v=27">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 .areceber-card {
@@ -39,6 +39,20 @@
 .areceber-table .val { text-align: right; color: #15803d; font-weight: 700; white-space: nowrap; }
 .areceber-empty { padding: 20px; text-align: center; color: #64748b; font-size: 13px; }
 .badge-cat-rec { display:inline-block; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:600; }
+.areceber-row {
+  cursor: pointer; transition: background 0.15s;
+}
+.areceber-row:hover td { background: #bbf7d050; }
+.areceber-row:hover .desc { color: #15803d; }
+.areceber-row .receber-hint {
+  font-size: 10px; color: #22c55e; font-weight: 600;
+  opacity: 0; transition: opacity 0.15s;
+}
+.areceber-row:hover .receber-hint { opacity: 1; }
+.receber-info-dash {
+  background: #f0fdf4; border-left: 3px solid #22c55e;
+  border-radius: 10px; padding: 12px 14px; margin-bottom: 16px;
+}
 </style>
 </head>
 <body>
@@ -110,9 +124,31 @@
   </div>
 </div>
 
+<!-- Modal Marcar Como Recebida -->
+<div class="modal-overlay hidden" id="modal-receber">
+  <div class="modal">
+    <h2>Marcar Como Recebida</h2>
+    <input type="hidden" id="receber-id">
+    <div class="receber-info-dash">
+      <div id="receber-descricao" style="font-weight:700;color:#0f172a;margin-bottom:4px;font-size:14px"></div>
+      <div id="receber-valor" style="font-size:18px;color:#16a34a;font-weight:700"></div>
+    </div>
+    <div class="form-group">
+      <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px">Data de recebimento *</label>
+      <input type="date" id="f-data-recebimento" style="width:100%;padding:9px 12px;border:1.5px solid #ebebeb;border-radius:8px;font-size:14px;font-family:inherit">
+      <div style="font-size:11px;color:#94a3b8;margin-top:4px">Pode ser qualquer data — o valor soma no mês dessa data</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="fecharModalReceber()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarRecebimento()">Confirmar Recebimento</button>
+    </div>
+  </div>
+</div>
+
 <script src="/js/app.js?v=21"></script>
 <script>
 let chartEvolucao, chartCat, chartDonut;
+const _receitasMap = {};
 
 (async () => {
   const u = await checkAuth();
@@ -155,6 +191,9 @@ function renderAReceber(lista, total) {
   section.style.display = 'block';
   document.getElementById('areceber-total').textContent = fmtBRL(total);
   document.getElementById('areceber-qtd').textContent = lista.length;
+
+  lista.forEach(r => { _receitasMap[r.id] = r; });
+
   const tb = document.getElementById('tbody-areceber');
   tb.innerHTML = lista.map(r => {
     const catStyle = r.categoria_cor
@@ -163,16 +202,44 @@ function renderAReceber(lista, total) {
     const catLabel = r.categoria_nome
       ? `<span class="badge-cat-rec" style="${catStyle}">${r.categoria_nome}</span> `
       : '';
+    const descSafe = String(r.descricao).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     return `
-      <tr>
+      <tr class="areceber-row" onclick="abrirModalReceber(${r.id})" title="Clique para marcar como recebida">
         <td>
-          <div class="desc">${catLabel}${r.descricao}</div>
-          <div class="sub">${fmtData(r.data)}</div>
+          <div class="desc">${catLabel}${descSafe} <span class="receber-hint">▶ Receber</span></div>
+          <div class="sub">${fmtData(String(r.data).substring(0,10))}</div>
         </td>
         <td class="val">${fmtBRL(r.valor)}</td>
       </tr>
     `;
   }).join('');
+}
+
+function abrirModalReceber(id) {
+  const r = _receitasMap[id];
+  if (!r) return;
+  document.getElementById('receber-id').value = r.id;
+  document.getElementById('receber-descricao').textContent = r.descricao;
+  document.getElementById('receber-valor').textContent = fmtBRL(r.valor);
+  document.getElementById('f-data-recebimento').value = new Date().toISOString().split('T')[0];
+  openModal('modal-receber');
+}
+
+function fecharModalReceber() { closeModal('modal-receber'); }
+
+async function confirmarRecebimento() {
+  const id = document.getElementById('receber-id').value;
+  const data_recebimento = document.getElementById('f-data-recebimento').value;
+  if (!data_recebimento) { toast('Selecione a data de recebimento.', 'error'); return; }
+  try {
+    await apiFetch(`/receitas/${id}/receber`, {
+      method: 'PUT',
+      body: JSON.stringify({ data_recebimento })
+    });
+    toast('Receita marcada como recebida!');
+    fecharModalReceber();
+    carregar();
+  } catch (e) { toast(e.message, 'error'); }
 }
 
 function renderEvolucao(rec, desp) {

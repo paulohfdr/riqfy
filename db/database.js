@@ -94,11 +94,29 @@ async function initTenantTables() {
     await pool.execute('ALTER TABLE receitas ADD COLUMN recebido TINYINT NOT NULL DEFAULT 1');
     console.log('✅ Migração: coluna recebido adicionada à tabela receitas');
   } else if (String(colsRecebido[0].COLUMN_DEFAULT) === '0') {
-    // Coluna existe com default=0 (instalação anterior): muda default para 1
-    // e marca todos os existentes como recebidos (eram recebidos antes dessa feature existir)
     await pool.execute('ALTER TABLE receitas MODIFY COLUMN recebido TINYINT NOT NULL DEFAULT 1');
     await pool.execute('UPDATE receitas SET recebido = 1 WHERE recebido = 0');
     console.log('✅ Migração: padrão de recebido atualizado para 1 e registros existentes marcados como recebidos');
+  }
+
+  // Migração: colunas de status e data de recebimento
+  const [colsStatus] = await pool.execute(
+    `SELECT COLUMN_NAME FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'receitas' AND COLUMN_NAME = 'status'`
+  );
+  if (!colsStatus.length) {
+    await pool.execute(`ALTER TABLE receitas
+      ADD COLUMN status ENUM('pendente','recebida') NOT NULL DEFAULT 'pendente' AFTER descricao,
+      ADD COLUMN data_recebimento DATE DEFAULT NULL AFTER data,
+      ADD COLUMN mes_recebimento INT DEFAULT NULL AFTER data_recebimento,
+      ADD COLUMN ano_recebimento INT DEFAULT NULL AFTER mes_recebimento`);
+    await pool.execute('ALTER TABLE receitas ADD INDEX idx_status (status)');
+    await pool.execute('ALTER TABLE receitas ADD INDEX idx_data_recebimento (data_recebimento)');
+    await pool.execute('ALTER TABLE receitas ADD INDEX idx_mes_ano_recebimento (mes_recebimento, ano_recebimento)');
+    // Registros existentes com recebido=1 → recebida; recebido=0 → pendente
+    await pool.execute(`UPDATE receitas SET status='recebida', data_recebimento=data,
+      mes_recebimento=MONTH(data), ano_recebimento=YEAR(data) WHERE recebido=1`);
+    console.log('✅ Migração: colunas de status de receita adicionadas e dados sincronizados');
   }
 }
 

@@ -479,3 +479,19 @@ canvas { animation: canvasFade 0.5s ease; }
   }
   .more-menu-overlay.open { display: block; }
 }
+
+/* ===== STATUS DE RECEITAS ===== */
+.status-recebida {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  background: #dcfce7; color: #166534;
+  white-space: nowrap;
+}
+.status-pendente {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  background: #fff7ed; color: #92400e;
+  white-space: nowrap;
+}
