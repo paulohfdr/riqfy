@@ -8,8 +8,28 @@ async function checkAuth() {
     const { usuario } = await r.json();
     _tenantNome = usuario.tenantNome || '';
     renderUserBadge(usuario);
+    carregarPlanoBadge();
     return usuario;
   } catch { window.location.href = '/login'; return null; }
+}
+
+async function carregarPlanoBadge() {
+  try {
+    const r = await fetch(API + '/tenant/info');
+    if (!r.ok) return;
+    const info = await r.json();
+    const el = document.getElementById('sidebar-plano');
+    if (!el || !info.plano_nome) return;
+    const cores = { Free: '#64748b', Pro: '#2563eb', Family: '#ca8a04' };
+    const bgs   = { Free: '#f1f5f9', Pro: '#eff6ff', Family: '#fefce8' };
+    const cor = cores[info.plano_nome] || '#64748b';
+    const bg  = bgs[info.plano_nome]  || '#f1f5f9';
+    el.innerHTML =
+      '<span style="display:inline-flex;align-items:center;gap:4px;background:' + bg + ';color:' + cor + ';' +
+      'border:1px solid ' + cor + '33;border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700;letter-spacing:.04em">' +
+      '<span style="width:5px;height:5px;border-radius:50%;background:' + cor + ';display:inline-block"></span>' +
+      info.plano_nome + '</span>';
+  } catch {}
 }
 
 function getSaudacao() {
@@ -155,7 +175,8 @@ function renderSidebar(ativo) {
         '<div class="user-avatar" id="sidebar-avatar" style="width:36px;height:36px;font-size:14px;flex-shrink:0">?</div>' +
         '<div style="flex:1;min-width:0">' +
           '<div style="font-size:13px;font-weight:700;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sidebar-nome">—</div>' +
-          '<div style="font-size:11px;color:var(--muted)" id="sidebar-saudacao">Bem-vindo</div>' +
+          '<div style="font-size:11px;color:var(--muted);margin-bottom:4px" id="sidebar-saudacao">Bem-vindo</div>' +
+          '<div id="sidebar-plano"></div>' +
         '</div>' +
       '</div>' +
       '<nav class="sidebar-nav">' +
