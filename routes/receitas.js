@@ -3,6 +3,7 @@ const router = express.Router();
 const { getDb } = require('../db/database');
 const { authMiddleware } = require('../middleware/auth');
 const { validate, schemas } = require('../middleware/validation');
+const { lancamentoLimitCheck } = require('../middleware/plano');
 const logger = require('../utils/logger');
 
 router.use(authMiddleware);
@@ -83,7 +84,7 @@ router.get('/resumo', async (req, res) => {
 });
 
 // POST / → criar receita (sempre pendente)
-router.post('/', validate(schemas.receita), async (req, res) => {
+router.post('/', lancamentoLimitCheck, validate(schemas.receita), async (req, res) => {
   try {
     const db = await getDb(req.tenantSlug);
     const { descricao, valor, data, categoria_id, recorrente } = req.body;

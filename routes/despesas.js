@@ -3,6 +3,7 @@ const router = express.Router();
 const { getDb } = require('../db/database');
 const { authMiddleware } = require('../middleware/auth');
 const { validate, schemas } = require('../middleware/validation');
+const { lancamentoLimitCheck } = require('../middleware/plano');
 const { randomUUID } = require('crypto');
 
 router.use(authMiddleware);
@@ -47,7 +48,7 @@ router.get('/resumo', async (req, res) => {
   } catch(e) { res.status(500).json({ erro: e.message }); }
 });
 
-router.post('/', validate(schemas.despesa), async (req, res) => {
+router.post('/', lancamentoLimitCheck, validate(schemas.despesa), async (req, res) => {
   try {
     const db = await getDb(req.tenantSlug);
     const { descricao, valor, vencimento, categoria_id, forma_pagamento, recorrente, total_parcelas } = req.body;
