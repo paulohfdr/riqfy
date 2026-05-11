@@ -66,4 +66,22 @@ router.put('/:id/status', authAdmin, async (req, res) => {
   } catch(e) { res.status(500).json({ erro: e.message }); }
 });
 
+router.delete('/:id', authAdmin, async (req, res) => {
+  try {
+    if (String(req.params.id) === String(req.usuario.id))
+      return res.status(400).json({ erro: 'Você não pode excluir sua própria conta.' });
+    const db = await getDb(req.tenantSlug);
+    const admins = await db.all(
+      "SELECT id FROM usuarios WHERE tenant_id=? AND nivel='administrador' AND status='ativo'",
+      [db.tenantId]
+    );
+    const alvo = await db.get('SELECT nivel FROM usuarios WHERE id=? AND tenant_id=?', [req.params.id, db.tenantId]);
+    if (!alvo) return res.status(404).json({ erro: 'Usuário não encontrado.' });
+    if (alvo.nivel === 'administrador' && admins.length <= 1)
+      return res.status(400).json({ erro: 'Não é possível excluir o único administrador ativo.' });
+    await db.run('DELETE FROM usuarios WHERE id=? AND tenant_id=?', [req.params.id, db.tenantId]);
+    res.json({ ok: true });
+  } catch(e) { res.status(500).json({ erro: e.message }); }
+});
+
 module.exports = router;

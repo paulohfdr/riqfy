@@ -102,9 +102,12 @@
 
 <script src="/js/app.js?v=21"></script>
 <script>
+let meId = null;
+
 (async () => {
   const u = await checkAuth();
   if (!u) return;
+  meId = u.id;
   document.getElementById('sidebar-root').innerHTML = renderSidebar('/usuarios');
   document.getElementById('topbar-root').innerHTML = renderTopbar();
   document.getElementById('bottom-nav-root').innerHTML = renderBottomNav('/usuarios');
@@ -139,6 +142,7 @@ async function carregar() {
         <button class="btn btn-info btn-sm" onclick="editar(${u.id})">Editar</button>
         <button class="btn btn-warning btn-sm" onclick="abrirReset(${u.id})">Resetar senha</button>
         <button class="btn btn-sm" style="background:#f1f5f9;color:#475569" onclick="toggleStatus(${u.id},'${u.status}')">${u.status==='ativo'?'Inativar':'Ativar'}</button>
+        ${u.id !== meId ? `<button class="btn btn-danger btn-sm" onclick="confirmarExcluir(${u.id},'${u.nome.replace(/'/g,"\\'")}')">Excluir</button>` : ''}
       </td>
     </tr>
   `).join('');
@@ -232,6 +236,22 @@ async function toggleStatus(id, status) {
     carregar();
   } catch(e) { toast(e.message,'error'); }
 }
+
+function confirmarExcluir(id, nome) {
+  document.getElementById('excluir-id').value = id;
+  document.getElementById('excluir-nome').textContent = nome;
+  openModal('modal-excluir');
+}
+
+async function excluir() {
+  const id = document.getElementById('excluir-id').value;
+  try {
+    await apiFetch(`/usuarios/${id}`, { method:'DELETE' });
+    toast('Usuário excluído!');
+    closeModal('modal-excluir');
+    carregar();
+  } catch(e) { toast(e.message,'error'); }
+}
 </script>
 
 <!-- Modal Alterar Minha Senha -->
@@ -253,6 +273,18 @@ async function toggleStatus(id, status) {
     <div class="modal-footer">
       <button class="btn-cancel" onclick="closeModal('modal-minha-senha')">Cancelar</button>
       <button class="btn btn-primary" onclick="salvarMinhaSenha()">Salvar senha</button>
+    </div>
+  </div>
+</div>
+<!-- Modal Confirmar Exclusão -->
+<div class="modal-overlay hidden" id="modal-excluir">
+  <div class="modal" style="max-width:380px">
+    <h2>Excluir usuário</h2>
+    <input type="hidden" id="excluir-id">
+    <p style="color:#64748b;font-size:14px;margin:12px 0 20px">Tem certeza que deseja excluir o usuário <strong id="excluir-nome"></strong>? Esta ação não pode ser desfeita.</p>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-excluir')">Cancelar</button>
+      <button class="btn btn-danger" onclick="excluir()">Excluir</button>
     </div>
   </div>
 </div>
