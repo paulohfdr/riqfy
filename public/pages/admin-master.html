@@ -109,6 +109,7 @@ tr:hover td{background:#fafbff}
             <th>Nome</th>
             <th>Código de acesso</th>
             <th>Email</th>
+            <th>Plano</th>
             <th>Status</th>
             <th>Criado em</th>
             <th style="text-align:right">Ações</th>
@@ -177,12 +178,29 @@ tr:hover td{background:#fafbff}
   </div>
 </div>
 
+<!-- Modal alterar plano -->
+<div class="modal-overlay hidden" id="modal-plano">
+  <div class="modal" style="max-width:400px">
+    <h2>Alterar plano</h2>
+    <input type="hidden" id="plano-tenant-id">
+    <div class="form-group" style="margin-bottom:24px">
+      <label>Selecione o plano</label>
+      <div id="plano-opcoes" style="display:flex;flex-direction:column;gap:10px;margin-top:8px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="document.getElementById('modal-plano').classList.add('hidden')">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarAlterarPlano()">Salvar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toast-container"></div>
 
 <script>
 let masterPwd  = '';
 let masterUser = '';
 let todosOsTenants = [];
+let planosDisponiveis = [];
 
 ['master-user', 'master-pwd'].forEach(id => {
   document.getElementById(id).addEventListener('keydown', e => {
@@ -212,6 +230,7 @@ async function autenticar() {
   document.getElementById('main-content').style.display = 'block';
   document.getElementById('admin-info').textContent = 'Autenticado como ' + user;
   carregar();
+  carregarPlanos();
 }
 
 function api(url, opts) {
@@ -222,6 +241,10 @@ function api(url, opts) {
     'x-master-password': masterPwd
   }, opts.headers || {});
   return fetch('/api/admin' + url, opts).then(r => r.json());
+}
+
+async function carregarPlanos() {
+  planosDisponiveis = await api('/planos');
 }
 
 async function carregar() {
@@ -268,11 +291,13 @@ function renderTabela(tenants) {
       <td><strong>${t.nome}</strong></td>
       <td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px">${t.slug}</code></td>
       <td style="color:#64748b">${t.email_admin}</td>
+      <td>${planoBadge(t.plano_nome)}</td>
       <td>${statusBadge(t.status)}</td>
       <td style="color:#64748b">${fmtDate(t.criado_em)}</td>
       <td>
         <div class="actions" style="justify-content:flex-end">
           <button class="btn btn-sm btn-primary" onclick="verDetalhes(${t.id})">Detalhes</button>
+          <button class="btn btn-sm" style="background:#7c3aed;color:#fff" onclick="abrirAlterarPlano(${t.id},'${t.plano_nome}')">Plano</button>
           ${t.status === 'ativo'
             ? `<button class="btn btn-sm btn-danger" onclick="mudarStatus(${t.id},'suspenso','${t.nome}')">Suspender</button>`
             : `<button class="btn btn-sm btn-success" onclick="mudarStatus(${t.id},'ativo','${t.nome}')">Ativar</button>`
@@ -413,6 +438,50 @@ async function apagarUsuario(id, nome) {
   else toast(r.erro || 'Erro ao apagar', 'error');
 }
 
+const planoCores = { Free: '#64748b', Pro: '#2563eb', Family: '#ca8a04' };
+const planoDescricoes = {
+  Free:   '1 usuário · 50 lançamentos/mês · Gratuito',
+  Pro:    'Até 5 usuários · Ilimitado · R$ 29,90/mês',
+  Family: 'Usuários ilimitados · Ilimitado · R$ 49,90/mês'
+};
+
+function abrirAlterarPlano(tenantId, planoAtual) {
+  document.getElementById('plano-tenant-id').value = tenantId;
+  const container = document.getElementById('plano-opcoes');
+  container.innerHTML = planosDisponiveis.map(p => `
+    <label style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:2px solid ${p.nome === planoAtual ? planoCores[p.nome] || '#2563eb' : '#e2e8f0'};border-radius:10px;cursor:pointer;transition:border-color .15s" onclick="selecionarPlano(this,'${p.nome}')">
+      <input type="radio" name="plano-radio" value="${p.id}" ${p.nome === planoAtual ? 'checked' : ''} style="accent-color:${planoCores[p.nome] || '#2563eb'}">
+      <div>
+        <div style="font-weight:700;font-size:14px;color:#0f172a">${p.nome}</div>
+        <div style="font-size:12px;color:#64748b;margin-top:2px">${planoDescricoes[p.nome] || ''}</div>
+      </div>
+    </label>
+  `).join('');
+  document.getElementById('modal-plano').classList.remove('hidden');
+}
+
+function selecionarPlano(label, nome) {
+  document.querySelectorAll('#plano-opcoes label').forEach(l => l.style.borderColor = '#e2e8f0');
+  label.style.borderColor = planoCores[nome] || '#2563eb';
+}
+
+async function confirmarAlterarPlano() {
+  const tenantId = document.getElementById('plano-tenant-id').value;
+  const radio = document.querySelector('input[name="plano-radio"]:checked');
+  if (!radio) return;
+  const r = await api('/tenants/' + tenantId + '/plano', {
+    method: 'PUT',
+    body: JSON.stringify({ plano_id: parseInt(radio.value) })
+  });
+  if (r.ok) {
+    toast('Plano alterado com sucesso!');
+    document.getElementById('modal-plano').classList.add('hidden');
+    carregar();
+  } else {
+    toast(r.erro || 'Erro ao alterar plano', 'error');
+  }
+}
+
 function sair() {
   sessionStorage.removeItem('masterUser');
   sessionStorage.removeItem('masterPwd');
@@ -433,6 +502,13 @@ if (savedUser && savedPwd) {
   document.getElementById('master-pwd').value  = savedPwd;
   autenticar();
 }
+
+// Fechar modais clicando fora
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.add('hidden');
+  });
+});
 </script>
 </body>
 </html>
