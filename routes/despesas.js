@@ -106,27 +106,27 @@ router.put('/:id', validate(schemas.despesa), async (req, res) => {
     );
     if (!despesaAtual) return res.status(404).json({ erro: 'Despesa não encontrada' });
 
-    if (despesaAtual.grupo_parcela && escopo && escopo !== 'esta') {
-      // Atualiza parcelas do grupo conforme escopo
+    if (despesaAtual.grupo_parcela) {
+      // Sempre atualiza TODAS as parcelas do grupo
       const todasParcelas = await db.all(
         'SELECT * FROM despesas WHERE grupo_parcela = ? AND tenant_id = ? ORDER BY parcela_atual ASC',
         [despesaAtual.grupo_parcela, db.tenantId]
       );
-      const parcelasAlvo = escopo === 'futuras'
-        ? todasParcelas.filter(p => p.parcela_atual >= despesaAtual.parcela_atual)
-        : todasParcelas;
+      const n = todasParcelas.length;
+      const valorTotal = Number(valor);
+      const valorParcela = Math.round(valorTotal / n * 100) / 100;
+      const ajuste = Math.round((valorTotal - valorParcela * n) * 100) / 100;
 
-      for (const p of parcelasAlvo) {
-        const desc = todasParcelas.length > 1
-          ? `${descricao} (${p.parcela_atual}/${todasParcelas.length})`
-          : descricao;
+      for (const p of todasParcelas) {
+        const desc = `${descricao} (${p.parcela_atual}/${n})`;
+        const valorFinal = p.parcela_atual === n ? valorParcela + ajuste : valorParcela;
         await db.run(
           'UPDATE despesas SET descricao=?,valor=?,categoria_id=?,forma_pagamento=?,recorrente=? WHERE id=? AND tenant_id=?',
-          [desc, Number(valor), categoria_id || null, forma_pagamento, recorrente ? 1 : 0, p.id, db.tenantId]
+          [desc, valorFinal, categoria_id || null, forma_pagamento, recorrente ? 1 : 0, p.id, db.tenantId]
         );
       }
     } else {
-      // Edita apenas esta despesa individualmente
+      // Despesa simples — atualiza registro individual
       await db.run(
         'UPDATE despesas SET descricao=?,valor=?,vencimento=?,categoria_id=?,forma_pagamento=?,recorrente=?,total_parcelas=? WHERE id=? AND tenant_id=?',
         [descricao, Number(valor), vencimento, categoria_id || null, forma_pagamento, recorrente ? 1 : 0, parseInt(total_parcelas) || 1, req.params.id, db.tenantId]

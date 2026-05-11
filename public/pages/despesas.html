@@ -125,20 +125,6 @@
   </div>
 </div>
 
-<!-- Modal escopo de parcelas -->
-<div class="modal-overlay hidden" id="modal-escopo">
-  <div class="modal" style="max-width:380px;text-align:center">
-    <h2 id="escopo-titulo">Editar Parcelas</h2>
-    <p id="escopo-desc" style="color:#64748b;font-size:14px;margin:12px 0 20px"></p>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button class="btn btn-info" onclick="escolherEscopo('esta')" id="escopo-btn-esta">Esta parcela apenas</button>
-      <button class="btn btn-warning" onclick="escolherEscopo('futuras')" id="escopo-btn-futuras">Esta e as futuras</button>
-      <button class="btn btn-danger" onclick="escolherEscopo('todas')" id="escopo-btn-todas">Todas as parcelas</button>
-      <button class="btn-cancel" onclick="closeModal('modal-escopo')">Cancelar</button>
-    </div>
-  </div>
-</div>
-
 <!-- Modal -->
 <div class="modal-overlay hidden" id="modal-overlay">
   <div class="modal">
@@ -150,7 +136,7 @@
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>Valor (R$) *</label>
+        <label id="f-valor-label">Valor (R$) *</label>
         <input type="text" id="f-valor" placeholder="0,00" inputmode="numeric" autocomplete="off" oninput="mascaraMoeda(this)">
       </div>
       <div class="form-group">
@@ -199,9 +185,7 @@
 <script>
 let chartCat, chartForma, chartDist;
 let despesasList = [];
-let escopoAcao = null; // 'editar' | 'excluir'
-let escopoId = null;
-let pendingEditEscopo = null;
+let escopoId = null; // usado apenas no fluxo de excluir parcelada
 
 (async () => {
   const u = await checkAuth();
@@ -300,11 +284,14 @@ function stripParcelaDesc(desc) {
 }
 
 function abrirModal(dados=null) {
+  const ehParcelada = dados && dados.total_parcelas > 1;
   document.getElementById('modal-titulo').textContent = dados ? 'Editar Despesa' : 'Nova Despesa';
   document.getElementById('edit-id').value = dados?.id || '';
-  // Exibe descrição base sem o sufixo (1/8)
   document.getElementById('f-descricao').value = dados ? stripParcelaDesc(dados.descricao) : '';
-  document.getElementById('f-valor').value = dados?.valor ? fmtMoedaInput(dados.valor) : '';
+  // Para parceladas mostra valor total; backend vai redistribuir pelas parcelas
+  document.getElementById('f-valor-label').textContent = ehParcelada ? 'Valor total (R$) *' : 'Valor (R$) *';
+  const valorExibido = ehParcelada ? dados.valor * dados.total_parcelas : dados?.valor;
+  document.getElementById('f-valor').value = valorExibido ? fmtMoedaInput(valorExibido) : '';
   document.getElementById('f-vencimento').value = dados ? String(dados.vencimento).substring(0, 10) : new Date().toISOString().split('T')[0];
   document.getElementById('f-categoria').value = dados?.categoria_id || '';
   const forma = dados?.forma_pagamento || 'credito';
@@ -316,10 +303,7 @@ function abrirModal(dados=null) {
   openModal('modal-overlay');
 }
 
-function fecharModal() {
-  pendingEditEscopo = null;
-  closeModal('modal-overlay');
-}
+function fecharModal() { closeModal('modal-overlay'); }
 
 async function salvar() {
   const id = document.getElementById('edit-id').value;
@@ -332,13 +316,11 @@ async function salvar() {
     total_parcelas: document.getElementById('f-parcelas').value,
     recorrente: document.getElementById('f-recorrente').value === 'true'
   };
-  if (id && pendingEditEscopo) body.escopo = pendingEditEscopo;
   if (!body.descricao || !body.valor || !body.vencimento) { toast('Preencha os campos obrigatórios.', 'error'); return; }
   try {
     if (id) await apiFetch(`/despesas/${id}`, { method:'PUT', body:JSON.stringify(body) });
     else await apiFetch('/despesas', { method:'POST', body:JSON.stringify(body) });
     toast(id ? 'Despesa atualizada!' : 'Despesa cadastrada!');
-    pendingEditEscopo = null;
     fecharModal();
     carregar();
   } catch(e) { toast(e.message, 'error'); }
@@ -346,60 +328,27 @@ async function salvar() {
 
 function editar(id) {
   const d = despesasList.find(x => x.id === id);
-  if (!d) return;
-  if (d.total_parcelas > 1) {
-    escopoAcao = 'editar';
-    escopoId = id;
-    document.getElementById('escopo-titulo').textContent = 'Editar Parcelas';
-    document.getElementById('escopo-desc').textContent =
-      `"${stripParcelaDesc(d.descricao)}" tem ${d.total_parcelas} parcelas. O que deseja editar?`;
-    document.getElementById('escopo-btn-futuras').style.display = 'block';
-    openModal('modal-escopo');
-  } else {
-    abrirModal(d);
-  }
+  if (d) abrirModal(d);
 }
 
 function excluir(id) {
   const d = despesasList.find(x => x.id === id);
   if (!d) return;
   if (d.total_parcelas > 1) {
-    escopoAcao = 'excluir';
     escopoId = id;
-    document.getElementById('escopo-titulo').textContent = 'Excluir Parcelas';
-    document.getElementById('escopo-desc').textContent =
-      `"${stripParcelaDesc(d.descricao)}" tem ${d.total_parcelas} parcelas. O que deseja excluir?`;
-    document.getElementById('escopo-btn-futuras').style.display = 'none';
-    openModal('modal-escopo');
+    // Mostra confirmação com opção de apagar todas ou só esta
+    const nomeBase = stripParcelaDesc(d.descricao);
+    confirmarExclusao(`todas as ${d.total_parcelas} parcelas de "${nomeBase}"`, async () => {
+      try {
+        await apiFetch(`/despesas/${id}?escopo=todas`, { method:'DELETE' });
+        toast('Todas as parcelas excluídas!');
+        carregar();
+      } catch(e) { toast(e.message, 'error'); }
+    });
   } else {
     confirmarExclusao(d.descricao || 'esta despesa', async () => {
       try { await apiFetch(`/despesas/${id}`, { method:'DELETE' }); toast('Despesa excluída!'); carregar(); }
       catch(e) { toast(e.message, 'error'); }
-    });
-  }
-}
-
-function escolherEscopo(escopo) {
-  closeModal('modal-escopo');
-  const d = despesasList.find(x => x.id === escopoId);
-  if (!d) return;
-
-  if (escopoAcao === 'editar') {
-    pendingEditEscopo = escopo;
-    abrirModal(d);
-  } else if (escopoAcao === 'excluir') {
-    const url = escopo === 'todas'
-      ? `/despesas/${escopoId}?escopo=todas`
-      : `/despesas/${escopoId}`;
-    const msg = escopo === 'todas'
-      ? `todas as ${d.total_parcelas} parcelas de "${stripParcelaDesc(d.descricao)}"`
-      : `a parcela ${d.parcela_atual}/${d.total_parcelas} de "${stripParcelaDesc(d.descricao)}"`;
-    confirmarExclusao(msg, async () => {
-      try {
-        await apiFetch(url, { method:'DELETE' });
-        toast(escopo === 'todas' ? 'Todas as parcelas excluídas!' : 'Parcela excluída!');
-        carregar();
-      } catch(e) { toast(e.message, 'error'); }
     });
   }
 }
