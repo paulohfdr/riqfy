@@ -143,6 +143,10 @@ tr:hover td{background:#fafbff}
       <label>Senha *</label>
       <input type="password" id="ne-senha" placeholder="Mínimo 6 caracteres" style="width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none">
     </div>
+    <div class="form-group">
+      <label>Plano *</label>
+      <div id="ne-plano-opcoes" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+    </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="document.getElementById('modal-nova-empresa').classList.add('hidden')">Cancelar</button>
       <button class="btn btn-success" id="btn-criar-empresa" onclick="criarEmpresa()">Criar acesso</button>
@@ -373,16 +377,32 @@ function abrirNovaEmpresa() {
   ['ne-nome-admin','ne-email','ne-username','ne-senha'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('ne-slug-preview').innerHTML = '';
   document.getElementById('nova-empresa-error').style.display = 'none';
+  const container = document.getElementById('ne-plano-opcoes');
+  container.innerHTML = planosDisponiveis.map((p, i) => `
+    <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:2px solid ${i === 0 ? planoCores[p.nome] || '#64748b' : '#e2e8f0'};border-radius:10px;cursor:pointer;transition:border-color .15s" onclick="selecionarPlanoNovo(this,'${p.nome}')">
+      <input type="radio" name="ne-plano-radio" value="${p.id}" ${i === 0 ? 'checked' : ''} style="accent-color:${planoCores[p.nome] || '#64748b'}">
+      <div>
+        <div style="font-weight:700;font-size:13px;color:#0f172a">${p.nome}</div>
+        <div style="font-size:11px;color:#64748b;margin-top:1px">${planoDescricoes[p.nome] || ''}</div>
+      </div>
+    </label>
+  `).join('');
   document.getElementById('modal-nova-empresa').classList.remove('hidden');
+}
+
+function selecionarPlanoNovo(label, nome) {
+  document.querySelectorAll('#ne-plano-opcoes label').forEach(l => l.style.borderColor = '#e2e8f0');
+  label.style.borderColor = planoCores[nome] || '#64748b';
 }
 
 async function criarEmpresa() {
   const btn    = document.getElementById('btn-criar-empresa');
   const errEl  = document.getElementById('nova-empresa-error');
-  const nome   = document.getElementById('ne-nome-admin').value.trim();
-  const email  = document.getElementById('ne-email').value.trim();
+  const nome     = document.getElementById('ne-nome-admin').value.trim();
+  const email    = document.getElementById('ne-email').value.trim();
   const username = document.getElementById('ne-username').value.trim();
-  const senha  = document.getElementById('ne-senha').value;
+  const senha    = document.getElementById('ne-senha').value;
+  const planoRadio = document.querySelector('input[name="ne-plano-radio"]:checked');
 
   errEl.style.display = 'none';
   if (!nome || !email || !username || !senha) {
@@ -398,7 +418,7 @@ async function criarEmpresa() {
     const r = await fetch('/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, email, username, senha })
+      body: JSON.stringify({ nome, email, username, senha, plano_id: planoRadio ? parseInt(planoRadio.value) : undefined })
     });
     const data = await r.json();
     if (!r.ok) {

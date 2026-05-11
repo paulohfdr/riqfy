@@ -26,7 +26,8 @@ const schemas = {
     username: Joi.string().pattern(/^[a-zA-Z0-9._]+$/).min(3).max(100).required()
       .messages({ 'string.pattern.base': 'Username deve conter apenas letras, números, pontos e underscores' }),
     senha: Joi.string().min(8).max(200).required()
-      .messages({ 'string.min': 'Senha deve ter no mínimo 8 caracteres' })
+      .messages({ 'string.min': 'Senha deve ter no mínimo 8 caracteres' }),
+    plano_id: Joi.number().integer().positive().optional()
   }),
 
   receita: Joi.object({

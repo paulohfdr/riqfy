@@ -84,7 +84,7 @@ router.post('/login', loginLimiter, validate(schemas.login), async (req, res) =>
 
 // Cadastro de novo tenant/usuário admin
 router.post('/register', validate(schemas.register), async (req, res) => {
-  const { nome, email, username, senha } = req.body;
+  const { nome, email, username, senha, plano_id } = req.body;
 
   try {
     const masterDb = await getMasterDb();
@@ -97,7 +97,11 @@ router.post('/register', validate(schemas.register), async (req, res) => {
 
     const slug = await slugUnico(masterDb, gerarSlug(username));
     const planoFree = await masterDb.get('SELECT id FROM planos ORDER BY id LIMIT 1');
-    const planoId = planoFree?.id || 1;
+    let planoId = planoFree?.id || 1;
+    if (plano_id) {
+      const planoEscolhido = await masterDb.get('SELECT id FROM planos WHERE id = ?', [plano_id]);
+      if (planoEscolhido) planoId = planoEscolhido.id;
+    }
 
     const r = await masterDb.run(
       'INSERT INTO tenants (nome,slug,email_admin,plano_id,status) VALUES (?,?,?,?,?)',
