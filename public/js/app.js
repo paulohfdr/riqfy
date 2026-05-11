@@ -18,17 +18,14 @@ async function carregarPlanoBadge() {
     const r = await fetch(API + '/tenant/info');
     if (!r.ok) return;
     const info = await r.json();
-    const el = document.getElementById('sidebar-plano');
+    const el = document.getElementById('sidebar-plano-nome');
     if (!el || !info.plano_nome) return;
     const cores = { Free: '#64748b', Pro: '#2563eb', Family: '#ca8a04' };
-    const bgs   = { Free: '#f1f5f9', Pro: '#eff6ff', Family: '#fefce8' };
     const cor = cores[info.plano_nome] || '#64748b';
-    const bg  = bgs[info.plano_nome]  || '#f1f5f9';
-    el.innerHTML =
-      '<span style="display:inline-flex;align-items:center;gap:4px;background:' + bg + ';color:' + cor + ';' +
-      'border:1px solid ' + cor + '33;border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700;letter-spacing:.04em">' +
-      '<span style="width:5px;height:5px;border-radius:50%;background:' + cor + ';display:inline-block"></span>' +
-      info.plano_nome + '</span>';
+    el.textContent = info.plano_nome;
+    el.style.color = cor;
+    const icon = el.closest('#sidebar-plano')?.querySelector('svg');
+    if (icon) icon.style.color = cor;
   } catch {}
 }
 
@@ -174,10 +171,7 @@ function renderSidebar(ativo) {
       '<div onclick="window.location.href=\'/usuarios\'" style="padding:12px 16px 14px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:10px;cursor:pointer" title="Gerenciar usuários">' +
         '<div class="user-avatar" id="sidebar-avatar" style="width:36px;height:36px;font-size:14px;flex-shrink:0">?</div>' +
         '<div style="flex:1;min-width:0">' +
-          '<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">' +
-            '<div style="font-size:13px;font-weight:700;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0" id="sidebar-nome">—</div>' +
-            '<div id="sidebar-plano" style="flex-shrink:0"></div>' +
-          '</div>' +
+          '<div style="font-size:13px;font-weight:700;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sidebar-nome">—</div>' +
           '<div style="font-size:11px;color:var(--muted)" id="sidebar-saudacao">Bem-vindo</div>' +
         '</div>' +
       '</div>' +
@@ -191,7 +185,16 @@ function renderSidebar(ativo) {
         navItem('/usuarios', 'usuarios', 'Usuários') +
         navItem('/backup', 'backup', 'Backup') +
       '</nav>' +
-      '<div style="padding:12px 16px">' +
+      '<div style="padding:8px 12px 4px">' +
+        '<div id="sidebar-plano" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:var(--bg);border:1px solid var(--borda)">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.05em">Plano atual</div>' +
+            '<div style="font-size:13px;font-weight:700;color:var(--texto)" id="sidebar-plano-nome">—</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="padding:8px 12px 12px">' +
         '<button onclick="logout()" style="width:100%;background:var(--primary);color:#fff;border:none;padding:9px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;transition:background 0.15s">Sair</button>' +
       '</div>' +
       '<div class="sidebar-footer">Suas finanças, seu controle.</div>' +
