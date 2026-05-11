@@ -174,9 +174,11 @@ function renderSidebar(ativo) {
       '<div onclick="window.location.href=\'/usuarios\'" style="padding:12px 16px 14px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:10px;cursor:pointer" title="Gerenciar usuários">' +
         '<div class="user-avatar" id="sidebar-avatar" style="width:36px;height:36px;font-size:14px;flex-shrink:0">?</div>' +
         '<div style="flex:1;min-width:0">' +
-          '<div style="font-size:13px;font-weight:700;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis" id="sidebar-nome">—</div>' +
-          '<div style="font-size:11px;color:var(--muted);margin-bottom:4px" id="sidebar-saudacao">Bem-vindo</div>' +
-          '<div id="sidebar-plano"></div>' +
+          '<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">' +
+            '<div style="font-size:13px;font-weight:700;color:var(--texto);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0" id="sidebar-nome">—</div>' +
+            '<div id="sidebar-plano" style="flex-shrink:0"></div>' +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--muted)" id="sidebar-saudacao">Bem-vindo</div>' +
         '</div>' +
       '</div>' +
       '<nav class="sidebar-nav">' +
