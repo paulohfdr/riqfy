@@ -1,6 +1,8 @@
 const { getMasterDb } = require('../db/master');
 const { getDb } = require('../db/database');
 
+const MESES_FRENTE = 3; // gera mês atual + próximos 2
+
 async function gerarRecorrencias() {
   try {
     const masterDb = await getMasterDb();
@@ -17,45 +19,68 @@ async function gerarRecorrencias() {
 async function gerarRecorrenciasTenant(slug) {
   const db = await getDb(slug);
   const hoje = new Date();
-  const mes = hoje.getMonth() + 1;
-  const ano = hoje.getFullYear();
 
-  const recorrentes = await db.all(
-    'SELECT * FROM despesas WHERE recorrente = 1 AND tenant_id = ?',
+  // Monta lista de meses-alvo: atual + próximos (MESES_FRENTE - 1)
+  const mesesAlvo = [];
+  for (let i = 0; i < MESES_FRENTE; i++) {
+    const d = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
+    mesesAlvo.push({ mes: d.getMonth() + 1, ano: d.getFullYear() });
+  }
+
+  // Só processa despesas "mãe": recorrente=1 sem pai vinculado
+  const maes = await db.all(
+    'SELECT * FROM despesas WHERE recorrente = 1 AND despesa_recorrente_id IS NULL AND tenant_id = ?',
     [db.tenantId]
   );
 
-  for (const d of recorrentes) {
-    const dataOriginal = new Date(d.vencimento + 'T12:00:00');
-    const diaVenc = dataOriginal.getDate();
-    const novaData = `${ano}-${String(mes).padStart(2,'0')}-${String(diaVenc).padStart(2,'0')}`;
+  for (const mae of maes) {
+    const dataOriginal = new Date(mae.vencimento + 'T12:00:00');
+    const diaVenc     = dataOriginal.getDate();
+    const mesOriginal = dataOriginal.getMonth() + 1;
+    const anoOriginal = dataOriginal.getFullYear();
 
-    // Verifica duplicata respeitando NULL em categoria_id
-    let jaExiste;
-    if (d.categoria_id == null) {
-      jaExiste = await db.get(
-        `SELECT id FROM despesas
-         WHERE descricao=? AND MONTH(vencimento)=? AND YEAR(vencimento)=?
-         AND recorrente=1 AND categoria_id IS NULL AND usuario_id=? AND tenant_id=?`,
-        [d.descricao, mes, ano, d.usuario_id, db.tenantId]
-      );
-    } else {
-      jaExiste = await db.get(
-        `SELECT id FROM despesas
-         WHERE descricao=? AND MONTH(vencimento)=? AND YEAR(vencimento)=?
-         AND recorrente=1 AND categoria_id=? AND usuario_id=? AND tenant_id=?`,
-        [d.descricao, mes, ano, d.categoria_id, d.usuario_id, db.tenantId]
-      );
-    }
+    for (const { mes, ano } of mesesAlvo) {
+      // Não recria o próprio mês da mãe (ela já existe)
+      if (ano === anoOriginal && mes === mesOriginal) continue;
 
-    if (!jaExiste) {
+      // Não cria no passado
+      if (ano < anoOriginal || (ano === anoOriginal && mes < mesOriginal)) continue;
+
+      // Verifica se já existe cópia — checa tanto estilo novo (despesa_recorrente_id)
+      // quanto estilo antigo (mesma descricao+mês+ano, compatibilidade com dados legados)
+      const params = mae.categoria_id == null
+        ? [db.tenantId, mes, ano, mae.id, mae.descricao, mae.usuario_id]
+        : [db.tenantId, mes, ano, mae.id, mae.descricao, mae.usuario_id, mae.categoria_id];
+
+      const jaExiste = await db.get(
+        `SELECT id FROM despesas
+         WHERE tenant_id = ? AND MONTH(vencimento) = ? AND YEAR(vencimento) = ?
+         AND (
+           despesa_recorrente_id = ?
+           OR (descricao = ? AND usuario_id = ?
+               ${mae.categoria_id == null ? 'AND categoria_id IS NULL' : 'AND categoria_id = ?'})
+         )
+         LIMIT 1`,
+        params
+      );
+
+      if (jaExiste) continue;
+
+      // Trata dia inexistente no mês (ex: dia 31 em fevereiro → último dia)
+      const ultimoDia = new Date(ano, mes, 0).getDate();
+      const dia = Math.min(diaVenc, ultimoDia);
+      const novaData = `${ano}-${String(mes).padStart(2,'0')}-${String(dia).padStart(2,'0')}`;
+
       await db.run(
-        `INSERT INTO despesas (tenant_id,descricao,valor,vencimento,categoria_id,usuario_id,forma_pagamento,recorrente,total_parcelas,parcela_atual)
-         VALUES (?,?,?,?,?,?,?,1,1,1)`,
-        [db.tenantId, d.descricao, d.valor, novaData, d.categoria_id, d.usuario_id, d.forma_pagamento]
+        `INSERT INTO despesas
+         (tenant_id, descricao, valor, vencimento, categoria_id, usuario_id,
+          forma_pagamento, recorrente, total_parcelas, parcela_atual, despesa_recorrente_id)
+         VALUES (?,?,?,?,?,?,?,0,1,1,?)`,
+        [db.tenantId, mae.descricao, mae.valor, novaData,
+         mae.categoria_id, mae.usuario_id, mae.forma_pagamento, mae.id]
       );
     }
   }
 }
 
-module.exports = { gerarRecorrencias };
+module.exports = { gerarRecorrencias, gerarRecorrenciasTenant };

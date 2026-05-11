@@ -85,6 +85,17 @@ async function initTenantTables() {
     FOREIGN KEY (meta_id) REFERENCES metas(id) ON DELETE CASCADE
   ) CHARACTER SET utf8mb4`);
 
+  // Migração: despesa_recorrente_id — vincula cópias recorrentes à despesa mãe
+  const [colsRecId] = await pool.execute(
+    `SELECT COLUMN_NAME FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'despesas' AND COLUMN_NAME = 'despesa_recorrente_id'`
+  );
+  if (!colsRecId.length) {
+    await pool.execute('ALTER TABLE despesas ADD COLUMN despesa_recorrente_id INT NULL');
+    await pool.execute('ALTER TABLE despesas ADD INDEX idx_desp_recorrente_id (despesa_recorrente_id)');
+    console.log('✅ Migração: coluna despesa_recorrente_id adicionada à tabela despesas');
+  }
+
   // Migração: adiciona coluna recebido se não existir (compatível com qualquer versão MySQL)
   const [colsRecebido] = await pool.execute(
     `SELECT COLUMN_NAME, COLUMN_DEFAULT FROM information_schema.COLUMNS

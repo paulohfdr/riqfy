@@ -4,6 +4,7 @@ const { getDb } = require('../db/database');
 const { authMiddleware } = require('../middleware/auth');
 const { validate, schemas } = require('../middleware/validation');
 const { lancamentoLimitCheck } = require('../middleware/plano');
+const { gerarRecorrenciasTenant } = require('./recorrencia');
 const { randomUUID } = require('crypto');
 
 router.use(authMiddleware);
@@ -69,6 +70,12 @@ router.post('/', lancamentoLimitCheck, validate(schemas.despesa), async (req, re
       );
       ids.push(r.lastId);
     }
+
+    // Se recorrente, gera os próximos meses imediatamente
+    if (recorrente) {
+      gerarRecorrenciasTenant(req.tenantSlug).catch(() => {});
+    }
+
     res.json({ ok: true, ids });
   } catch(e) { res.status(500).json({ erro: e.message }); }
 });
@@ -125,6 +132,11 @@ router.put('/:id', validate(schemas.despesa), async (req, res) => {
       );
     }
 
+    // Se recorrência foi ativada, gera próximos meses imediatamente
+    if (recorrente) {
+      gerarRecorrenciasTenant(req.tenantSlug).catch(() => {});
+    }
+
     res.json({ ok: true });
   } catch(err) { res.status(500).json({ erro: err.message }); }
 });
@@ -132,6 +144,21 @@ router.put('/:id', validate(schemas.despesa), async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const db = await getDb(req.tenantSlug);
+    const despesa = await db.get(
+      'SELECT id, recorrente, despesa_recorrente_id FROM despesas WHERE id=? AND tenant_id=?',
+      [req.params.id, db.tenantId]
+    );
+    if (!despesa) return res.status(404).json({ erro: 'Despesa não encontrada' });
+
+    // Se for despesa mãe, apaga cópias futuras vinculadas
+    if (despesa.recorrente && !despesa.despesa_recorrente_id) {
+      const hoje = new Date().toISOString().split('T')[0];
+      await db.run(
+        'DELETE FROM despesas WHERE despesa_recorrente_id=? AND vencimento > ? AND tenant_id=?',
+        [despesa.id, hoje, db.tenantId]
+      );
+    }
+
     await db.run('DELETE FROM despesas WHERE id=? AND tenant_id=?', [req.params.id, db.tenantId]);
     res.json({ ok: true });
   } catch(e) { res.status(500).json({ erro: e.message }); }
