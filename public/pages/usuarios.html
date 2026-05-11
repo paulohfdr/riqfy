@@ -107,6 +107,13 @@ let meId = null;
 (async () => {
   const u = await checkAuth();
   if (!u) return;
+
+  const tenantInfo = await apiFetch('/tenant/info');
+  if (!tenantInfo || tenantInfo.plano_nome === 'Free') {
+    window.location.href = '/upgrade';
+    return;
+  }
+
   meId = u.id;
   document.getElementById('sidebar-root').innerHTML = renderSidebar('/usuarios');
   document.getElementById('topbar-root').innerHTML = renderTopbar();

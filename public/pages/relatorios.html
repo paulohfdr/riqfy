@@ -341,6 +341,13 @@ let dataFimAtiva = null;
 (async () => {
   const u = await checkAuth();
   if (!u) return;
+
+  const tenantInfo = await apiFetch('/tenant/info');
+  if (!tenantInfo || tenantInfo.plano_nome === 'Free') {
+    window.location.href = '/upgrade';
+    return;
+  }
+
   document.getElementById('sidebar-root').innerHTML = renderSidebar('/relatorios');
   document.getElementById('topbar-root').innerHTML  = renderTopbar();
   document.getElementById('bottom-nav-root').innerHTML = renderBottomNav('/relatorios');

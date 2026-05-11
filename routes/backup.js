@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { authAdmin } = require('../middleware/auth');
 const { getDb } = require('../db/database');
+const { planoCheck } = require('../middleware/plano');
 
 router.use(authAdmin);
+router.use(planoCheck);
 
 router.get('/info', async (req, res) => {
   try {

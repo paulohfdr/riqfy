@@ -24,8 +24,23 @@ async function carregarPlanoBadge() {
     const cor = cores[info.plano_nome] || '#64748b';
     el.textContent = info.plano_nome;
     el.style.color = cor;
-    const icon = el.closest('#sidebar-plano')?.querySelector('svg');
-    if (icon) icon.style.color = cor;
+    const planCard = el.closest('#sidebar-plano');
+    if (planCard) planCard.querySelector('svg').style.color = cor;
+
+    if (info.plano_nome === 'Free') {
+      ['/relatorios', '/usuarios', '/backup'].forEach(function(route) {
+        var item = document.querySelector('#sidebar-root a[href="' + route + '"]');
+        if (item) item.style.display = 'none';
+      });
+      if (planCard && !planCard.querySelector('.upgrade-btn')) {
+        var btn = document.createElement('a');
+        btn.href = '/upgrade';
+        btn.className = 'upgrade-btn';
+        btn.style.cssText = 'display:block;text-align:center;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;text-decoration:none;padding:6px;border-radius:6px;font-size:11px;font-weight:700;margin-top:8px;letter-spacing:.02em';
+        btn.textContent = '⭐ Fazer Upgrade';
+        planCard.appendChild(btn);
+      }
+    }
   } catch {}
 }
 

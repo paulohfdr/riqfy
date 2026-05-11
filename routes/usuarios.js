@@ -4,8 +4,10 @@ const { getDb } = require('../db/database');
 const bcrypt = require('bcryptjs');
 const { authMiddleware, authAdmin } = require('../middleware/auth');
 const { validate, schemas } = require('../middleware/validation');
+const { planoCheck } = require('../middleware/plano');
 
 router.use(authMiddleware);
+router.use(planoCheck);
 
 router.get('/', authAdmin, async (req, res) => {
   try {

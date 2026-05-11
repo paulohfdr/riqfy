@@ -69,6 +69,7 @@ pages.forEach(p => {
 app.get('/login',    (req, res) => res.sendFile(path.join(__dirname, 'public', 'pages', 'login.html')));
 app.get('/register', (req, res) => res.redirect('/login'));
 app.get('/admin',    (req, res) => res.sendFile(path.join(__dirname, 'public', 'pages', 'admin-master.html')));
+app.get('/upgrade',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'pages', 'upgrade.html')));
 
 // Handler de erro centralizado e seguro
 app.use(errorHandler);
