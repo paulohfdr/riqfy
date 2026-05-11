@@ -23,7 +23,8 @@ const schemas = {
   register: Joi.object({
     nome: Joi.string().min(2).max(200).required(),
     email: Joi.string().email().max(200).required(),
-    username: Joi.string().alphanum().min(3).max(100).required(),
+    username: Joi.string().pattern(/^[a-zA-Z0-9._]+$/).min(3).max(100).required()
+      .messages({ 'string.pattern.base': 'Username deve conter apenas letras, números, pontos e underscores' }),
     senha: Joi.string().min(8).max(200).required()
       .messages({ 'string.min': 'Senha deve ter no mínimo 8 caracteres' })
   }),
@@ -75,7 +76,8 @@ const schemas = {
 
   usuario: Joi.object({
     nome: Joi.string().min(2).max(200).required(),
-    username: Joi.string().alphanum().min(3).max(100).required(),
+    username: Joi.string().pattern(/^[a-zA-Z0-9._]+$/).min(3).max(100).required()
+      .messages({ 'string.pattern.base': 'Username deve conter apenas letras, números, pontos e underscores' }),
     email: Joi.string().email().max(200).required(),
     senha: Joi.string().min(8).max(200).required()
       .messages({ 'string.min': 'Senha deve ter no mínimo 8 caracteres' }),
