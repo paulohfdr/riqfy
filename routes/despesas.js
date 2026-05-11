@@ -58,20 +58,35 @@ router.post('/', lancamentoLimitCheck, validate(schemas.despesa), async (req, re
     const grupo = parcelas > 1 ? randomUUID() : null;
     const ids = [];
 
+    const valorTotal = Number(valor);
+    // Divide valor pelas parcelas e absorve diferença de arredondamento na última
+    const valorParcela = parcelas > 1 ? Math.round(valorTotal / parcelas * 100) / 100 : valorTotal;
+    const ajusteUltima = parcelas > 1
+      ? Math.round((valorTotal - valorParcela * parcelas) * 100) / 100
+      : 0;
+
     for (let i = 1; i <= parcelas; i++) {
       const data = new Date(vencimento + 'T12:00:00');
       data.setMonth(data.getMonth() + (i - 1));
+      // Trata meses com menos dias (ex: 31 de jan → 28/29 de fev)
+      const diaOriginal = parseInt(vencimento.split('-')[2]);
+      const ultimoDia = new Date(data.getFullYear(), data.getMonth() + 1, 0).getDate();
+      if (data.getDate() < Math.min(diaOriginal, ultimoDia)) {
+        data.setDate(Math.min(diaOriginal, ultimoDia));
+      }
       const dataStr = data.toISOString().split('T')[0];
+      const descParc = parcelas > 1 ? `${descricao} (${i}/${parcelas})` : descricao;
+      const valorFinal = (i === parcelas && parcelas > 1) ? valorParcela + ajusteUltima : valorParcela;
+
       const r = await db.run(
         `INSERT INTO despesas (tenant_id,descricao,valor,vencimento,categoria_id,usuario_id,forma_pagamento,recorrente,total_parcelas,parcela_atual,grupo_parcela)
          VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
-        [db.tenantId, descricao, Number(valor), dataStr, categoria_id || null, req.usuario.id,
+        [db.tenantId, descParc, valorFinal, dataStr, categoria_id || null, req.usuario.id,
          forma_pagamento || 'pix', recorrente ? 1 : 0, parcelas, i, grupo]
       );
       ids.push(r.lastId);
     }
 
-    // Se recorrente, gera os próximos meses imediatamente
     if (recorrente) {
       gerarRecorrenciasTenant(req.tenantSlug).catch(() => {});
     }
@@ -83,7 +98,7 @@ router.post('/', lancamentoLimitCheck, validate(schemas.despesa), async (req, re
 router.put('/:id', validate(schemas.despesa), async (req, res) => {
   try {
     const db = await getDb(req.tenantSlug);
-    const { descricao, valor, vencimento, categoria_id, forma_pagamento, recorrente, total_parcelas } = req.body;
+    const { descricao, valor, vencimento, categoria_id, forma_pagamento, recorrente, total_parcelas, escopo } = req.body;
 
     const despesaAtual = await db.get(
       'SELECT * FROM despesas WHERE id = ? AND tenant_id = ?',
@@ -91,48 +106,33 @@ router.put('/:id', validate(schemas.despesa), async (req, res) => {
     );
     if (!despesaAtual) return res.status(404).json({ erro: 'Despesa não encontrada' });
 
-    const novasParcelas = parseInt(total_parcelas) || 1;
-
-    if (despesaAtual.grupo_parcela) {
+    if (despesaAtual.grupo_parcela && escopo && escopo !== 'esta') {
+      // Atualiza parcelas do grupo conforme escopo
       const todasParcelas = await db.all(
         'SELECT * FROM despesas WHERE grupo_parcela = ? AND tenant_id = ? ORDER BY parcela_atual ASC',
         [despesaAtual.grupo_parcela, db.tenantId]
       );
-      const parcelasAtuais = todasParcelas.length;
+      const parcelasAlvo = escopo === 'futuras'
+        ? todasParcelas.filter(p => p.parcela_atual >= despesaAtual.parcela_atual)
+        : todasParcelas;
 
-      for (const p of todasParcelas) {
+      for (const p of parcelasAlvo) {
+        const desc = todasParcelas.length > 1
+          ? `${descricao} (${p.parcela_atual}/${todasParcelas.length})`
+          : descricao;
         await db.run(
-          'UPDATE despesas SET descricao=?,valor=?,categoria_id=?,forma_pagamento=?,recorrente=?,total_parcelas=? WHERE id=? AND tenant_id=?',
-          [descricao, Number(valor), categoria_id || null, forma_pagamento, recorrente ? 1 : 0, novasParcelas, p.id, db.tenantId]
+          'UPDATE despesas SET descricao=?,valor=?,categoria_id=?,forma_pagamento=?,recorrente=? WHERE id=? AND tenant_id=?',
+          [desc, Number(valor), categoria_id || null, forma_pagamento, recorrente ? 1 : 0, p.id, db.tenantId]
         );
       }
-
-      if (novasParcelas < parcelasAtuais) {
-        const parcelasExcluir = todasParcelas.slice(novasParcelas);
-        for (const p of parcelasExcluir) {
-          await db.run('DELETE FROM despesas WHERE id=? AND tenant_id=?', [p.id, db.tenantId]);
-        }
-      } else if (novasParcelas > parcelasAtuais) {
-        const v0 = todasParcelas[0].vencimento;
-        const v0Str = v0 instanceof Date ? v0.toISOString().split('T')[0] : String(v0).substring(0, 10);
-        const primeiraData = new Date(v0Str + 'T12:00:00');
-        for (let i = parcelasAtuais + 1; i <= novasParcelas; i++) {
-          const novaData = new Date(primeiraData);
-          novaData.setMonth(novaData.getMonth() + (i - 1));
-          await db.run(
-            'INSERT INTO despesas (tenant_id,descricao,valor,vencimento,categoria_id,usuario_id,forma_pagamento,recorrente,total_parcelas,parcela_atual,grupo_parcela) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
-            [db.tenantId, descricao, Number(valor), novaData.toISOString().split('T')[0], categoria_id || null, despesaAtual.usuario_id, forma_pagamento, recorrente ? 1 : 0, novasParcelas, i, despesaAtual.grupo_parcela]
-          );
-        }
-      }
     } else {
+      // Edita apenas esta despesa individualmente
       await db.run(
         'UPDATE despesas SET descricao=?,valor=?,vencimento=?,categoria_id=?,forma_pagamento=?,recorrente=?,total_parcelas=? WHERE id=? AND tenant_id=?',
-        [descricao, Number(valor), vencimento, categoria_id || null, forma_pagamento, recorrente ? 1 : 0, novasParcelas, req.params.id, db.tenantId]
+        [descricao, Number(valor), vencimento, categoria_id || null, forma_pagamento, recorrente ? 1 : 0, parseInt(total_parcelas) || 1, req.params.id, db.tenantId]
       );
     }
 
-    // Se recorrência foi ativada, gera próximos meses imediatamente
     if (recorrente) {
       gerarRecorrenciasTenant(req.tenantSlug).catch(() => {});
     }
@@ -144,22 +144,32 @@ router.put('/:id', validate(schemas.despesa), async (req, res) => {
 router.delete('/:id', async (req, res) => {
   try {
     const db = await getDb(req.tenantSlug);
+    const { escopo } = req.query;
+
     const despesa = await db.get(
-      'SELECT id, recorrente, despesa_recorrente_id FROM despesas WHERE id=? AND tenant_id=?',
+      'SELECT id, recorrente, despesa_recorrente_id, grupo_parcela FROM despesas WHERE id=? AND tenant_id=?',
       [req.params.id, db.tenantId]
     );
     if (!despesa) return res.status(404).json({ erro: 'Despesa não encontrada' });
 
-    // Se for despesa mãe, apaga cópias futuras vinculadas
-    if (despesa.recorrente && !despesa.despesa_recorrente_id) {
-      const hoje = new Date().toISOString().split('T')[0];
+    if (escopo === 'todas' && despesa.grupo_parcela) {
+      // Apaga todas as parcelas do grupo
       await db.run(
-        'DELETE FROM despesas WHERE despesa_recorrente_id=? AND vencimento > ? AND tenant_id=?',
-        [despesa.id, hoje, db.tenantId]
+        'DELETE FROM despesas WHERE grupo_parcela=? AND tenant_id=?',
+        [despesa.grupo_parcela, db.tenantId]
       );
+    } else {
+      // Apaga só esta parcela/despesa
+      if (despesa.recorrente && !despesa.despesa_recorrente_id) {
+        const hoje = new Date().toISOString().split('T')[0];
+        await db.run(
+          'DELETE FROM despesas WHERE despesa_recorrente_id=? AND vencimento > ? AND tenant_id=?',
+          [despesa.id, hoje, db.tenantId]
+        );
+      }
+      await db.run('DELETE FROM despesas WHERE id=? AND tenant_id=?', [req.params.id, db.tenantId]);
     }
 
-    await db.run('DELETE FROM despesas WHERE id=? AND tenant_id=?', [req.params.id, db.tenantId]);
     res.json({ ok: true });
   } catch(e) { res.status(500).json({ erro: e.message }); }
 });

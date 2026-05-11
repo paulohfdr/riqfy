@@ -52,7 +52,8 @@ const schemas = {
     categoria_id: Joi.number().integer().positive().allow(null, '').default(null),
     forma_pagamento: Joi.string().max(50).default('pix'),
     recorrente: Joi.boolean().default(false),
-    total_parcelas: Joi.number().integer().min(1).max(60).default(1)
+    total_parcelas: Joi.number().integer().min(1).max(60).default(1),
+    escopo: Joi.string().valid('esta', 'futuras', 'todas').optional()
   }),
 
   categoria: Joi.object({
