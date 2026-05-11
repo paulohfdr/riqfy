@@ -46,14 +46,14 @@ router.get('/', async (req, res) => {
     );
 
     const proximasContas = await db.all(
-      `SELECT d.*, c.nome as categoria_nome FROM despesas d
+      `SELECT d.*, DATE_FORMAT(d.vencimento, '%Y-%m-%d') as vencimento, c.nome as categoria_nome FROM despesas d
        LEFT JOIN categorias c ON d.categoria_id = c.id
        WHERE d.tenant_id=? ORDER BY d.vencimento ASC LIMIT 5`,
       [tid]
     );
 
     const ultimosLancamentos = await db.all(
-      `SELECT d.*, c.nome as categoria_nome FROM despesas d
+      `SELECT d.*, DATE_FORMAT(d.vencimento, '%Y-%m-%d') as vencimento, c.nome as categoria_nome FROM despesas d
        LEFT JOIN categorias c ON d.categoria_id = c.id
        WHERE d.tenant_id=? ORDER BY d.criado_em DESC LIMIT 5`,
       [tid]

@@ -80,7 +80,7 @@ function fmtData(d) {
 }
 function fmtDataCurta(d) {
   if (!d) return '—';
-  return d.split('-').reverse().join('/');
+  return String(d).substring(0, 10).split('-').reverse().join('/');
 }
 
 function toast(msg, tipo) {

@@ -1,7 +1,7 @@
 const { getMasterDb } = require('../db/master');
 const { getDb } = require('../db/database');
 
-const MESES_FRENTE = 3; // gera mês atual + próximos 2
+const MESES_FRENTE = 12; // gera mês atual + próximos 11
 
 async function gerarRecorrencias() {
   try {
@@ -29,12 +29,13 @@ async function gerarRecorrenciasTenant(slug) {
 
   // Só processa despesas "mãe": recorrente=1 sem pai vinculado
   const maes = await db.all(
-    'SELECT * FROM despesas WHERE recorrente = 1 AND despesa_recorrente_id IS NULL AND tenant_id = ?',
+    `SELECT *, DATE_FORMAT(vencimento, '%Y-%m-%d') as vencimento FROM despesas
+     WHERE recorrente = 1 AND despesa_recorrente_id IS NULL AND tenant_id = ?`,
     [db.tenantId]
   );
 
   for (const mae of maes) {
-    const dataOriginal = new Date(mae.vencimento + 'T12:00:00');
+    const dataOriginal = new Date(String(mae.vencimento).substring(0, 10) + 'T12:00:00');
     const diaVenc     = dataOriginal.getDate();
     const mesOriginal = dataOriginal.getMonth() + 1;
     const anoOriginal = dataOriginal.getFullYear();
