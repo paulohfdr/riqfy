@@ -4,7 +4,7 @@ import {
   spring, interpolate, Easing,
 } from 'remotion';
 import { loadFont } from '@remotion/google-fonts/PlusJakartaSans';
-import { ORANGE, ORANGE2, YELLOW, GREEN, RED, BG, BG2, BG3, TEXT, TEXT2, TEXT3, BORDER, FONT, BLUE } from '../constants';
+import { ORANGE, ORANGE2, ORANGE3, YELLOW, GREEN, RED, BG, BG2, BG3, TEXT, TEXT2, TEXT3, BORDER, FONT, BLUE } from '../constants';
 
 loadFont();
 
