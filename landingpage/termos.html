@@ -4,21 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Termos de Uso — RiqFy</title>
+<meta name="description" content="As regras e condições para utilização do sistema RiqFy.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
-  --o:#FF6400; --o2:#e55a00; --dk:#080808; --dk2:#111111;
-  --bd:rgba(255,255,255,.07); --t1:#ffffff; --t2:rgba(255,255,255,.55); --t3:rgba(255,255,255,.28);
+  --o:#FF6400; --o2:#e55a00; --o3:#ff8533;
+  --dk:#080808; --dk2:#111111;
+  --bd:rgba(255,255,255,.07); --bd2:rgba(255,255,255,.04);
+  --t1:#ffffff; --t2:rgba(255,255,255,.55); --t3:rgba(255,255,255,.28);
   --font:'Plus Jakarta Sans', -apple-system, sans-serif;
   --ease:cubic-bezier(.4,0,.2,1);
 }
 html { scroll-behavior: smooth; }
-body { font-family: var(--font); background: var(--dk); color: var(--t1); -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); background: var(--dk); color: var(--t1); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; }
 a { text-decoration: none; }
 
+/* ── NAV ── */
 #nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 900;
   height: 68px; padding: 0 5%;
@@ -26,6 +31,10 @@ a { text-decoration: none; }
   background: #000000; border-bottom: 1px solid rgba(255,255,255,.08);
 }
 .nav-logo img { height: 38px; width: auto; }
+.nav-links { display: flex; align-items: center; gap: 36px; }
+.nav-links a { font-size: 14px; font-weight: 500; color: var(--t2); transition: color .2s; }
+.nav-links a:hover { color: var(--t1); }
+.nav-actions { display: flex; align-items: center; gap: 12px; }
 .btn-ghost {
   font-size: 14px; font-weight: 600; color: var(--t2);
   padding: 9px 18px; border-radius: 10px; border: 1px solid var(--bd);
@@ -39,9 +48,23 @@ a { text-decoration: none; }
   transition: all .25s; display: inline-flex; align-items: center; gap: 6px;
 }
 .btn-pill:hover { background: var(--o2); transform: translateY(-1px); }
+.nav-burger { display: none; background: none; border: none; cursor: pointer; padding: 4px; color: var(--t2); }
 
+/* ── MOBILE MENU ── */
+#mobile-nav {
+  display: none; position: fixed; inset: 0; z-index: 999;
+  background: rgba(6,6,6,.97); backdrop-filter: blur(20px);
+  flex-direction: column; align-items: center; justify-content: center; gap: 32px;
+}
+#mobile-nav.open { display: flex; }
+#mobile-nav a { font-size: 22px; font-weight: 700; color: var(--t2); transition: color .2s; }
+#mobile-nav a:hover { color: var(--t1); }
+.mob-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--t2); font-size: 28px; cursor: pointer; }
+
+/* ── CONTEÚDO ── */
 .page-hero {
-  padding: 140px 5% 72px; border-bottom: 1px solid var(--bd);
+  padding: 130px 5% 64px;
+  border-bottom: 1px solid var(--bd);
   background: linear-gradient(180deg, rgba(255,100,0,.06) 0%, transparent 100%);
 }
 .page-hero .eyebrow {
@@ -50,74 +73,98 @@ a { text-decoration: none; }
   color: var(--o); margin-bottom: 14px;
 }
 .page-hero .eyebrow::before { content:''; width:16px; height:2px; background:var(--o); border-radius:2px; }
-.page-hero h1 { font-size: clamp(30px,4vw,48px); font-weight: 800; line-height: 1.15; letter-spacing: -1px; margin-bottom: 12px; }
+.page-hero h1 { font-size: clamp(28px,4vw,46px); font-weight: 800; line-height: 1.15; letter-spacing: -1px; margin-bottom: 10px; }
 .page-hero p { font-size: 15px; color: var(--t2); }
 
-.doc-wrap { max-width: 760px; margin: 0 auto; padding: 72px 5% 100px; }
-.doc-section { margin-bottom: 52px; }
-.doc-section h2 {
-  font-size: 20px; font-weight: 700; margin-bottom: 16px;
-  padding-bottom: 12px; border-bottom: 1px solid var(--bd);
-  display: flex; align-items: center; gap: 10px;
-}
-.doc-section h2 .num {
-  width: 28px; height: 28px; border-radius: 8px;
-  background: rgba(255,100,0,.12); border: 1px solid rgba(255,100,0,.2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 800; color: var(--o); flex-shrink: 0;
-}
-.doc-section p { font-size: 15px; color: var(--t2); line-height: 1.8; margin-bottom: 14px; }
-.doc-section p:last-child { margin-bottom: 0; }
-.doc-section ul { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
-.doc-section ul li {
-  font-size: 15px; color: var(--t2); line-height: 1.7;
-  padding-left: 20px; position: relative;
-}
-.doc-section ul li::before { content:''; position:absolute; left:0; top:9px; width:6px; height:6px; border-radius:50%; background:var(--o); }
-.doc-section strong { color: var(--t1); }
-.highlight-box {
-  background: rgba(255,100,0,.06); border: 1px solid rgba(255,100,0,.15);
-  border-radius: 12px; padding: 18px 22px; margin-bottom: 14px;
-  font-size: 14px; color: rgba(255,255,255,.65); line-height: 1.75;
-}
-.highlight-box strong { color: var(--o); }
+.doc-wrap { max-width: 760px; margin: 0 auto; padding: 64px 5% 100px; }
 .updated-badge {
   display: inline-flex; align-items: center; gap: 6px;
   background: rgba(255,255,255,.04); border: 1px solid var(--bd);
   border-radius: 50px; padding: 6px 14px;
   font-size: 12px; color: var(--t3); margin-bottom: 48px;
 }
-
-footer { background: #060606; border-top: 1px solid var(--bd); padding: 36px 5%; }
-.foot-bottom {
-  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+.highlight-box {
+  background: rgba(255,100,0,.06); border: 1px solid rgba(255,100,0,.15);
+  border-radius: 12px; padding: 18px 22px; margin-bottom: 20px;
+  font-size: 14px; color: rgba(255,255,255,.65); line-height: 1.75;
 }
+.highlight-box strong { color: var(--o); }
+.doc-section { margin-bottom: 52px; }
+.doc-section h2 {
+  font-size: 19px; font-weight: 700; margin-bottom: 16px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; gap: 10px;
+}
+.doc-section h2 .num {
+  width: 28px; height: 28px; border-radius: 8px; flex-shrink: 0;
+  background: rgba(255,100,0,.12); border: 1px solid rgba(255,100,0,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: var(--o);
+}
+.doc-section p { font-size: 15px; color: var(--t2); line-height: 1.8; margin-bottom: 14px; }
+.doc-section p:last-child { margin-bottom: 0; }
+.doc-section ul { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.doc-section ul li { font-size: 15px; color: var(--t2); line-height: 1.7; padding-left: 20px; position: relative; }
+.doc-section ul li::before { content:''; position:absolute; left:0; top:9px; width:6px; height:6px; border-radius:50%; background:var(--o); }
+.doc-section strong { color: var(--t1); }
+.doc-section a { color: var(--o); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── FOOTER ── */
+footer { background: #060606; border-top: 1px solid var(--bd); padding: 72px 5% 36px; }
+.foot-grid { display: grid; grid-template-columns: 2.2fr 1fr 1fr 1fr; gap: 56px; margin-bottom: 56px; }
+.foot-brand img { height: 36px; margin-bottom: 18px; }
+.foot-brand p { font-size: 14px; color: var(--t3); line-height: 1.75; max-width: 270px; }
+.foot-col h5 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: rgba(255,255,255,.4); margin-bottom: 18px; }
+.foot-col a { display: block; font-size: 14px; color: var(--t3); margin-bottom: 11px; transition: color .2s; text-decoration: none; }
+.foot-col a:hover { color: rgba(255,255,255,.8); }
+.foot-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 28px; border-top: 1px solid var(--bd); }
 .foot-bottom p { font-size: 13px; color: var(--t3); }
 .foot-bottom strong { color: var(--o); }
-.foot-links { display: flex; gap: 20px; }
-.foot-links a { font-size: 13px; color: var(--t3); transition: color .2s; }
-.foot-links a:hover { color: rgba(255,255,255,.7); }
 .foot-ripafe { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--t3); }
-.foot-ripafe img { height: 24px; width: auto; opacity: .65; transition: opacity .2s; }
-.foot-ripafe a { display: flex; align-items: center; }
+.foot-ripafe img { height: 26px; width: auto; opacity: .7; transition: opacity .2s; }
+.foot-ripafe a { display: flex; align-items: center; text-decoration: none; }
 .foot-ripafe a:hover img { opacity: 1; }
 
-@media(max-width:600px) {
-  .foot-bottom { flex-direction: column; text-align: center; }
-  .foot-links { justify-content: center; }
+@media(max-width:1024px) { .foot-grid { grid-template-columns: 1fr 1fr; gap: 36px; } }
+@media(max-width:768px) {
+  .nav-links { display: none; }
+  .nav-burger { display: block; }
+  .foot-grid { grid-template-columns: 1fr; }
+  .foot-bottom { flex-direction: column; gap: 16px; text-align: center; }
 }
 </style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav id="nav">
-  <a href="/" class="nav-logo"><img src="img/logo_riqfy_branco.svg" alt="RiqFy"></a>
-  <div style="display:flex;align-items:center;gap:12px">
-    <a href="https://app.riqfy.com.br" class="btn-ghost">Entrar</a>
-    <a href="https://wa.me/5511942288038?text=Ol%C3%A1!%20Tenho%20interesse%20em%20saber%20mais%20sobre%20o%20sistema%20RiqFy." target="_blank" rel="noopener" class="btn-pill">Começar grátis →</a>
+  <a href="https://riqfy.com.br" class="nav-logo"><img src="img/logo_riqfy_branco.svg" alt="RiqFy"></a>
+  <div class="nav-links">
+    <a href="https://riqfy.com.br/#funcionalidades">Funcionalidades</a>
+    <a href="https://riqfy.com.br/#como-funciona">Como funciona</a>
+    <a href="https://riqfy.com.br/#planos">Planos</a>
+    <a href="https://riqfy.com.br/#faq">FAQ</a>
   </div>
+  <div class="nav-actions">
+    <a href="https://app.riqfy.com.br" class="btn-ghost">Entrar</a>
+    <a href="https://wa.me/5511942288038?text=Olá!%20Tenho%20interesse%20em%20saber%20mais%20sobre%20o%20sistema%20RiqFy." target="_blank" rel="noopener" class="btn-pill">Começar grátis <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+  </div>
+  <button class="nav-burger" onclick="toggleNav()" aria-label="Menu">
+    <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+  </button>
 </nav>
 
+<!-- MOBILE MENU -->
+<div id="mobile-nav">
+  <button class="mob-close" onclick="toggleNav()">✕</button>
+  <a href="https://riqfy.com.br/#funcionalidades" onclick="toggleNav()">Funcionalidades</a>
+  <a href="https://riqfy.com.br/#como-funciona" onclick="toggleNav()">Como funciona</a>
+  <a href="https://riqfy.com.br/#planos" onclick="toggleNav()">Planos</a>
+  <a href="https://riqfy.com.br/#faq" onclick="toggleNav()">FAQ</a>
+  <a href="https://wa.me/5511942288038?text=Olá!%20Tenho%20interesse%20em%20saber%20mais%20sobre%20o%20sistema%20RiqFy." target="_blank" rel="noopener" class="btn-pill" onclick="toggleNav()">Começar grátis →</a>
+</div>
+
+<!-- HERO DA PÁGINA -->
 <div class="page-hero">
   <div style="max-width:760px;margin:0 auto">
     <div class="eyebrow">Legal</div>
@@ -126,6 +173,7 @@ footer { background: #060606; border-top: 1px solid var(--bd); padding: 36px 5%;
   </div>
 </div>
 
+<!-- CONTEÚDO -->
 <div class="doc-wrap">
   <div class="updated-badge">
     <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -220,7 +268,7 @@ footer { background: #060606; border-top: 1px solid var(--bd); padding: 36px 5%;
 
   <div class="doc-section">
     <h2><span class="num">9</span>Encerramento da conta</h2>
-    <p>Você pode solicitar o encerramento da sua conta a qualquer momento pelo WhatsApp <strong>(11) 94228-8038</strong>. Após o encerramento, seus dados serão removidos conforme descrito na nossa <a href="/privacidade" style="color:var(--o)">Política de Privacidade</a>.</p>
+    <p>Você pode solicitar o encerramento da sua conta a qualquer momento pelo WhatsApp <strong>(11) 94228-8038</strong>. Após o encerramento, seus dados serão removidos conforme descrito na nossa <a href="https://riqfy.com.br/privacidade">Política de Privacidade</a>.</p>
     <p>Reservamo-nos o direito de suspender ou encerrar contas que violem estes termos, com ou sem aviso prévio, dependendo da gravidade da infração.</p>
   </div>
 
@@ -244,13 +292,33 @@ footer { background: #060606; border-top: 1px solid var(--bd); padding: 36px 5%;
   </div>
 </div>
 
+<!-- FOOTER -->
 <footer>
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <img src="img/logo_riqfy_branco.svg" alt="RiqFy">
+      <p>Sistema de controle financeiro pessoal moderno, seguro e completo. Feito para quem quer ter o dinheiro sob controle.</p>
+    </div>
+    <div class="foot-col">
+      <h5>Sistema</h5>
+      <a href="https://riqfy.com.br/#funcionalidades">Funcionalidades</a>
+      <a href="https://riqfy.com.br/#como-funciona">Como funciona</a>
+      <a href="https://riqfy.com.br/#planos">Planos</a>
+      <a href="https://riqfy.com.br/#faq">FAQ</a>
+    </div>
+    <div class="foot-col">
+      <h5>Conta</h5>
+      <a href="https://app.riqfy.com.br" target="_blank" rel="noopener">Entrar</a>
+      <a href="https://wa.me/5511942288038?text=Ol%C3%A1!%20Tenho%20interesse%20em%20saber%20mais%20sobre%20o%20sistema%20RiqFy." target="_blank" rel="noopener">Falar no WhatsApp</a>
+    </div>
+    <div class="foot-col">
+      <h5>Legal</h5>
+      <a href="https://riqfy.com.br/privacidade">Privacidade</a>
+      <a href="https://riqfy.com.br/termos">Termos de Uso</a>
+    </div>
+  </div>
   <div class="foot-bottom">
     <p>© <span id="ano"></span> <strong>RiqFy</strong>. Todos os direitos reservados.</p>
-    <div class="foot-links">
-      <a href="/privacidade">Privacidade</a>
-      <a href="/termos">Termos de uso</a>
-    </div>
     <div class="foot-ripafe">
       <span>Desenvolvido por</span>
       <a href="https://wa.me/5511942288038" target="_blank" rel="noopener"><img src="img/logo_agencia_ripafe.png" alt="Agência Ripafe"></a>
@@ -258,6 +326,11 @@ footer { background: #060606; border-top: 1px solid var(--bd); padding: 36px 5%;
   </div>
 </footer>
 
-<script>document.getElementById('ano').textContent = new Date().getFullYear();</script>
+<script>
+document.getElementById('ano').textContent = new Date().getFullYear();
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => nav.style.borderColor = scrollY > 30 ? 'rgba(255,255,255,.12)' : 'rgba(255,255,255,.08)', {passive:true});
+function toggleNav() { document.getElementById('mobile-nav').classList.toggle('open'); }
+</script>
 </body>
 </html>
