@@ -60,8 +60,9 @@ router.get('/', async (req, res) => {
     );
 
     const aReceber = await db.all(
-      `SELECT r.*, c.nome as categoria_nome, c.cor as categoria_cor FROM receitas r
-       LEFT JOIN categorias c ON r.categoria_id = c.id
+      `SELECT r.*, DATE_FORMAT(r.data, '%Y-%m-%d') AS data,
+              c.nome as categoria_nome, c.cor as categoria_cor
+       FROM receitas r LEFT JOIN categorias c ON r.categoria_id = c.id
        WHERE r.tenant_id=? AND r.status='pendente'
        ORDER BY r.data ASC LIMIT 20`,
       [tid]

@@ -226,23 +226,26 @@ function dateStr(d) {
 async function carregar() {
   const mes = document.getElementById('sel-mes').value;
   const ano = document.getElementById('sel-ano').value;
+  try {
+    const [dados, resumo] = await Promise.all([
+      apiFetch(`/receitas?mes=${mes}&ano=${ano}`),
+      apiFetch(`/receitas/resumo?mes=${mes}&ano=${ano}`)
+    ]);
+    if (!dados || !resumo) return;
 
-  const [dados, resumo] = await Promise.all([
-    apiFetch(`/receitas?mes=${mes}&ano=${ano}`),
-    apiFetch(`/receitas/resumo?mes=${mes}&ano=${ano}`)
-  ]);
-  if (!dados || !resumo) return;
+    dadosCarregados = dados;
 
-  dadosCarregados = dados;
+    document.getElementById('cv-recebidas').textContent = fmtBRL(dados.resumo.receitas_recebidas);
+    document.getElementById('cv-pendentes').textContent = fmtBRL(dados.resumo.receitas_pendentes);
+    document.getElementById('cv-qtd-rec').textContent = dados.resumo.qtd_recebidas;
+    document.getElementById('cv-qtd-pen').textContent = dados.resumo.qtd_pendentes;
 
-  document.getElementById('cv-recebidas').textContent = fmtBRL(dados.resumo.receitas_recebidas);
-  document.getElementById('cv-pendentes').textContent = fmtBRL(dados.resumo.receitas_pendentes);
-  document.getElementById('cv-qtd-rec').textContent = dados.resumo.qtd_recebidas;
-  document.getElementById('cv-qtd-pen').textContent = dados.resumo.qtd_pendentes;
-
-  renderTabelaRecebidas(dados.receitas_recebidas);
-  renderTabelaPendentes(dados.receitas_pendentes);
-  renderChart(resumo.porCategoria || []);
+    renderTabelaRecebidas(dados.receitas_recebidas);
+    renderTabelaPendentes(dados.receitas_pendentes);
+    renderChart(resumo.porCategoria || []);
+  } catch (e) {
+    toast('Erro ao carregar receitas: ' + e.message, 'error');
+  }
 }
 
 function renderTabelaRecebidas(lista) {
@@ -326,9 +329,19 @@ function renderChart(dados) {
 }
 
 // ── Modal Receber ──────────────────────────────────────────────
-function abrirModalReceber(id) {
-  const r = dadosCarregados.receitas_pendentes.find(x => x.id === id);
-  if (!r) return;
+async function abrirModalReceber(id) {
+  let r = dadosCarregados.receitas_pendentes.find(x => x.id === id);
+  if (!r) {
+    // dadosCarregados pode estar desatualizado — busca direto da API
+    try {
+      const dados = await apiFetch(`/receitas?mes=${document.getElementById('sel-mes').value}&ano=${document.getElementById('sel-ano').value}`);
+      if (dados) {
+        dadosCarregados = dados;
+        r = dadosCarregados.receitas_pendentes.find(x => x.id === id);
+      }
+    } catch (e) { toast('Erro ao carregar receita.', 'error'); return; }
+  }
+  if (!r) { toast('Receita não encontrada.', 'error'); return; }
   document.getElementById('receber-id').value = r.id;
   document.getElementById('receber-descricao').textContent = r.descricao;
   document.getElementById('receber-valor').textContent = fmtBRL(r.valor);

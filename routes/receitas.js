@@ -17,7 +17,10 @@ router.get('/', async (req, res) => {
     const tid = db.tenantId;
 
     const recebidas = await db.all(
-      `SELECT r.*, c.nome AS categoria_nome, c.cor AS categoria_cor
+      `SELECT r.*,
+              DATE_FORMAT(r.data, '%Y-%m-%d') AS data,
+              DATE_FORMAT(r.data_recebimento, '%Y-%m-%d') AS data_recebimento,
+              c.nome AS categoria_nome, c.cor AS categoria_cor
        FROM receitas r LEFT JOIN categorias c ON r.categoria_id = c.id
        WHERE r.tenant_id = ? AND r.status = 'recebida'
          AND r.mes_recebimento = ? AND r.ano_recebimento = ?
@@ -26,7 +29,9 @@ router.get('/', async (req, res) => {
     );
 
     const pendentes = await db.all(
-      `SELECT r.*, c.nome AS categoria_nome, c.cor AS categoria_cor
+      `SELECT r.*,
+              DATE_FORMAT(r.data, '%Y-%m-%d') AS data,
+              c.nome AS categoria_nome, c.cor AS categoria_cor
        FROM receitas r LEFT JOIN categorias c ON r.categoria_id = c.id
        WHERE r.tenant_id = ? AND r.status = 'pendente'
        ORDER BY r.data ASC`,
