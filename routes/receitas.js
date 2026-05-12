@@ -88,18 +88,29 @@ router.get('/resumo', async (req, res) => {
   }
 });
 
-// POST / → criar receita (sempre pendente)
+// POST / → criar receita (pendente ou já recebida)
 router.post('/', lancamentoLimitCheck, validate(schemas.receita), async (req, res) => {
   try {
     const db = await getDb(req.tenantSlug);
-    const { descricao, valor, data, categoria_id, recorrente } = req.body;
+    const { descricao, valor, data, categoria_id, recorrente, status, data_recebimento } = req.body;
+
+    const recebida = status === 'recebida';
+    const dataRec = recebida ? (data_recebimento || data) : null;
+    const mesRec = dataRec ? Number(dataRec.split('-')[1]) : null;
+    const anoRec = dataRec ? Number(dataRec.split('-')[0]) : null;
+
     const r = await db.run(
-      `INSERT INTO receitas (tenant_id, descricao, valor, data, categoria_id, usuario_id, recorrente, recebido, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 0, 'pendente')`,
-      [db.tenantId, descricao, Number(valor), data, categoria_id || null, req.usuario.id, recorrente ? 1 : 0]
+      `INSERT INTO receitas
+         (tenant_id, descricao, valor, data, categoria_id, usuario_id, recorrente,
+          recebido, status, data_recebimento, mes_recebimento, ano_recebimento)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [db.tenantId, descricao, Number(valor), data, categoria_id || null,
+       req.usuario.id, recorrente ? 1 : 0,
+       recebida ? 1 : 0, recebida ? 'recebida' : 'pendente',
+       dataRec, mesRec, anoRec]
     );
-    logger.info('Receita criada', { id: r.lastId, tenant: req.tenantSlug, usuario: req.usuario.id });
-    res.json({ sucesso: true, id: r.lastId, mensagem: 'Receita criada como pendente' });
+    logger.info('Receita criada', { id: r.lastId, status: recebida ? 'recebida' : 'pendente', tenant: req.tenantSlug });
+    res.json({ sucesso: true, id: r.lastId, mensagem: recebida ? 'Receita registrada como recebida' : 'Receita criada como pendente' });
   } catch (e) {
     logger.error('Erro ao criar receita', { error: e.message });
     res.status(500).json({ erro: e.message });
@@ -170,14 +181,26 @@ router.put('/:id/desfazer-recebimento', async (req, res) => {
   }
 });
 
-// PUT /:id → editar campos básicos (não altera status)
+// PUT /:id → editar receita (pode alterar status)
 router.put('/:id', validate(schemas.receita), async (req, res) => {
   try {
     const db = await getDb(req.tenantSlug);
-    const { descricao, valor, data, categoria_id, recorrente } = req.body;
+    const { descricao, valor, data, categoria_id, recorrente, status, data_recebimento } = req.body;
+
+    const recebida = status === 'recebida';
+    const dataRec = recebida ? (data_recebimento || data) : null;
+    const mesRec = dataRec ? Number(dataRec.split('-')[1]) : null;
+    const anoRec = dataRec ? Number(dataRec.split('-')[0]) : null;
+
     const result = await db.run(
-      'UPDATE receitas SET descricao=?,valor=?,data=?,categoria_id=?,recorrente=? WHERE id=? AND tenant_id=?',
-      [descricao, Number(valor), data, categoria_id || null, recorrente ? 1 : 0, req.params.id, db.tenantId]
+      `UPDATE receitas
+       SET descricao=?, valor=?, data=?, categoria_id=?, recorrente=?,
+           status=?, recebido=?, data_recebimento=?, mes_recebimento=?, ano_recebimento=?
+       WHERE id=? AND tenant_id=?`,
+      [descricao, Number(valor), data, categoria_id || null, recorrente ? 1 : 0,
+       recebida ? 'recebida' : 'pendente', recebida ? 1 : 0,
+       dataRec, mesRec, anoRec,
+       req.params.id, db.tenantId]
     );
     if (result.changes === 0) return res.status(404).json({ erro: 'Receita não encontrada' });
     res.json({ sucesso: true, mensagem: 'Receita atualizada' });

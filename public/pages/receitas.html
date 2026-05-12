@@ -157,6 +157,25 @@
       <select id="f-categoria"><option value="">Sem categoria</option></select>
     </div>
     <div class="form-group">
+      <label>Status do recebimento</label>
+      <input type="hidden" id="f-status" value="pendente">
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button type="button" id="btn-status-pendente" onclick="setStatus('pendente')"
+          style="flex:1;padding:9px;border-radius:8px;border:2px solid #e2e8f0;background:#fff;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;color:#64748b;transition:all 0.15s">
+          ⏳ A receber
+        </button>
+        <button type="button" id="btn-status-recebida" onclick="setStatus('recebida')"
+          style="flex:1;padding:9px;border-radius:8px;border:2px solid #e2e8f0;background:#fff;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;color:#64748b;transition:all 0.15s">
+          ✅ Já recebi
+        </button>
+      </div>
+    </div>
+    <div class="form-group" id="grupo-data-recebimento" style="display:none">
+      <label>Data de recebimento *</label>
+      <input type="date" id="f-data-recebimento-form">
+      <div class="toggle-hint">O valor será contabilizado no mês dessa data</div>
+    </div>
+    <div class="form-group">
       <label>Recorrência mensal</label>
       <input type="hidden" id="f-recorrente" value="false">
       <div class="toggle-row">
@@ -376,6 +395,24 @@ async function desfazerRecebimento(id) {
 }
 
 // ── Modal Nova/Editar ──────────────────────────────────────────
+function setStatus(val) {
+  document.getElementById('f-status').value = val;
+  const pendEl = document.getElementById('btn-status-pendente');
+  const recEl  = document.getElementById('btn-status-recebida');
+  const grupoRec = document.getElementById('grupo-data-recebimento');
+  if (val === 'recebida') {
+    pendEl.style.border = '2px solid #e2e8f0'; pendEl.style.color = '#64748b'; pendEl.style.background = '#fff';
+    recEl.style.border  = '2px solid #22c55e'; recEl.style.color  = '#15803d'; recEl.style.background = '#f0fdf4';
+    grupoRec.style.display = '';
+    if (!document.getElementById('f-data-recebimento-form').value)
+      document.getElementById('f-data-recebimento-form').value = new Date().toISOString().split('T')[0];
+  } else {
+    pendEl.style.border = '2px solid #f59e0b'; pendEl.style.color = '#b45309'; pendEl.style.background = '#fffbeb';
+    recEl.style.border  = '2px solid #e2e8f0'; recEl.style.color  = '#64748b'; recEl.style.background = '#fff';
+    grupoRec.style.display = 'none';
+  }
+}
+
 function abrirModal(dados = null) {
   document.getElementById('modal-titulo').textContent = dados ? 'Editar Receita' : 'Nova Receita';
   document.getElementById('edit-id').value = dados?.id || '';
@@ -384,6 +421,9 @@ function abrirModal(dados = null) {
   document.getElementById('f-data').value = dados ? (dateStr(dados.data) || '') : new Date().toISOString().split('T')[0];
   document.getElementById('f-categoria').value = dados?.categoria_id || '';
   setRecorrente(!!dados?.recorrente);
+  setStatus(dados?.status === 'recebida' ? 'recebida' : 'pendente');
+  if (dados?.data_recebimento)
+    document.getElementById('f-data-recebimento-form').value = dateStr(dados.data_recebimento) || '';
   openModal('modal-overlay');
 }
 
@@ -391,18 +431,27 @@ function fecharModal() { closeModal('modal-overlay'); }
 
 async function salvar() {
   const id = document.getElementById('edit-id').value;
+  const status = document.getElementById('f-status').value;
+  const dataRecForm = document.getElementById('f-data-recebimento-form').value;
+
+  if (status === 'recebida' && !dataRecForm) {
+    toast('Informe a data de recebimento.', 'error'); return;
+  }
+
   const body = {
     descricao: document.getElementById('f-descricao').value.trim(),
     valor: parseMoeda(document.getElementById('f-valor').value),
     data: document.getElementById('f-data').value,
     categoria_id: document.getElementById('f-categoria').value || null,
-    recorrente: document.getElementById('f-recorrente').value === 'true'
+    recorrente: document.getElementById('f-recorrente').value === 'true',
+    status,
+    data_recebimento: status === 'recebida' ? dataRecForm : null
   };
   if (!body.descricao || !body.valor || !body.data) { toast('Preencha os campos obrigatórios.', 'error'); return; }
   try {
     if (id) await apiFetch(`/receitas/${id}`, { method: 'PUT', body: JSON.stringify(body) });
     else     await apiFetch('/receitas',       { method: 'POST', body: JSON.stringify(body) });
-    toast(id ? 'Receita atualizada!' : 'Receita criada!');
+    toast(id ? 'Receita atualizada!' : (status === 'recebida' ? 'Receita registrada como recebida!' : 'Receita criada como "A receber"!'));
     fecharModal();
     carregar();
   } catch (e) { toast(e.message, 'error'); }
