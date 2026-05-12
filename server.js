@@ -61,7 +61,7 @@ app.use('/api/backup',    require('./routes/backup'));
 app.use('/api/tenant',    require('./routes/tenant'));
 app.use('/api/admin',     require('./routes/admin-master'));
 
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pages', 'landing.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'landingpage', 'index.html')));
 
 const pages = ['/dashboard', '/receitas', '/despesas', '/categorias', '/metas', '/relatorios', '/usuarios', '/backup'];
 pages.forEach(p => {
