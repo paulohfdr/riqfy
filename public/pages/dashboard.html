@@ -37,7 +37,7 @@
 .areceber-table .desc { font-weight: 600; color: #1e293b; }
 .areceber-table .sub { font-size: 11px; color: #64748b; margin-top: 2px; }
 .areceber-table .val { text-align: right; color: #15803d; font-weight: 700; white-space: nowrap; }
-.areceber-empty { padding: 20px; text-align: center; color: #64748b; font-size: 13px; }
+.areceber-empty { padding: 28px 20px; text-align: center; color: #64748b; font-size: 13px; line-height: 1.8; }
 .badge-cat-rec { display:inline-block; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:600; }
 .areceber-row {
   cursor: pointer; transition: background 0.15s;
@@ -74,19 +74,24 @@
       <div class="summary-card"><div class="card-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg></div><div><div class="card-label">Recorrências</div><div class="card-value" id="cv-recorrencias">—</div></div></div>
     </div>
 
-    <!-- Seção A Receber — aparece só quando há pendentes -->
-    <div id="section-areceber" style="display:none">
+    <!-- Seção A Receber -->
+    <div id="section-areceber">
       <div class="areceber-card">
         <div class="areceber-header">
           <h3>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             A Receber
-            <span id="areceber-qtd" style="background:#bbf7d0;color:#166534;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;"></span>
+            <span id="areceber-qtd" style="background:#bbf7d0;color:#166534;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;display:none"></span>
           </h3>
-          <span class="areceber-total" id="areceber-total">—</span>
+          <div style="display:flex;align-items:center;gap:16px">
+            <span class="areceber-total" id="areceber-total"></span>
+            <a href="/receitas" style="font-size:12px;font-weight:600;color:#15803d;text-decoration:none;white-space:nowrap">Ver todas →</a>
+          </div>
         </div>
         <table class="areceber-table">
-          <tbody id="tbody-areceber"></tbody>
+          <tbody id="tbody-areceber">
+            <tr><td colspan="2" class="areceber-empty">Carregando...</td></tr>
+          </tbody>
         </table>
       </div>
     </div>
@@ -186,15 +191,29 @@ async function carregar() {
 }
 
 function renderAReceber(lista, total) {
-  const section = document.getElementById('section-areceber');
-  if (!lista.length) { section.style.display = 'none'; return; }
-  section.style.display = 'block';
-  document.getElementById('areceber-total').textContent = fmtBRL(total);
-  document.getElementById('areceber-qtd').textContent = lista.length;
+  const qtdEl = document.getElementById('areceber-qtd');
+  const totalEl = document.getElementById('areceber-total');
+  const tb = document.getElementById('tbody-areceber');
+
+  if (!lista.length) {
+    qtdEl.style.display = 'none';
+    totalEl.textContent = '';
+    tb.innerHTML = `
+      <tr>
+        <td colspan="2" class="areceber-empty">
+          <span style="font-size:20px">✅</span><br>
+          Nenhuma receita pendente a receber
+        </td>
+      </tr>`;
+    return;
+  }
+
+  qtdEl.style.display = '';
+  qtdEl.textContent = lista.length + (lista.length === 1 ? ' pendente' : ' pendentes');
+  totalEl.textContent = fmtBRL(total);
 
   lista.forEach(r => { _receitasMap[r.id] = r; });
 
-  const tb = document.getElementById('tbody-areceber');
   tb.innerHTML = lista.map(r => {
     const catStyle = r.categoria_cor
       ? `background:${r.categoria_cor}22;color:${r.categoria_cor}`
@@ -203,11 +222,12 @@ function renderAReceber(lista, total) {
       ? `<span class="badge-cat-rec" style="${catStyle}">${r.categoria_nome}</span> `
       : '';
     const descSafe = String(r.descricao).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    const dataFmt = r.data ? fmtDataCurta(String(r.data).substring(0, 10)) : '—';
     return `
       <tr class="areceber-row" onclick="abrirModalReceber(${r.id})" title="Clique para marcar como recebida">
         <td>
           <div class="desc">${catLabel}${descSafe} <span class="receber-hint">▶ Receber</span></div>
-          <div class="sub">${fmtData(String(r.data).substring(0,10))}</div>
+          <div class="sub">${dataFmt}</div>
         </td>
         <td class="val">${fmtBRL(r.valor)}</td>
       </tr>
