@@ -61,10 +61,11 @@ app.use('/api/backup',    require('./routes/backup'));
 app.use('/api/tenant',    require('./routes/tenant'));
 app.use('/api/admin',     require('./routes/admin-master'));
 
-const pages = ['/', '/dashboard', '/receitas', '/despesas', '/categorias', '/metas', '/relatorios', '/usuarios', '/backup'];
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'pages', 'landing.html')));
+
+const pages = ['/dashboard', '/receitas', '/despesas', '/categorias', '/metas', '/relatorios', '/usuarios', '/backup'];
 pages.forEach(p => {
-  const file = p === '/' ? 'dashboard' : p.slice(1);
-  app.get(p, (req, res) => res.sendFile(path.join(__dirname, 'public', 'pages', file + '.html')));
+  app.get(p, (req, res) => res.sendFile(path.join(__dirname, 'public', 'pages', p.slice(1) + '.html')));
 });
 app.get('/login',    (req, res) => res.sendFile(path.join(__dirname, 'public', 'pages', 'login.html')));
 app.get('/register', (req, res) => res.redirect('/login'));
