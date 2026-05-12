@@ -408,15 +408,19 @@ a { text-decoration: none; }
 }
 .plan-btn.fire:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(255,100,0,.5); }
 
-/* ─── TESTIMONIALS ─── */
-.testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; margin-top: 60px; }
+/* ─── TESTIMONIALS CAROUSEL ─── */
+.testi-carousel-wrap { position: relative; margin-top: 60px; overflow: hidden; }
+.testi-carousel {
+  display: flex; gap: 20px;
+  cursor: grab; user-select: none;
+  transition: transform .4s var(--ease);
+}
+.testi-carousel.grabbing { cursor: grabbing; transition: none; }
 .testi {
   background: #0f0f0f; border: 1px solid rgba(255,255,255,.07);
   border-radius: 18px; padding: 28px;
-  opacity: 0; transform: translateY(24px);
-  transition: opacity .5s var(--ease), transform .5s var(--ease);
+  min-width: 340px; max-width: 340px; flex-shrink: 0;
 }
-.testi.vis { opacity: 1; transform: none; }
 .testi-stars { display: flex; gap: 3px; margin-bottom: 16px; }
 .testi-stars span { color: var(--yw); font-size: 14px; }
 .testi-quote { font-size: 15px; color: rgba(255,255,255,.7); line-height: 1.75; margin-bottom: 22px; font-style: italic; }
@@ -428,6 +432,12 @@ a { text-decoration: none; }
 }
 .testi-name { font-size: 14px; font-weight: 700; color: rgba(255,255,255,.85); }
 .testi-role { font-size: 12px; color: rgba(255,255,255,.35); margin-top: 2px; }
+.testi-dots { display: flex; justify-content: center; gap: 8px; margin-top: 28px; }
+.testi-dot {
+  width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.2);
+  cursor: pointer; transition: all .2s; border: none;
+}
+.testi-dot.on { background: var(--o); width: 24px; border-radius: 4px; }
 
 /* ─── FAQ ─── */
 .faq-list { max-width: 720px; margin: 56px auto 0; display: flex; flex-direction: column; gap: 2px; }
@@ -469,6 +479,14 @@ a { text-decoration: none; }
 
 /* ─── FOOTER ─── */
 footer { background: #060606; border-top: 1px solid var(--bd); padding: 72px 5% 36px; }
+.foot-ripafe {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 28px 0 0; margin-top: 28px; border-top: 1px solid var(--bd);
+  font-size: 13px; color: var(--t3);
+}
+.foot-ripafe img { height: 30px; width: auto; opacity: .7; transition: opacity .2s; vertical-align: middle; }
+.foot-ripafe a { display: flex; align-items: center; }
+.foot-ripafe a:hover img { opacity: 1; }
 .foot-grid { display: grid; grid-template-columns: 2.2fr 1fr 1fr 1fr; gap: 56px; margin-bottom: 56px; }
 .foot-brand img { height: 36px; margin-bottom: 18px; }
 .foot-brand p { font-size: 14px; color: var(--t3); line-height: 1.75; max-width: 270px; }
@@ -848,31 +866,74 @@ footer { background: #060606; border-top: 1px solid var(--bd); padding: 72px 5% 
     <div class="sec-eyebrow">Depoimentos</div>
     <h2 class="sec-h2">O que dizem quem usa</h2>
   </div>
-  <div class="testi-grid">
-    <div class="testi reveal">
-      <div class="testi-stars"><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span></div>
-      <div class="testi-quote">"Finalmente um sistema que eu consigo usar de verdade. O dashboard me deu clareza sobre os meus gastos logo no primeiro mês."</div>
-      <div class="testi-author">
-        <div class="testi-avatar" style="background:linear-gradient(135deg,#FF6400,#ff9a4d)">P</div>
-        <div><div class="testi-name">Pedro Alves</div><div class="testi-role">Autônomo</div></div>
+  <div class="testi-carousel-wrap">
+    <div class="testi-carousel" id="testi-carousel">
+      <div class="testi">
+        <div class="testi-stars"><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span></div>
+        <div class="testi-quote">"Finalmente um sistema que eu consigo usar de verdade. O dashboard me deu clareza sobre os meus gastos logo no primeiro mês."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#FF6400,#ff9a4d)">P</div>
+          <div><div class="testi-name">Pedro Alves</div><div class="testi-role">Autônomo</div></div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="testi-stars"><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span></div>
+        <div class="testi-quote">"As metas financeiras são incríveis. Defini minha reserva de emergência em dezembro e já bati 60% do valor em 4 meses."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#00296b,#0050cc)">M</div>
+          <div><div class="testi-name">Marina Costa</div><div class="testi-role">Designer Freelancer</div></div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="testi-stars"><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span></div>
+        <div class="testi-quote">"As recorrências automáticas salvaram meu mês. Aluguel, streaming, gym — tudo já lançado sem precisar fazer nada."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#fdc500,#ff6400)">R</div>
+          <div><div class="testi-name">Rafael Lima</div><div class="testi-role">Engenheiro</div></div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="testi-stars"><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span></div>
+        <div class="testi-quote">"Antes eu perdia dinheiro sem saber onde. Com o RiqFy consegui economizar R$ 800 no primeiro mês só identificando gastos desnecessários."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#22c55e,#16a34a)">A</div>
+          <div><div class="testi-name">Ana Paula</div><div class="testi-role">Professora</div></div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="testi-stars"><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span></div>
+        <div class="testi-quote">"Uso com minha esposa, cada um tem seu login e vemos as finanças da família juntos. Simplesmente perfeito para casal."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">C</div>
+          <div><div class="testi-name">Carlos Mendes</div><div class="testi-role">Empreendedor</div></div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="testi-stars"><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span></div>
+        <div class="testi-quote">"O relatório por categoria abriu meus olhos. Eu gastava quase R$ 600/mês em delivery sem perceber. Reduzi pela metade em 2 meses."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#0891b2,#06b6d4)">J</div>
+          <div><div class="testi-name">Juliana Rocha</div><div class="testi-role">Nutricionista</div></div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="testi-stars"><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span></div>
+        <div class="testi-quote">"Gerencio as finanças do meu pequeno negócio e da vida pessoal no mesmo sistema. Economizei tempo e dinheiro de contador."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#dc2626,#ef4444)">F</div>
+          <div><div class="testi-name">Fernando Costa</div><div class="testi-role">Microempreendedor</div></div>
+        </div>
+      </div>
+      <div class="testi">
+        <div class="testi-stars"><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span></div>
+        <div class="testi-quote">"Em 3 meses de uso já juntei o valor da minha meta de viagem. O sistema de metas com aportes faz toda a diferença na disciplina."</div>
+        <div class="testi-author">
+          <div class="testi-avatar" style="background:linear-gradient(135deg,#d97706,#f59e0b)">L</div>
+          <div><div class="testi-name">Letícia Souza</div><div class="testi-role">Estudante de Medicina</div></div>
+        </div>
       </div>
     </div>
-    <div class="testi reveal" style="transition-delay:.12s">
-      <div class="testi-stars"><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span></div>
-      <div class="testi-quote">"As metas financeiras são incríveis. Defini minha reserva de emergência em dezembro e já bati 60% do valor em 4 meses."</div>
-      <div class="testi-author">
-        <div class="testi-avatar" style="background:linear-gradient(135deg,#00296b,#0050cc)">M</div>
-        <div><div class="testi-name">Marina Costa</div><div class="testi-role">Designer Freelancer</div></div>
-      </div>
-    </div>
-    <div class="testi reveal" style="transition-delay:.24s">
-      <div class="testi-stars"><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span><span>⭐</span></div>
-      <div class="testi-quote">"As recorrências automáticas salvaram meu mês. Aluguel, streaming, gym — tudo já lançado sem precisar fazer nada."</div>
-      <div class="testi-author">
-        <div class="testi-avatar" style="background:linear-gradient(135deg,#fdc500,#ff6400)">R</div>
-        <div><div class="testi-name">Rafael Lima</div><div class="testi-role">Engenheiro</div></div>
-      </div>
-    </div>
+    <div class="testi-dots" id="testi-dots"></div>
   </div>
 </section>
 
@@ -945,6 +1006,10 @@ footer { background: #060606; border-top: 1px solid var(--bd); padding: 72px 5% 
       <a href="#">Termos de uso</a>
     </div>
   </div>
+  <div class="foot-ripafe">
+    <span>Desenvolvido por</span>
+    <a href="https://wa.me/5511942288038" target="_blank" rel="noopener"><img src="img/logo_agencia_ripafe.png" alt="Agência Ripafe"></a>
+  </div>
   <div class="foot-bottom">
     <p>© <span id="ano"></span> <strong>RiqFy</strong>. Todos os direitos reservados.</p>
     <div class="foot-socials">
@@ -996,6 +1061,85 @@ function toggleFaq(i) {
   document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('open'));
   if (!wasOpen) item.classList.add('open');
 }
+
+// ── Testimonials Carousel ──
+(function () {
+  const carousel = document.getElementById('testi-carousel');
+  const dotsWrap = document.getElementById('testi-dots');
+  if (!carousel || !dotsWrap) return;
+
+  const cards = carousel.querySelectorAll('.testi');
+  const n = cards.length;
+  let current = 0;
+  let autoTimer;
+  let startX = 0;
+  let dragDelta = 0;
+  let dragging = false;
+
+  // Build dots
+  const dots = Array.from({ length: n }, (_, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'testi-dot' + (i === 0 ? ' on' : '');
+    btn.setAttribute('aria-label', 'Depoimento ' + (i + 1));
+    btn.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(btn);
+    return btn;
+  });
+
+  function cardWidth() {
+    return cards[0].offsetWidth + 20; // card + gap
+  }
+
+  function maxIndex() {
+    const visible = Math.max(1, Math.floor(carousel.parentElement.offsetWidth / cardWidth()));
+    return Math.max(0, n - visible);
+  }
+
+  function goTo(idx) {
+    current = Math.max(0, Math.min(idx, maxIndex()));
+    carousel.style.transform = 'translateX(-' + (current * cardWidth()) + 'px)';
+    dots.forEach((d, i) => d.classList.toggle('on', i === current));
+    restartAuto();
+  }
+
+  function restartAuto() {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(() => goTo(current >= maxIndex() ? 0 : current + 1), 4000);
+  }
+
+  // Mouse drag
+  carousel.addEventListener('mousedown', e => {
+    dragging = true; startX = e.clientX; dragDelta = 0;
+    carousel.classList.add('grabbing');
+    clearInterval(autoTimer);
+  });
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    dragDelta = e.clientX - startX;
+  });
+  window.addEventListener('mouseup', () => {
+    if (!dragging) return;
+    dragging = false;
+    carousel.classList.remove('grabbing');
+    if (dragDelta < -60) goTo(current + 1);
+    else if (dragDelta > 60) goTo(current - 1);
+    else goTo(current);
+  });
+
+  // Touch drag
+  carousel.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    clearInterval(autoTimer);
+  }, { passive: true });
+  carousel.addEventListener('touchend', e => {
+    const diff = e.changedTouches[0].clientX - startX;
+    if (diff < -60) goTo(current + 1);
+    else if (diff > 60) goTo(current - 1);
+    else goTo(current);
+  });
+
+  goTo(0);
+})();
 </script>
 </body>
 </html>
