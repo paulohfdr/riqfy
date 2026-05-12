@@ -49,6 +49,7 @@ app.use(rateLimit({
 }));
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'landingpage')));
 
 app.use('/api/auth',      require('./routes/auth'));
 app.use('/api/dashboard', require('./routes/dashboard'));
