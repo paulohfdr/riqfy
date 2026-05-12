@@ -160,13 +160,13 @@
       <label>Status do recebimento</label>
       <input type="hidden" id="f-status" value="pendente">
       <div style="display:flex;gap:8px;margin-top:4px">
-        <button type="button" id="btn-status-pendente" onclick="setStatus('pendente')"
-          style="flex:1;padding:9px;border-radius:8px;border:2px solid #e2e8f0;background:#fff;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;color:#64748b;transition:all 0.15s">
-          ⏳ A receber
-        </button>
         <button type="button" id="btn-status-recebida" onclick="setStatus('recebida')"
           style="flex:1;padding:9px;border-radius:8px;border:2px solid #e2e8f0;background:#fff;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;color:#64748b;transition:all 0.15s">
           ✅ Já recebi
+        </button>
+        <button type="button" id="btn-status-pendente" onclick="setStatus('pendente')"
+          style="flex:1;padding:9px;border-radius:8px;border:2px solid #e2e8f0;background:#fff;cursor:pointer;font-size:13px;font-weight:600;font-family:inherit;color:#64748b;transition:all 0.15s">
+          ⏳ A receber
         </button>
       </div>
     </div>
@@ -421,7 +421,7 @@ function abrirModal(dados = null) {
   document.getElementById('f-data').value = dados ? (dateStr(dados.data) || '') : new Date().toISOString().split('T')[0];
   document.getElementById('f-categoria').value = dados?.categoria_id || '';
   setRecorrente(!!dados?.recorrente);
-  setStatus(dados?.status === 'recebida' ? 'recebida' : 'pendente');
+  setStatus(dados?.status === 'pendente' ? 'pendente' : 'recebida');
   if (dados?.data_recebimento)
     document.getElementById('f-data-recebimento-form').value = dateStr(dados.data_recebimento) || '';
   openModal('modal-overlay');
