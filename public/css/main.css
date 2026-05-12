@@ -204,7 +204,7 @@ body {
 .btn-danger { background: var(--red); color: #fff; }
 .btn-info { background: #f0f0f0; color: var(--dark); }
 .btn-warning { background: var(--primary); color: #fff; }
-.btn-sm { padding: 5px 11px; font-size: 12px; }
+.btn-sm { padding: 5px 10px; font-size: 12px; white-space: nowrap; }
 
 /* ===== TABELAS ===== */
 .table-card {
@@ -241,7 +241,7 @@ td {
 td:first-child, th:first-child { max-width: unset; white-space: normal; }
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: #fafafa; }
-.td-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; max-width: unset; overflow: visible; white-space: normal; }
+.td-actions { display: flex; gap: 5px; flex-wrap: nowrap; align-items: center; max-width: unset; overflow: visible; white-space: nowrap; }
 .empty-row td { text-align: center; color: var(--muted); padding: 32px; }
 
 /* ===== BADGES ===== */
