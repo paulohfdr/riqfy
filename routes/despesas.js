@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
       sql += ' AND MONTH(d.vencimento) = ? AND YEAR(d.vencimento) = ?';
       params.push(Number(mes), Number(ano));
     }
-    sql += ' ORDER BY d.vencimento ASC';
+    sql += ' ORDER BY d.criado_em DESC, d.id DESC';
     res.json(await db.all(sql, params));
   } catch(e) { res.status(500).json({ erro: e.message }); }
 });
