@@ -72,6 +72,8 @@ app.get('/register', (req, res) => res.redirect('/login'));
 app.get('/admin',    (req, res) => res.sendFile(path.join(__dirname, 'public', 'pages', 'admin-master.html')));
 app.get('/upgrade',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'pages', 'upgrade.html')));
 
+app.use((req, res) => res.status(404).sendFile(path.join(__dirname, 'public', 'pages', '404.html')));
+
 // Handler de erro centralizado e seguro
 app.use(errorHandler);
 
