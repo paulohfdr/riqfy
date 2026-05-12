@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termos de Uso — RiqFy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --o:#FF6400; --o2:#e55a00; --dk:#080808; --dk2:#111111;
+  --bd:rgba(255,255,255,.07); --t1:#ffffff; --t2:rgba(255,255,255,.55); --t3:rgba(255,255,255,.28);
+  --font:'Plus Jakarta Sans', -apple-system, sans-serif;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--dk); color: var(--t1); -webkit-font-smoothing: antialiased; }
+a { text-decoration: none; }
+
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  height: 68px; padding: 0 5%;
+  display: flex; align-items: center; justify-content: space-between;
+  background: #000000; border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.nav-logo img { height: 38px; width: auto; }
+.btn-ghost {
+  font-size: 14px; font-weight: 600; color: var(--t2);
+  padding: 9px 18px; border-radius: 10px; border: 1px solid var(--bd);
+  transition: all .2s; background: transparent; font-family: var(--font); cursor: pointer;
+}
+.btn-ghost:hover { color: var(--t1); border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.05); }
+.btn-pill {
+  font-size: 14px; font-weight: 700; color: #fff;
+  padding: 9px 22px; border-radius: 50px; border: none;
+  background: var(--o); font-family: var(--font); cursor: pointer;
+  transition: all .25s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-pill:hover { background: var(--o2); transform: translateY(-1px); }
+
+.page-hero {
+  padding: 140px 5% 72px; border-bottom: 1px solid var(--bd);
+  background: linear-gradient(180deg, rgba(255,100,0,.06) 0%, transparent 100%);
+}
+.page-hero .eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--o); margin-bottom: 14px;
+}
+.page-hero .eyebrow::before { content:''; width:16px; height:2px; background:var(--o); border-radius:2px; }
+.page-hero h1 { font-size: clamp(30px,4vw,48px); font-weight: 800; line-height: 1.15; letter-spacing: -1px; margin-bottom: 12px; }
+.page-hero p { font-size: 15px; color: var(--t2); }
+
+.doc-wrap { max-width: 760px; margin: 0 auto; padding: 72px 5% 100px; }
+.doc-section { margin-bottom: 52px; }
+.doc-section h2 {
+  font-size: 20px; font-weight: 700; margin-bottom: 16px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; gap: 10px;
+}
+.doc-section h2 .num {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(255,100,0,.12); border: 1px solid rgba(255,100,0,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: var(--o); flex-shrink: 0;
+}
+.doc-section p { font-size: 15px; color: var(--t2); line-height: 1.8; margin-bottom: 14px; }
+.doc-section p:last-child { margin-bottom: 0; }
+.doc-section ul { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.doc-section ul li {
+  font-size: 15px; color: var(--t2); line-height: 1.7;
+  padding-left: 20px; position: relative;
+}
+.doc-section ul li::before { content:''; position:absolute; left:0; top:9px; width:6px; height:6px; border-radius:50%; background:var(--o); }
+.doc-section strong { color: var(--t1); }
+.highlight-box {
+  background: rgba(255,100,0,.06); border: 1px solid rgba(255,100,0,.15);
+  border-radius: 12px; padding: 18px 22px; margin-bottom: 14px;
+  font-size: 14px; color: rgba(255,255,255,.65); line-height: 1.75;
+}
+.highlight-box strong { color: var(--o); }
+.updated-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.04); border: 1px solid var(--bd);
+  border-radius: 50px; padding: 6px 14px;
+  font-size: 12px; color: var(--t3); margin-bottom: 48px;
+}
+
+footer { background: #060606; border-top: 1px solid var(--bd); padding: 36px 5%; }
+.foot-bottom {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+}
+.foot-bottom p { font-size: 13px; color: var(--t3); }
+.foot-bottom strong { color: var(--o); }
+.foot-links { display: flex; gap: 20px; }
+.foot-links a { font-size: 13px; color: var(--t3); transition: color .2s; }
+.foot-links a:hover { color: rgba(255,255,255,.7); }
+.foot-ripafe { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--t3); }
+.foot-ripafe img { height: 24px; width: auto; opacity: .65; transition: opacity .2s; }
+.foot-ripafe a { display: flex; align-items: center; }
+.foot-ripafe a:hover img { opacity: 1; }
+
+@media(max-width:600px) {
+  .foot-bottom { flex-direction: column; text-align: center; }
+  .foot-links { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="/" class="nav-logo"><img src="img/logo_riqfy_branco.svg" alt="RiqFy"></a>
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="https://app.riqfy.com.br" class="btn-ghost">Entrar</a>
+    <a href="https://wa.me/5511942288038?text=Ol%C3%A1!%20Tenho%20interesse%20em%20saber%20mais%20sobre%20o%20sistema%20RiqFy." target="_blank" rel="noopener" class="btn-pill">Começar grátis →</a>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div style="max-width:760px;margin:0 auto">
+    <div class="eyebrow">Legal</div>
+    <h1>Termos de Uso</h1>
+    <p>As regras e condições para utilização do sistema RiqFy.</p>
+  </div>
+</div>
+
+<div class="doc-wrap">
+  <div class="updated-badge">
+    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Última atualização: maio de 2026
+  </div>
+
+  <div class="highlight-box">
+    <strong>Atenção:</strong> Ao criar uma conta e utilizar o RiqFy, você concorda com estes Termos de Uso. Leia com atenção antes de começar. Se tiver dúvidas, entre em contato pelo WhatsApp <strong>(11) 94228-8038</strong>.
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">1</span>Aceitação dos termos</h2>
+    <p>Estes Termos de Uso regulam o acesso e a utilização do <strong>RiqFy</strong>, sistema de controle financeiro disponível em <strong>app.riqfy.com.br</strong>, desenvolvido e operado pela <strong>Agência Ripafe</strong>.</p>
+    <p>Ao acessar ou usar o RiqFy, você declara ter lido, compreendido e concordado com estes termos. Caso não concorde, não utilize o sistema.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">2</span>Descrição do serviço</h2>
+    <p>O RiqFy é uma plataforma de gestão financeira pessoal e empresarial que oferece:</p>
+    <ul>
+      <li>Dashboard com visão consolidada de receitas, despesas e saldo</li>
+      <li>Controle de receitas e despesas com categorização</li>
+      <li>Sistema de metas financeiras com acompanhamento de progresso</li>
+      <li>Lançamentos recorrentes automáticos</li>
+      <li>Relatórios por período e categoria</li>
+      <li>Gestão de múltiplos usuários por conta (planos pagos)</li>
+    </ul>
+    <p>O serviço pode ser atualizado, expandido ou ter funcionalidades descontinuadas a qualquer momento, com aviso prévio razoável.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">3</span>Cadastro e conta</h2>
+    <p>Para utilizar o RiqFy, é necessário criar uma conta fornecendo informações verdadeiras e atualizadas. Você é responsável por:</p>
+    <ul>
+      <li>Manter a confidencialidade da sua senha</li>
+      <li>Todas as atividades realizadas com suas credenciais</li>
+      <li>Notificar imediatamente em caso de acesso não autorizado</li>
+      <li>Manter seus dados cadastrais atualizados</li>
+    </ul>
+    <p>É proibido criar contas com dados falsos, ceder suas credenciais a terceiros ou criar múltiplas contas para burlar limites do plano gratuito.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">4</span>Uso aceitável</h2>
+    <p>Você concorda em utilizar o RiqFy apenas para fins lícitos e de acordo com estes termos. É expressamente proibido:</p>
+    <ul>
+      <li>Tentar acessar dados de outros usuários ou contas</li>
+      <li>Realizar ataques de força bruta, injeção de código ou qualquer tentativa de comprometer a segurança</li>
+      <li>Usar o sistema para atividades ilegais ou fraudulentas</li>
+      <li>Realizar engenharia reversa, copiar ou redistribuir o sistema sem autorização</li>
+      <li>Sobrecarregar os servidores com requisições automatizadas excessivas</li>
+    </ul>
+    <p>O descumprimento dessas regras pode resultar no bloqueio imediato da conta, sem direito a reembolso.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">5</span>Planos e pagamento</h2>
+    <p>O RiqFy oferece um plano gratuito com limitações e planos pagos com recursos ampliados. Sobre os planos pagos:</p>
+    <ul>
+      <li>Os valores são cobrados de forma recorrente (mensal ou anual, conforme escolhido)</li>
+      <li>O cancelamento pode ser feito a qualquer momento, sem multa</li>
+      <li>Após o cancelamento, o acesso ao plano pago permanece ativo até o fim do período já pago</li>
+      <li>Não há reembolso proporcional por períodos não utilizados, exceto quando exigido por lei</li>
+      <li>Os preços podem ser alterados com aviso prévio de 30 dias</li>
+    </ul>
+    <p>Para contratar ou cancelar um plano, entre em contato pelo WhatsApp <strong>(11) 94228-8038</strong>.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">6</span>Seus dados financeiros</h2>
+    <p>Todos os dados financeiros inseridos no RiqFy <strong>pertencem exclusivamente a você</strong>. O RiqFy atua apenas como ferramenta de organização e não assume responsabilidade por decisões financeiras tomadas com base nas informações do sistema.</p>
+    <p>Você pode exportar e fazer backup dos seus dados a qualquer momento (disponível nos planos pagos). Recomendamos manter cópias de segurança regulares.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">7</span>Propriedade intelectual</h2>
+    <p>O RiqFy, incluindo seu código, design, marca, logotipos e conteúdo, é propriedade da <strong>Agência Ripafe</strong> e está protegido por leis de propriedade intelectual.</p>
+    <p>O uso do sistema não concede qualquer direito de propriedade intelectual sobre o sistema. É proibida a reprodução, distribuição ou criação de obras derivadas sem autorização expressa por escrito.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">8</span>Disponibilidade e limitação de responsabilidade</h2>
+    <p>Nos esforçamos para manter o RiqFy disponível 24/7, mas não garantimos disponibilidade ininterrupta. Podem ocorrer períodos de manutenção, atualizações ou indisponibilidade por fatores externos.</p>
+    <p>A Agência Ripafe não se responsabiliza por:</p>
+    <ul>
+      <li>Perdas financeiras decorrentes do uso ou não uso do sistema</li>
+      <li>Decisões financeiras tomadas com base nos dados do sistema</li>
+      <li>Indisponibilidades causadas por falhas de infraestrutura, internet ou força maior</li>
+      <li>Danos causados por uso inadequado ou não autorizado da conta pelo próprio usuário</li>
+    </ul>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">9</span>Encerramento da conta</h2>
+    <p>Você pode solicitar o encerramento da sua conta a qualquer momento pelo WhatsApp <strong>(11) 94228-8038</strong>. Após o encerramento, seus dados serão removidos conforme descrito na nossa <a href="/privacidade" style="color:var(--o)">Política de Privacidade</a>.</p>
+    <p>Reservamo-nos o direito de suspender ou encerrar contas que violem estes termos, com ou sem aviso prévio, dependendo da gravidade da infração.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">10</span>Alterações nestes termos</h2>
+    <p>Podemos atualizar estes Termos de Uso periodicamente. Alterações significativas serão comunicadas com antecedência mínima de <strong>15 dias</strong> por e-mail ou aviso no sistema.</p>
+    <p>O uso continuado do RiqFy após a entrada em vigor das alterações implica aceitação dos novos termos. Se não concordar, você pode encerrar sua conta antes da data de vigência.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">11</span>Lei aplicável e foro</h2>
+    <p>Estes termos são regidos pelas leis da República Federativa do Brasil. Para dirimir quaisquer controvérsias decorrentes deste instrumento, fica eleito o foro da Comarca de <strong>São Paulo — SP</strong>, com renúncia expressa a qualquer outro, por mais privilegiado que seja.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">12</span>Contato</h2>
+    <div class="highlight-box">
+      <strong>Agência Ripafe</strong> — responsável pelo RiqFy<br>
+      WhatsApp: <strong>(11) 94228-8038</strong>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-bottom">
+    <p>© <span id="ano"></span> <strong>RiqFy</strong>. Todos os direitos reservados.</p>
+    <div class="foot-links">
+      <a href="/privacidade">Privacidade</a>
+      <a href="/termos">Termos de uso</a>
+    </div>
+    <div class="foot-ripafe">
+      <span>Desenvolvido por</span>
+      <a href="https://wa.me/5511942288038" target="_blank" rel="noopener"><img src="img/logo_agencia_ripafe.png" alt="Agência Ripafe"></a>
+    </div>
+  </div>
+</footer>
+
+<script>document.getElementById('ano').textContent = new Date().getFullYear();</script>
+</body>
+</html>

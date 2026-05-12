@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidade — RiqFy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --o:#FF6400; --o2:#e55a00; --dk:#080808; --dk2:#111111;
+  --bd:rgba(255,255,255,.07); --t1:#ffffff; --t2:rgba(255,255,255,.55); --t3:rgba(255,255,255,.28);
+  --font:'Plus Jakarta Sans', -apple-system, sans-serif;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--dk); color: var(--t1); -webkit-font-smoothing: antialiased; }
+a { text-decoration: none; }
+
+#nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+  height: 68px; padding: 0 5%;
+  display: flex; align-items: center; justify-content: space-between;
+  background: #000000; border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.nav-logo img { height: 38px; width: auto; }
+.btn-ghost {
+  font-size: 14px; font-weight: 600; color: var(--t2);
+  padding: 9px 18px; border-radius: 10px; border: 1px solid var(--bd);
+  transition: all .2s; background: transparent; font-family: var(--font); cursor: pointer;
+}
+.btn-ghost:hover { color: var(--t1); border-color: rgba(255,255,255,.18); background: rgba(255,255,255,.05); }
+.btn-pill {
+  font-size: 14px; font-weight: 700; color: #fff;
+  padding: 9px 22px; border-radius: 50px; border: none;
+  background: var(--o); font-family: var(--font); cursor: pointer;
+  transition: all .25s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-pill:hover { background: var(--o2); transform: translateY(-1px); }
+
+.page-hero {
+  padding: 140px 5% 72px; border-bottom: 1px solid var(--bd);
+  background: linear-gradient(180deg, rgba(255,100,0,.06) 0%, transparent 100%);
+}
+.page-hero .eyebrow {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+  color: var(--o); margin-bottom: 14px;
+}
+.page-hero .eyebrow::before { content:''; width:16px; height:2px; background:var(--o); border-radius:2px; }
+.page-hero h1 { font-size: clamp(30px,4vw,48px); font-weight: 800; line-height: 1.15; letter-spacing: -1px; margin-bottom: 12px; }
+.page-hero p { font-size: 15px; color: var(--t2); }
+
+.doc-wrap { max-width: 760px; margin: 0 auto; padding: 72px 5% 100px; }
+.doc-section { margin-bottom: 52px; }
+.doc-section h2 {
+  font-size: 20px; font-weight: 700; margin-bottom: 16px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; gap: 10px;
+}
+.doc-section h2 .num {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: rgba(255,100,0,.12); border: 1px solid rgba(255,100,0,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; color: var(--o); flex-shrink: 0;
+}
+.doc-section p { font-size: 15px; color: var(--t2); line-height: 1.8; margin-bottom: 14px; }
+.doc-section p:last-child { margin-bottom: 0; }
+.doc-section ul { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.doc-section ul li {
+  font-size: 15px; color: var(--t2); line-height: 1.7;
+  padding-left: 20px; position: relative;
+}
+.doc-section ul li::before { content:''; position:absolute; left:0; top:9px; width:6px; height:6px; border-radius:50%; background:var(--o); }
+.doc-section strong { color: var(--t1); }
+.highlight-box {
+  background: rgba(255,100,0,.06); border: 1px solid rgba(255,100,0,.15);
+  border-radius: 12px; padding: 18px 22px; margin-bottom: 14px;
+  font-size: 14px; color: rgba(255,255,255,.65); line-height: 1.75;
+}
+.highlight-box strong { color: var(--o); }
+.updated-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,.04); border: 1px solid var(--bd);
+  border-radius: 50px; padding: 6px 14px;
+  font-size: 12px; color: var(--t3); margin-bottom: 48px;
+}
+
+footer { background: #060606; border-top: 1px solid var(--bd); padding: 36px 5%; }
+.foot-bottom {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+}
+.foot-bottom p { font-size: 13px; color: var(--t3); }
+.foot-bottom strong { color: var(--o); }
+.foot-links { display: flex; gap: 20px; }
+.foot-links a { font-size: 13px; color: var(--t3); transition: color .2s; }
+.foot-links a:hover { color: rgba(255,255,255,.7); }
+.foot-ripafe { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--t3); }
+.foot-ripafe img { height: 24px; width: auto; opacity: .65; transition: opacity .2s; }
+.foot-ripafe a { display: flex; align-items: center; }
+.foot-ripafe a:hover img { opacity: 1; }
+
+@media(max-width:600px) {
+  .foot-bottom { flex-direction: column; text-align: center; }
+  .foot-links { justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<nav id="nav">
+  <a href="/" class="nav-logo"><img src="img/logo_riqfy_branco.svg" alt="RiqFy"></a>
+  <div style="display:flex;align-items:center;gap:12px">
+    <a href="https://app.riqfy.com.br" class="btn-ghost">Entrar</a>
+    <a href="https://wa.me/5511942288038?text=Ol%C3%A1!%20Tenho%20interesse%20em%20saber%20mais%20sobre%20o%20sistema%20RiqFy." target="_blank" rel="noopener" class="btn-pill">Começar grátis →</a>
+  </div>
+</nav>
+
+<div class="page-hero">
+  <div style="max-width:760px;margin:0 auto">
+    <div class="eyebrow">Legal</div>
+    <h1>Política de Privacidade</h1>
+    <p>Como coletamos, usamos e protegemos seus dados pessoais no RiqFy.</p>
+  </div>
+</div>
+
+<div class="doc-wrap">
+  <div class="updated-badge">
+    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Última atualização: maio de 2026
+  </div>
+
+  <div class="highlight-box">
+    <strong>Resumo:</strong> O RiqFy coleta apenas os dados necessários para o funcionamento do sistema. Não vendemos, alugamos nem compartilhamos suas informações financeiras com terceiros. Você tem controle total sobre seus dados.
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">1</span>Quem somos</h2>
+    <p>O RiqFy é um sistema de controle financeiro pessoal desenvolvido e operado pela <strong>Agência Ripafe</strong>. Esta política descreve como tratamos os dados pessoais dos usuários do sistema acessível em <strong>app.riqfy.com.br</strong>.</p>
+    <p>Em caso de dúvidas sobre esta política ou sobre seus dados, entre em contato pelo WhatsApp <strong>(11) 94228-8038</strong>.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">2</span>Dados que coletamos</h2>
+    <p>Coletamos apenas o necessário para fornecer o serviço:</p>
+    <ul>
+      <li><strong>Dados de cadastro:</strong> nome, endereço de e-mail e senha (armazenada com hash seguro)</li>
+      <li><strong>Dados financeiros:</strong> receitas, despesas, metas e categorias que você cadastra voluntariamente</li>
+      <li><strong>Dados de acesso:</strong> data e hora de login, endereço IP e tipo de navegador (para segurança)</li>
+      <li><strong>Cookies de sessão:</strong> token JWT em cookie HttpOnly para manter você autenticado</li>
+    </ul>
+    <p>Não coletamos dados de cartão de crédito, documentos ou informações bancárias.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">3</span>Como usamos seus dados</h2>
+    <ul>
+      <li>Fornecer e manter o funcionamento do sistema</li>
+      <li>Autenticar seu acesso com segurança</li>
+      <li>Gerar recorrências automáticas de lançamentos configurados por você</li>
+      <li>Enviar comunicações essenciais sobre a conta (quando necessário)</li>
+      <li>Identificar e corrigir problemas técnicos</li>
+    </ul>
+    <p>Não usamos seus dados financeiros para publicidade, perfilamento ou venda a terceiros.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">4</span>Compartilhamento de dados</h2>
+    <p>Seus dados <strong>não são vendidos ou compartilhados com terceiros</strong> para fins comerciais. O compartilhamento ocorre apenas nas seguintes situações:</p>
+    <ul>
+      <li><strong>Infraestrutura de hospedagem:</strong> servidor onde o sistema está instalado (acesso restrito e criptografado)</li>
+      <li><strong>Obrigação legal:</strong> quando exigido por lei, ordem judicial ou autoridade competente</li>
+    </ul>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">5</span>Segurança dos dados</h2>
+    <p>Adotamos medidas técnicas para proteger suas informações:</p>
+    <ul>
+      <li>Senhas armazenadas com hash bcrypt (nunca em texto puro)</li>
+      <li>Autenticação via JWT em cookies HttpOnly e Secure</li>
+      <li>Comunicação criptografada via HTTPS/TLS</li>
+      <li>Isolamento de dados por tenant (seus dados não se misturam com os de outros usuários)</li>
+      <li>Rate limiting para prevenir ataques de força bruta</li>
+    </ul>
+    <p>Nenhum sistema é 100% inviolável, mas trabalhamos continuamente para manter o nível máximo de proteção.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">6</span>Seus direitos (LGPD)</h2>
+    <p>Nos termos da Lei Geral de Proteção de Dados (Lei nº 13.709/2018), você tem direito a:</p>
+    <ul>
+      <li><strong>Acesso:</strong> confirmar se tratamos seus dados e obter uma cópia</li>
+      <li><strong>Correção:</strong> corrigir dados incompletos, inexatos ou desatualizados</li>
+      <li><strong>Exclusão:</strong> solicitar a eliminação dos seus dados pessoais</li>
+      <li><strong>Portabilidade:</strong> exportar seus dados em formato estruturado</li>
+      <li><strong>Revogação do consentimento:</strong> retirar o consentimento a qualquer momento</li>
+    </ul>
+    <p>Para exercer qualquer um desses direitos, entre em contato pelo WhatsApp <strong>(11) 94228-8038</strong>.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">7</span>Retenção de dados</h2>
+    <p>Mantemos seus dados enquanto sua conta estiver ativa. Ao solicitar a exclusão da conta, seus dados serão removidos dos sistemas em até <strong>30 dias</strong>, exceto quando houver obrigação legal de retenção.</p>
+    <p>Dados anonimizados e agregados podem ser mantidos por prazo indeterminado para fins estatísticos internos.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">8</span>Cookies</h2>
+    <p>Utilizamos apenas cookies estritamente necessários para o funcionamento do sistema:</p>
+    <ul>
+      <li><strong>Cookie de sessão (JWT):</strong> mantém você autenticado durante o uso. Expira ao fechar o navegador ou após período de inatividade</li>
+    </ul>
+    <p>Não utilizamos cookies de rastreamento, publicidade ou analytics de terceiros.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">9</span>Alterações nesta política</h2>
+    <p>Podemos atualizar esta política periodicamente. Em caso de alterações relevantes, notificaremos via e-mail cadastrado ou aviso no sistema. O uso continuado após as alterações implica aceitação da nova política.</p>
+  </div>
+
+  <div class="doc-section">
+    <h2><span class="num">10</span>Contato</h2>
+    <p>Para dúvidas, solicitações ou reclamações relacionadas à privacidade dos seus dados:</p>
+    <div class="highlight-box">
+      <strong>Agência Ripafe</strong> — responsável pelo RiqFy<br>
+      WhatsApp: <strong>(11) 94228-8038</strong>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="foot-bottom">
+    <p>© <span id="ano"></span> <strong>RiqFy</strong>. Todos os direitos reservados.</p>
+    <div class="foot-links">
+      <a href="/privacidade">Privacidade</a>
+      <a href="/termos">Termos de uso</a>
+    </div>
+    <div class="foot-ripafe">
+      <span>Desenvolvido por</span>
+      <a href="https://wa.me/5511942288038" target="_blank" rel="noopener"><img src="img/logo_agencia_ripafe.png" alt="Agência Ripafe"></a>
+    </div>
+  </div>
+</footer>
+
+<script>document.getElementById('ano').textContent = new Date().getFullYear();</script>
+</body>
+</html>
