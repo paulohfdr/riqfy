@@ -450,7 +450,7 @@ canvas { animation: canvasFade 0.5s ease; }
     background: var(--bg-card);
     border-radius: 20px 20px 0 0;
     border-top: 1px solid var(--borda);
-    padding: 20px 16px 8px;
+    padding: 14px 16px 8px;
     z-index: 199;
     transform: translateY(100%);
     transition: transform 0.25s ease;
@@ -460,12 +460,12 @@ canvas { animation: canvasFade 0.5s ease; }
   .more-menu-title {
     font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
     text-transform: uppercase; color: var(--muted);
-    margin-bottom: 12px; padding: 0 4px;
+    margin-bottom: 10px; padding: 0 4px;
   }
-  .more-menu-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
+  .more-menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 8px; }
   .more-menu-item {
     display: flex; flex-direction: column; align-items: center; gap: 6px;
-    padding: 14px 8px; background: var(--bg); border-radius: 12px;
+    padding: 12px 8px; background: var(--bg); border-radius: 12px;
     color: var(--muted); text-decoration: none; font-size: 11px; font-weight: 500; transition: all 0.15s;
   }
   .more-menu-item svg { width: 22px !important; height: 22px !important; min-width: 22px; max-width: 22px; }
