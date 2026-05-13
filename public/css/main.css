@@ -442,9 +442,8 @@ canvas { animation: canvasFade 0.5s ease; }
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 4px 12px rgba(255,100,0,0.35);
     padding: 0 !important; min-width: unset;
-    overflow: hidden;
   }
-  .bottom-nav-more svg { width: 24px !important; height: 24px !important; color: #fff; overflow: hidden; }
+  .bottom-nav-more svg { width: 24px !important; height: 24px !important; color: #fff; }
   .bottom-nav-more:hover { transform: none; opacity: 1; }
   .more-menu {
     position: fixed; bottom: 72px; left: 0; right: 0;
