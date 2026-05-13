@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="img/icon_site.svg">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RiqFy — Controle Financeiro Inteligente</title>
 <meta name="description" content="Dashboard completo, metas, relatórios e recorrências automáticas. O sistema financeiro que você merecia ter.">
@@ -1131,6 +1132,18 @@ function toggleFaq(i) {
 
   goTo(0);
 })();
+
+// Scroll suave sem adicionar # na URL
+document.addEventListener('click', function(e) {
+  const a = e.target.closest('a[href^="#"]');
+  if (!a) return;
+  e.preventDefault();
+  const id = a.getAttribute('href').slice(1);
+  if (id) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
+});
 </script>
 </body>
 </html>
