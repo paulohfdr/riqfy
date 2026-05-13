@@ -446,7 +446,7 @@ canvas { animation: canvasFade 0.5s ease; }
   .bottom-nav-more svg { width: 24px !important; height: 24px !important; color: #fff; }
   .bottom-nav-more:hover { background: var(--primary-hover) !important; transform: none; opacity: 1; }
   .more-menu {
-    position: fixed; bottom: 72px; left: 0; right: 0;
+    position: fixed; bottom: 64px; left: 0; right: 0;
     background: var(--bg-card);
     border-radius: 20px 20px 0 0;
     border-top: 1px solid var(--borda);
