@@ -397,13 +397,11 @@ canvas { animation: canvasFade 0.5s ease; }
 .bottom-nav { display: none; }
 #bottom-nav-root { display: none; }
 .more-menu { display: none; }
-.more-menu-overlay { display: none; }
 .more-menu-grid { display: none; }
 
 @media (max-width: 1024px) {
   #bottom-nav-root { display: block; }
   .more-menu { display: block; }
-  .more-menu-overlay { display: none; }
   .more-menu-grid { display: grid; }
 }
 
@@ -444,8 +442,9 @@ canvas { animation: canvasFade 0.5s ease; }
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 4px 12px rgba(255,100,0,0.35);
     padding: 0 !important; min-width: unset;
+    overflow: hidden;
   }
-  .bottom-nav-more svg { width: 26px !important; height: 26px !important; color: #fff; }
+  .bottom-nav-more svg { width: 24px !important; height: 24px !important; color: #fff; overflow: hidden; }
   .bottom-nav-more:hover { transform: none; opacity: 1; }
   .more-menu {
     position: fixed; bottom: 72px; left: 0; right: 0;
@@ -473,11 +472,6 @@ canvas { animation: canvasFade 0.5s ease; }
   .more-menu-item svg { width: 22px !important; height: 22px !important; min-width: 22px; max-width: 22px; }
   .more-menu-item.active { background: #fff7ed; color: var(--primary); }
   .more-menu-item:active { background: var(--borda); }
-  .more-menu-overlay {
-    position: fixed; inset: 0; z-index: 198;
-    background: rgba(0,0,0,0.3); display: none;
-  }
-  .more-menu-overlay.open { display: block; }
 }
 
 /* ===== STATUS DE RECEITAS ===== */

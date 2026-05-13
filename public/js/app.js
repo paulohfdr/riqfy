@@ -234,7 +234,6 @@ function renderTopbar() {
 function renderBottomNav(ativo) {
   function is(p) { return ativo === p ? ' active' : ''; }
   return (
-    '<div class="more-menu-overlay" id="more-overlay" onclick="toggleMore()"></div>' +
     '<div class="more-menu" id="more-menu">' +
       '<div class="more-menu-title">Mais opções</div>' +
       '<div class="more-menu-grid">' +
@@ -258,9 +257,16 @@ function renderBottomNav(ativo) {
 
 function toggleMore() {
   var menu = document.getElementById('more-menu');
-  var overlay = document.getElementById('more-overlay');
-  if (menu && overlay) {
+  if (menu) {
     menu.classList.toggle('open');
-    overlay.classList.toggle('open');
   }
 }
+
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('more-menu');
+  if (!menu || !menu.classList.contains('open')) return;
+  var btn = document.querySelector('.bottom-nav-more');
+  if (!menu.contains(e.target) && (!btn || !btn.contains(e.target))) {
+    menu.classList.remove('open');
+  }
+});
