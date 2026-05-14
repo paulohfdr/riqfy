@@ -181,7 +181,7 @@ function renderSidebar(ativo) {
   return (
     '<aside class="sidebar">' +
       '<div class="sidebar-logo">' +
-        '<img src="/img/logo_riqfy.svg" alt="RiqFy" onclick="window.open(\'https://riqfy.com.br\',\'_blank\')" style="cursor:pointer" title="riqfy.com.br">' +
+        '<a href="/dashboard"><img src="/img/logo_riqfy.svg" alt="RiqFy" style="cursor:pointer"></a>' +
       '</div>' +
       '<div onclick="window.location.href=\'/usuarios\'" style="padding:12px 16px 14px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:10px;cursor:pointer" title="Gerenciar usuários">' +
         '<div class="user-avatar" id="sidebar-avatar" style="width:36px;height:36px;font-size:14px;flex-shrink:0">?</div>' +
