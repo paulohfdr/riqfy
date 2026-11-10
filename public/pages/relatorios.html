@@ -124,18 +124,34 @@
 
 /* ===== PRINT / PDF ===== */
 .pdf-header { display: none; }
+.report-heading h2 { color: var(--texto); font-size: 20px; }
+.report-heading { margin-bottom: 18px; }
+.report-heading p { color: var(--muted); font-size: 13px; }
+@page { size: A4 landscape; margin: 14mm; }
 @media print {
-  #sidebar-root, #topbar-root, #bottom-nav-root,
-  .filter-panel, .export-wrap, .toast-container,
-  div[style*="margin-bottom:18px"] { display: none !important; }
-  body { background: #fff !important; }
-  .main { margin-left: 0 !important; }
-  .content { padding: 16px !important; }
-  .pdf-header { display: flex !important; }
-  .summary-cards { grid-template-columns: repeat(4,1fr) !important; }
-  .summary-card, .table-card { break-inside: avoid; box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
-  table { min-width: unset !important; }
-  .tfoot-total td { background: #f8fafc !important; }
+  body { --texto:#20252b; --muted:#525c67; --bg:#fff; --bg-card:#fff; --borda:#d4d8dc;
+    color-scheme:light; background:white!important; color:#20252b; display:block; font:10pt Arial,sans-serif; }
+  #sidebar-root,#topbar-root,#bottom-nav-root,.filter-panel,.table-actions,.toast-container,.report-heading,.card-icon,.si { display:none!important; }
+  body .main, body .content { display:block; width:auto; max-width:none; min-height:0; overflow:visible; margin:0!important; padding:0!important; }
+  .pdf-header { display:flex; justify-content:space-between; gap:15mm; align-items:flex-start; padding-bottom:5mm; border-bottom:2pt solid #ed762d; margin-bottom:6mm; }
+  .pdf-header h1 { font-size:22pt; line-height:1.2; margin:1mm 0 2mm; }
+  .pdf-header strong { color:#a74312; letter-spacing:.08em; }
+  #pdf-meta { text-align:right; color:#525c67; font-size:9pt; }
+  .summary-cards.cols-4 { display:grid!important; grid-template-columns:repeat(4,1fr)!important; gap:4mm; margin:0 0 6mm; }
+  body .summary-card,body .table-card { background:#fff!important; color:#20252b!important; box-shadow:none!important; min-width:0; }
+  body .summary-card { padding:3mm; border:1px solid #ced3d9; break-inside:avoid; }
+  .summary-card .card-value { font-size:15pt; color:#20252b!important; }
+  .card-sub { color:#535d65!important; max-width:none!important; white-space:normal!important; }
+  body .table-card, .table-card>div { overflow:visible!important; break-inside:auto; }
+  .table-card { border:none; } .table-header { padding:0 0 2mm; }
+  .table-card table { width:100%; min-width:0!important; table-layout:auto; }
+  .table-card th,.table-card td { padding:2mm; font-size:9pt; white-space:normal; overflow-wrap:anywhere; border-bottom:1px solid #d4d8dc; }
+  .table-card th { background:#eceff1!important; color:#343b43!important; }
+  .table-card tr:nth-child(even) td { background:#f6f7f8; }
+  .table-card td:last-child { white-space:nowrap; font-variant-numeric:tabular-nums; color:#242a30!important; }
+  .table-card .badge { padding:0; background:transparent!important; color:#374151!important; }
+  thead { display:table-header-group; } tfoot { display:table-row-group; } tr { break-inside:avoid; }
+  .tfoot-total td { border-top:2px solid #ed762d!important; }
 }
 th.sortable {
   cursor: pointer;
@@ -175,17 +191,13 @@ th.sortable:not(.asc):not(.desc) .si::after { content: '⇅'; }
   <div class="content">
 
     <!-- Cabeçalho visível apenas no PDF -->
-    <div class="pdf-header" style="align-items:flex-start;justify-content:space-between;margin-bottom:20px;padding-bottom:12px;border-bottom:2px solid #00296b">
-      <div>
-        <div style="font-size:18px;font-weight:700;color:#00296b">RiqFy — Relatório de Despesas</div>
-        <div style="font-size:12px;color:#64748b;margin-top:4px" id="pdf-periodo"></div>
-      </div>
-      <div style="text-align:right;font-size:11px;color:#94a3b8" id="pdf-meta"></div>
-    </div>
-
-    <div style="margin-bottom:18px">
-      <h2 style="font-size:18px;font-weight:700;color:#0f172a">Relatório de Despesas</h2>
-      <p style="font-size:13px;color:#64748b;margin-top:3px">Análise detalhada com filtros por período, categoria e forma de pagamento</p>
+    <header class="pdf-header">
+      <div><strong>RiqFy</strong><h1>Relatório de despesas</h1><p id="pdf-periodo"></p><p id="pdf-filtros"></p></div>
+      <div id="pdf-meta"></div>
+    </header>
+    <div class="report-heading">
+      <h2>Relatório de despesas</h2>
+      <p>Análise por período, categoria e forma de pagamento</p>
     </div>
 
     <!-- Painel de Filtros -->
@@ -332,6 +344,7 @@ th.sortable:not(.asc):not(.desc) .si::after { content: '⇅'; }
 const FORMA_LABELS = { pix:'Pix', credito:'Crédito', debito:'Débito', dinheiro:'Dinheiro', parcelado:'Parcelado' };
 const MESES_FULL   = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
+let ultimaConsulta = 0;
 let rawDesp  = [];
 let filtrados = [];
 let sortCol  = 'vencimento';
@@ -391,11 +404,10 @@ let dataFimAtiva = null;
 
 function sincronizarDateInputs(mes, ano) {
   const primeiroDia = `${ano}-${String(mes).padStart(2,'0')}-01`;
-  const ultimoDia   = new Date(ano, mes, 0).toISOString().split('T')[0];
+  const ultimoDia   = primeiroDia.slice(0, 8) + new Date(ano, mes, 0).getDate();
   document.getElementById('f-data-ini').value = primeiroDia;
   document.getElementById('f-data-fim').value = ultimoDia;
-  dataIniAtiva = primeiroDia;
-  dataFimAtiva = ultimoDia;
+
 }
 
 async function onMesAnoChange() {
@@ -428,17 +440,33 @@ async function aplicarIntervalo() {
     selAno.value = ini.getFullYear();
   }
 
-  dataIniAtiva = dataIni;
-  dataFimAtiva = dataFim;
+
   await carregar(periodos, dataIni, dataFim);
 }
 
-async function carregar(periodos, dataIni = null, dataFim = null) {
+function normalizarDespesa(d) {
+  const valor = Number(d.valor);
+  if (d.valor == null || String(d.valor).trim() === '' || !Number.isFinite(valor)) {
+    throw new Error('Foi encontrado um lançamento com valor inválido.');
+  }
+  const categoria_cor = /^#[0-9a-f]{6}$/i.test(d.categoria_cor) ? d.categoria_cor : '#64748b';
+  return { ...d, valor, categoria_cor, recorrente: Number(d.recorrente) === 1 };
+}
+
+async function carregar(periodos, dataIni = document.getElementById('f-data-ini').value,
+                        dataFim = document.getElementById('f-data-fim').value) {
+  const consulta = ++ultimaConsulta;
+  rawDesp = [];
+  dataIniAtiva = dataFimAtiva = null;
+  prepararImpressao();
+  filtrarLocal();
   try {
     const resultados = await Promise.all(
       periodos.map(p => apiFetch(`/despesas?mes=${p.mes}&ano=${p.ano}`))
     );
-    let dados = resultados.flat().filter(Boolean);
+    if (consulta !== ultimaConsulta) return;
+    if (!resultados.every(Array.isArray)) throw new Error('Não foi possível carregar todo o período.');
+    let dados = resultados.flat().map(normalizarDespesa);
 
     if (dataIni && dataFim) {
       dados = dados.filter(d => {
@@ -447,10 +475,12 @@ async function carregar(periodos, dataIni = null, dataFim = null) {
       });
     }
 
+    dataIniAtiva = dataIni;
+    dataFimAtiva = dataFim;
     rawDesp = dados;
     popularCategorias();
     filtrarLocal();
-  } catch(e) { toast(e.message, 'error'); }
+  } catch(e) { if (consulta === ultimaConsulta) toast(e.message, 'error'); }
 }
 
 function popularCategorias() {
@@ -459,8 +489,8 @@ function popularCategorias() {
   const cats = [...new Map(
     rawDesp.filter(d => d.categoria_nome).map(d => [d.categoria_nome, d.categoria_nome])
   ).values()].sort();
-  sel.innerHTML = '<option value="">Todas</option>' +
-    cats.map(c => `<option value="${c}"${c===prev?' selected':''}>${c}</option>`).join('');
+  sel.replaceChildren(new Option('Todas', ''));
+  cats.forEach(c => sel.add(new Option(c, c, false, c === prev)));
 }
 
 function filtrarLocal() {
@@ -478,10 +508,14 @@ function filtrarLocal() {
   renderTabela(filtrados);
 }
 
+function totalDoPeriodo(lista) {
+  return lista.reduce((centavos, d) => centavos + Math.round(d.valor * 100), 0) / 100;
+}
+
 function renderCards(lista) {
-  const total = lista.reduce((s, d) => s + (d.valor || 0), 0);
+  const total = totalDoPeriodo(lista);
   const qtd   = lista.length;
-  const maior = lista.reduce((m, d) => (d.valor || 0) > (m?.valor || 0) ? d : m, null);
+  const maior = lista.reduce((m, d) => (!m || d.valor > m.valor) ? d : m, null);
   const media = qtd > 0 ? total / qtd : 0;
 
   document.getElementById('cv-total').textContent      = fmtBRL(total);
@@ -501,8 +535,8 @@ function sortBy(col) {
   renderTabela(filtrados);
 }
 
-function renderTabela(lista) {
-  const sorted = [...lista].sort((a, b) => {
+function ordenar(lista) {
+  return [...lista].sort((a, b) => {
     let av = a[sortCol] ?? '';
     let bv = b[sortCol] ?? '';
     if (sortCol === 'valor')      { av = parseFloat(av) || 0; bv = parseFloat(bv) || 0; }
@@ -512,6 +546,14 @@ function renderTabela(lista) {
     return 0;
   });
 
+}
+
+function textoHTML(valor) {
+  return String(valor ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+}
+
+function renderTabela(lista) {
+  const sorted = ordenar(lista);
   const tb = document.getElementById('tbody-rel');
   const tf = document.getElementById('tfoot-rel');
 
@@ -524,12 +566,12 @@ function renderTabela(lista) {
   tb.innerHTML = sorted.map(d => `
     <tr>
       <td style="white-space:nowrap">${fmtData(d.vencimento)}</td>
-      <td style="font-weight:500">${d.descricao}</td>
+      <td style="font-weight:500">${textoHTML(d.descricao)}</td>
       <td>${d.categoria_nome
-        ? `<span class="badge" style="background:${d.categoria_cor||'#e2e8f0'}22;color:${d.categoria_cor||'#475569'}">${d.categoria_nome}</span>`
+        ? `<span class="badge" style="background:${d.categoria_cor||'#e2e8f0'}22;color:${d.categoria_cor||'#475569'}">${textoHTML(d.categoria_nome)}</span>`
         : '<span class="badge badge-gray">—</span>'
       }</td>
-      <td>${FORMA_LABELS[d.forma_pagamento] || d.forma_pagamento || '—'}</td>
+      <td>${textoHTML(FORMA_LABELS[d.forma_pagamento] || d.forma_pagamento || '—')}</td>
       <td>${d.total_parcelas > 1 ? `${d.parcela_atual}/${d.total_parcelas}` : '—'}</td>
       <td>${d.recorrente
         ? '<span class="badge badge-blue">Sim</span>'
@@ -539,7 +581,7 @@ function renderTabela(lista) {
     </tr>
   `).join('');
 
-  const total = sorted.reduce((s, d) => s + (d.valor || 0), 0);
+  const total = totalDoPeriodo(sorted);
   tf.innerHTML = `
     <tr class="tfoot-total">
       <td colspan="6" style="text-align:right;color:#64748b;font-size:11px;letter-spacing:0.04em;text-transform:uppercase;padding-right:16px">
@@ -564,21 +606,25 @@ function exportarCSV() {
   document.getElementById('export-wrap').classList.remove('open');
   if (!filtrados.length) { toast('Nenhum dado para exportar.', 'error'); return; }
   const headers = ['Data/Vencimento','Descrição','Categoria','Forma','Parcela','Recorrente','Valor'];
-  const rows = filtrados.map(d => [
+  const rows = ordenar(filtrados).map(d => [
     d.vencimento ? d.vencimento.slice(0, 10) : '',
-    `"${(d.descricao || '').replace(/"/g, '""')}"`,
-    `"${d.categoria_nome || ''}"`,
+    d.descricao || '',
+    d.categoria_nome || '',
     FORMA_LABELS[d.forma_pagamento] || d.forma_pagamento || '',
     d.total_parcelas > 1 ? `${d.parcela_atual}/${d.total_parcelas}` : '1/1',
     d.recorrente ? 'Sim' : 'Não',
-    String(d.valor || 0).replace('.', ',')
+    d.valor.toFixed(2).replace('.', ',')
   ]);
-  const csv  = [headers.join(';'), ...rows.map(r => r.join(';'))].join('\r\n');
+  const csv  = [headers.join(';'), ...rows.map(row => row.map((value, index) => {
+    let cell = String(value);
+    if (index !== 6 && /^[\s]*[=+@-]/.test(cell)) cell = "'" + cell;
+    return '"' + cell.replace(/"/g, '""') + '"';
+  }).join(';'))].join('\r\n');
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
-  a.download = 'relatorio_despesas.csv';
+  a.download = `RiqFy_despesas_${dataIniAtiva}_${dataFimAtiva}.csv`;
   a.click();
   URL.revokeObjectURL(url);
   toast('CSV exportado com sucesso!');
@@ -587,19 +633,27 @@ function exportarCSV() {
 function exportarPDF() {
   document.getElementById('export-wrap').classList.remove('open');
   if (!filtrados.length) { toast('Nenhum dado para exportar.', 'error'); return; }
-  const dataIni = document.getElementById('f-data-ini').value;
-  const dataFim = document.getElementById('f-data-fim').value;
-  const fmtDt = v => v ? v.split('-').reverse().join('/') : '';
-  const periodo = dataIni === dataFim
-    ? fmtDt(dataIni)
-    : `${fmtDt(dataIni)} a ${fmtDt(dataFim)}`;
-  document.getElementById('pdf-periodo').textContent = 'Período: ' + periodo;
-  document.getElementById('pdf-meta').innerHTML =
-    'Gerado em ' + new Date().toLocaleDateString('pt-BR') +
-    ' às ' + new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }) +
-    '<br>' + filtrados.length + ' lançamento' + (filtrados.length !== 1 ? 's' : '');
+  prepararImpressao();
   window.print();
 }
+
+function prepararImpressao() {
+  if (!document.getElementById('pdf-meta')) return;
+  if (!dataIniAtiva) {
+    for (const id of ['pdf-periodo', 'pdf-meta', 'pdf-filtros']) document.getElementById(id).textContent = '';
+    return;
+  }
+  document.getElementById('pdf-periodo').textContent =
+    fmtDataCurta(dataIniAtiva) + ' a ' + fmtDataCurta(dataFimAtiva);
+  const filtros = [['sel-cat','Categoria'], ['sel-forma','Forma'], ['sel-tipo','Tipo']]
+    .map(([id, nome]) => {
+      const sel = document.getElementById(id);
+      return sel.value ? nome + ': ' + sel.selectedOptions[0].textContent : '';
+    }).filter(Boolean);
+  document.getElementById('pdf-filtros').textContent = filtros.join(' · ');
+  document.getElementById('pdf-meta').textContent = 'Emitido em ' + new Date().toLocaleString('pt-BR');
+}
+window.addEventListener('beforeprint', prepararImpressao);
 </script>
 <div id="bottom-nav-root"></div>
 </body>
