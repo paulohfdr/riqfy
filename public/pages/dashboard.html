@@ -8,12 +8,12 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/main.css?v=28">
+<link rel="stylesheet" href="/css/main.css?v=29">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 .areceber-card {
-  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-  border: 1px solid #bbf7d0;
+  background: linear-gradient(135deg, #14231b 0%, #111a16 100%);
+  border: 1px solid #294535;
   border-radius: 14px;
   padding: 0;
   margin-bottom: 20px;
@@ -22,38 +22,39 @@
 .areceber-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 1px solid #bbf7d0;
+  border-bottom: 1px solid #294535;
 }
 .areceber-header h3 {
-  font-size: 15px; font-weight: 700; color: #166534; margin: 0;
+  font-size: 15px; font-weight: 700; color: #86efac; margin: 0;
   display: flex; align-items: center; gap: 8px;
 }
 .areceber-total {
-  font-size: 18px; font-weight: 800; color: #15803d;
+  font-size: 18px; font-weight: 800; color: #86efac;
 }
 .areceber-table { width: 100%; border-collapse: collapse; }
-.areceber-table tr { border-bottom: 1px solid #dcfce7; }
+.areceber-table tr { border-bottom: 1px solid #20372a; }
 .areceber-table tr:last-child { border-bottom: none; }
 .areceber-table td { padding: 10px 20px; font-size: 13px; }
-.areceber-table .desc { font-weight: 600; color: #1e293b; }
-.areceber-table .sub { font-size: 11px; color: #64748b; margin-top: 2px; }
-.areceber-table .val { text-align: right; color: #15803d; font-weight: 700; white-space: nowrap; }
-.areceber-empty { padding: 28px 20px; text-align: center; color: #64748b; font-size: 13px; line-height: 1.8; }
+.areceber-table .desc { font-weight: 600; color: #f3f4f6; }
+.areceber-table .sub { font-size: 11px; color: #a1a1aa; margin-top: 2px; }
+.areceber-table .val { text-align: right; color: #86efac; font-weight: 700; white-space: nowrap; }
+.areceber-empty { padding: 28px 20px; text-align: center; color: #a1a1aa; font-size: 13px; line-height: 1.8; }
 .badge-cat-rec { display:inline-block; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:600; }
 .areceber-row {
   cursor: pointer; transition: background 0.15s;
 }
-.areceber-row:hover td { background: #bbf7d050; }
-.areceber-row:hover .desc { color: #15803d; }
+.areceber-row:hover td { background: #20372a; }
+.areceber-row:hover .desc { color: #bbf7d0; }
 .areceber-row .receber-hint {
   font-size: 10px; color: #22c55e; font-weight: 600;
   opacity: 0; transition: opacity 0.15s;
 }
 .areceber-row:hover .receber-hint { opacity: 1; }
 .receber-info-dash {
-  background: #f0fdf4; border-left: 3px solid #22c55e;
+  background: #14231b; border-left: 3px solid #4ade80;
   border-radius: 10px; padding: 12px 14px; margin-bottom: 16px;
 }
+#areceber-qtd { background: #19402b !important; color: #86efac !important; }
 </style>
 </head>
 <body>
@@ -192,12 +193,16 @@
   </div>
 </div>
 
-<script src="/js/app.js?v=21"></script>
+<script src="/js/app.js?v=22"></script>
 <script>
 let chartEvolucao, chartCat, chartDonut;
 let calendarDays = {};
 let selectedCalendarDate = '';
 const _receitasMap = {};
+Chart.defaults.color = '#a1a1aa';
+Chart.defaults.borderColor = '#292e37';
+Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+Chart.defaults.scale.grid.color = 'rgba(161, 161, 170, 0.12)';
 
 (async () => {
   const u = await checkAuth();
@@ -284,9 +289,10 @@ function renderDiasCalendario(primeiroDia, quantidadeDias, ano, mes) {
     const data = `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
     const info = calendarDays[data] || { despesas: 0, receitas: 0, categorias: [] };
     const dots = [];
-    const cores = [...new Set((info.categorias || []).map(item => corSegura(item.cor)).filter(Boolean))].slice(0, 3);
-    cores.forEach(cor => dots.push(`<i class="calendar-dot" style="--dot-color:${cor}"></i>`));
-    if (Number(info.receitas) > 0) dots.push('<i class="calendar-dot income"></i>');
+    const temDespesas = Number(info.quantidadeDespesas || info.despesas) > 0;
+    const temReceitas = Number(info.quantidadeReceitas || info.receitas) > 0;
+    if (temDespesas) dots.push('<i class="calendar-dot expense" title="Há despesas neste dia"></i>');
+    if (temReceitas) dots.push('<i class="calendar-dot income" title="Há receitas recebidas neste dia"></i>');
     const title = `${dia}: despesas ${fmtBRL(info.despesas)}, receitas ${fmtBRL(info.receitas)}`;
     blocos.push(`<button type="button" class="calendar-day${data === selectedCalendarDate ? ' selected' : ''}${data === dataHojeLocal() ? ' today' : ''}" data-date="${data}" aria-pressed="${data === selectedCalendarDate}" aria-label="${escapeCalendarText(title)}" title="${escapeCalendarText(title)}" onclick="selecionarDiaCalendario('${data}')">
       <span class="calendar-day-number">${dia}</span>
@@ -342,7 +348,6 @@ function renderTransacoesCalendario(despesas, receitas) {
   }).join('');
 }
 
-function corSegura(cor) { return /^#[0-9a-f]{3,8}$/i.test(String(cor || '')) ? cor : '#ef4444'; }
 function escapeCalendarText(valor) {
   return String(valor ?? '').replace(/[&<>"']/g, caractere => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[caractere]);
 }
@@ -430,8 +435,8 @@ function renderEvolucao(rec, desp) {
     data: {
       labels,
       datasets: [
-        { label: 'Receitas', data: recArr, borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.1)', tension: 0.4, fill: true },
-        { label: 'Despesas', data: despArr, borderColor: '#dc2626', backgroundColor: 'rgba(220,38,38,0.06)', tension: 0.4, fill: true }
+        { label: 'Receitas', data: recArr, borderColor: '#4ade80', backgroundColor: 'rgba(34,197,94,0.12)', tension: 0.4, fill: true },
+        { label: 'Despesas', data: despArr, borderColor: '#fb7185', backgroundColor: 'rgba(244,63,94,0.08)', tension: 0.4, fill: true }
       ]
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, scales: { y: { beginAtZero: true, ticks: { callback: v => 'R$' + v.toLocaleString('pt-BR') } } } }
@@ -456,7 +461,7 @@ function renderDonut(rec, desp) {
     type: 'doughnut',
     data: {
       labels: ['Receitas', 'Despesas'],
-      datasets: [{ data: [rec, desp], backgroundColor: ['#22c55e', '#ef4444'], borderWidth: 0 }]
+      datasets: [{ data: [rec, desp], backgroundColor: ['#4ade80', '#fb7185'], borderColor: '#13161b', borderWidth: 3 }]
     },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } }, cutout: '65%' }
   });
