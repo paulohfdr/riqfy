@@ -10,36 +10,36 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body { font-family:'DM Sans',sans-serif; min-height:100vh; background:#00296b; display:flex; align-items:center; justify-content:center; padding:20px; }
-.card { background:#fff; border-radius:20px; width:100%; max-width:480px; padding:40px; box-shadow:0 25px 60px rgba(0,0,0,0.4); }
+body { font-family:'Plus Jakarta Sans',sans-serif; min-height:100vh; background:#0b0d10; display:flex; align-items:center; justify-content:center; padding:20px; }
+.card { background:#13161b; border:1px solid #292e37; border-radius:20px; width:100%; max-width:480px; padding:40px; box-shadow:0 25px 60px rgba(0,0,0,0.4); }
 .logo { text-align:center; margin-bottom:28px; }
-.logo img { height:56px; width:auto; }
-h1 { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; color:#00296b; text-align:center; margin-bottom:6px; }
-.subtitle { font-size:13px; color:#64748b; text-align:center; margin-bottom:28px; }
+.logo img { height:64px; width:auto; }
+h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:22px; font-weight:800; color:#f3f4f6; text-align:center; margin-bottom:6px; }
+.subtitle { font-size:13px; color:#a1a1aa; text-align:center; margin-bottom:28px; }
 .form-group { margin-bottom:16px; }
-.form-group label { display:block; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#374151; margin-bottom:6px; }
-.form-group input { width:100%; padding:11px 14px; border:1.5px solid #d1d5db; border-radius:10px; font-family:'DM Sans',sans-serif; font-size:14px; color:#1e293b; background:#fff; outline:none; transition:all 0.2s; }
-.form-group input:focus { border-color:#00296b; box-shadow:0 0 0 3px rgba(0,41,107,0.08); }
-.divider { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#94a3b8; text-align:center; margin:20px 0 16px; position:relative; }
-.divider::before,.divider::after { content:''; position:absolute; top:50%; width:38%; height:1px; background:#e2e8f0; }
+.form-group label { display:block; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:#d1d5db; margin-bottom:6px; }
+.form-group input { width:100%; padding:11px 14px; border:1.5px solid #343a46; border-radius:10px; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; color:#f3f4f6; background:#191d24; outline:none; transition:all 0.2s; }
+.form-group input:focus { border-color:#fe6402; box-shadow:0 0 0 3px rgba(254,100,2,0.14); }
+.divider { font-size:10px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#a1a1aa; text-align:center; margin:20px 0 16px; position:relative; }
+.divider::before,.divider::after { content:''; position:absolute; top:50%; width:38%; height:1px; background:#292e37; }
 .divider::before { left:0; } .divider::after { right:0; }
-.btn { width:100%; background:#00296b; color:#fff; border:none; padding:14px; border-radius:50px; font-family:'Syne',sans-serif; font-size:14px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer; margin-top:8px; transition:all 0.2s; }
-.btn:hover { background:#003580; transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,41,107,0.3); }
+.btn { width:100%; background:#fe6402; color:#fff; border:none; padding:14px; border-radius:12px; font-family:'Plus Jakarta Sans',sans-serif; font-size:14px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; cursor:pointer; margin-top:8px; transition:all 0.2s; }
+.btn:hover { background:#e85b00; transform:translateY(-2px); box-shadow:0 8px 24px rgba(254,100,2,0.25); }
 .btn:disabled { opacity:0.6; cursor:not-allowed; transform:none; box-shadow:none; }
-.error-msg { background:#fee2e2; color:#991b1b; padding:10px 14px; border-radius:10px; font-size:13px; margin-bottom:16px; display:none; border:1px solid #fca5a5; }
-.success-msg { background:#dcfce7; color:#166534; padding:16px; border-radius:10px; font-size:14px; margin-bottom:16px; display:none; border:1px solid #86efac; text-align:center; }
-.slug-preview { font-size:12px; color:#64748b; margin-top:4px; }
-.slug-preview span { font-family:monospace; background:#f1f5f9; padding:2px 6px; border-radius:4px; color:#00296b; font-weight:600; }
-.login-link { text-align:center; margin-top:20px; font-size:13px; color:#64748b; }
-.login-link a { color:#00296b; font-weight:600; text-decoration:none; }
-.plano-badge { display:inline-flex; align-items:center; gap:6px; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:8px 14px; font-size:12px; color:#166534; margin-bottom:20px; width:100%; }
-.plano-badge strong { color:#166534; }
+ .error-msg { background:rgba(244,63,94,.14); color:#fda4af; padding:10px 14px; border-radius:10px; font-size:13px; margin-bottom:16px; display:none; border:1px solid rgba(251,113,133,.32); }
+ .success-msg { background:rgba(34,197,94,.14); color:#86efac; padding:16px; border-radius:10px; font-size:14px; margin-bottom:16px; display:none; border:1px solid rgba(74,222,128,.28); text-align:center; }
+ .slug-preview { font-size:12px; color:#a1a1aa; margin-top:4px; }
+ .slug-preview span { font-family:monospace; background:#191d24; padding:2px 6px; border-radius:4px; color:#fdba74; font-weight:600; }
+.login-link { text-align:center; margin-top:20px; font-size:13px; color:#a1a1aa; }
+ .login-link a { color:#ff8a45; font-weight:600; text-decoration:none; }
+ .plano-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(34,197,94,.12); border:1px solid rgba(74,222,128,.28); border-radius:8px; padding:8px 14px; font-size:12px; color:#86efac; margin-bottom:20px; width:100%; }
+.plano-badge strong { color:#86efac; }
 </style>
 </head>
 <body>
 <div class="card">
   <div class="logo">
-    <img src="/img/logo_login.svg" alt="RiqFy">
+    <img src="/img/logo_riqfy_noturno.svg" alt="RiqFy">
   </div>
   <h1>Criar conta gratuita</h1>
   <p class="subtitle">Comece a controlar suas finanças agora mesmo</p>
