@@ -13,6 +13,8 @@
 <style>
 .calendar-day.holiday .calendar-day-number, .calendar-holiday-label { color:#ff858e; }
 .calendar-holiday-label { font-size:12px; font-weight:600; }
+.calendar-month-holidays:not(:empty) { flex-basis:100%; display:flex; flex-wrap:wrap; gap:6px 18px; }
+.calendar-month-holidays:empty { display:none; }
 
 .areceber-card {
   background: linear-gradient(135deg, #14231b 0%, #111a16 100%);
@@ -136,7 +138,7 @@
           </div>
           <div class="calendar-days" id="calendar-days" role="group" aria-label="Dias do mês"></div>
           <div class="calendar-legend">
-            <span><b class="calendar-holiday-label" aria-hidden="true">15</b> Feriado nacional</span>
+            <div id="calendar-month-holidays" class="calendar-month-holidays" role="list" aria-label="Feriados nacionais do mês"></div>
             <span><i class="calendar-legend-dot expense"></i> Despesas</span>
             <span><i class="calendar-legend-dot income"></i> Receitas recebidas</span>
           </div>
@@ -316,6 +318,12 @@ function feriadosNacionais(ano) {
 
 function renderDiasCalendario(primeiroDia, quantidadeDias, ano, mes) {
   const feriados = feriadosNacionais(Number(ano));
+  const mesLegenda = String(mes).padStart(2, '0');
+  document.getElementById('calendar-month-holidays').innerHTML = Object.keys(feriados)
+    .filter(chave => chave.startsWith(mesLegenda + '-'))
+    .sort()
+    .map(chave => `<span role="listitem"><b class="calendar-holiday-label">${chave.slice(3)}/${mesLegenda}</b> ${escapeCalendarText(feriados[chave])}</span>`)
+    .join('');
   const grid = document.getElementById('calendar-days');
   const blocos = Array(primeiroDia).fill('<span class="calendar-day-placeholder" aria-hidden="true"></span>');
   for (let dia = 1; dia <= quantidadeDias; dia++) {
