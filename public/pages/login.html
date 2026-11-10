@@ -54,32 +54,35 @@ body {
   border-radius: 12px;
   background: #18191d;
 }
-.ribbons {
-  position: absolute;
-  z-index: -1;
-  top: 31%;
-  left: -22%;
-  width: 158%;
-  height: 80%;
-  transform: rotate(-32deg);
+.ledger {
+  margin: 26px 0 0; padding: 18px; border: 1px solid #49413b;
+  border-top: 3px solid #ff853b; border-radius: 12px;
+  background: #1c2026; box-shadow: 0 12px 32px #0005;
 }
-.ribbons i {
-  position: absolute;
-  inset: 0;
-  border: clamp(13px, 2vw, 25px) solid #ff852f;
-  border-radius: 50%;
-  transform: translateY(calc(var(--layer) * 14px));
-  background: transparent;
-  box-shadow: inset 0 2px 4px #0008, 0 2px 2px #0005;
-  border-color: #ffb16b #fb7c2c #ad4218 #ec6820;
+.ledger figcaption { font-size: 15px; font-weight: 700; color: #f6f1eb; }
+.month { margin: 2px 0 12px; color: #c1b7af; font-size: 12px; }
+.days { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 2px; font-variant-numeric: tabular-nums; }
+.days small { color: #aeb3bc; font-size: 10px; }
+.days span { position: relative; line-height: 28px; font-size: 12px; border-radius: 5px; }
+.days .income, .days .expense { background: #282d34; }
+.days .income::after, .days .expense::after, .key i::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--marker);
 }
+.days span::after { position: absolute; bottom: 2px; left: calc(50% - 2.5px); }
+.income { --marker: #65dca1; } .expense { --marker: #ff8496; }
+.key { display: flex; gap: 15px; padding-top: 12px; margin-top: 9px; border-top: 1px solid #353940; }
+.key i { display: flex; align-items: center; gap: 5px; font-style: normal; font-size: 11px; color: #c6cbd1; }
 .form-panel { align-self: center; padding: clamp(28px, 4vw, 52px); }
 @media (max-width: 680px) {
   .login-card { grid-template-columns: 1fr; max-width: 440px; }
   .brand { min-height: 96px; padding: 16px 24px; border: 0; border-bottom: 1px solid #434044; }
   .logo { width: 96px; }
-  .ribbons { width: 68%; height: 132px; top: -32px; left: 52%; }
-  .ribbons i { border-width: 9px; transform: translateY(calc(var(--layer) * 6px)); }
+  .brand { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .ledger { margin: 0; padding: 8px 12px; }
+  .ledger figcaption { font-size: 12px; }
+  .ledger .month, .ledger .days { display: none; }
+  .key { margin-top: 3px; padding: 0; border: 0; gap: 8px; }
+  .logo { max-width: 26%; }
   .form-panel { padding: 28px 24px 32px; }
 }
 h1 { margin: 0 0 22px; font-size: clamp(24px, 5vw, 30px); line-height: 1.2; letter-spacing: -.035em; }
@@ -110,10 +113,20 @@ button:disabled { opacity: .75; cursor: wait; }
 <body>
 <main class="login-card">
   <div class="brand">
-    <div class="ribbons" aria-hidden="true">
-      <i style="--layer:4"></i><i style="--layer:3"></i><i style="--layer:2"></i><i style="--layer:1"></i><i style="--layer:0"></i>
-    </div>
     <img class="logo" src="/img/logo_riqfy_noturno.svg" alt="RiqFy">
+    <figure class="ledger" role="img" aria-label="Ilustração do calendário financeiro com dias de receitas e despesas">
+      <figcaption>Calendário financeiro</figcaption>
+      <p class="month">Novembro · 2026</p>
+      <div class="days" aria-hidden="true">
+        <small>D</small><small>S</small><small>T</small><small>Q</small><small>Q</small><small>S</small><small>S</small>
+        <span>1</span><span>2</span><span>3</span><span class="expense">4</span><span>5</span><span class="income">6</span><span>7</span>
+        <span>8</span><span>9</span><span>10</span><span class="expense">11</span><span>12</span><span>13</span><span>14</span>
+        <span>15</span><span>16</span><span class="expense">17</span><span>18</span><span>19</span><span class="income">20</span><span>21</span>
+        <span>22</span><span>23</span><span class="expense">24</span><span>25</span><span>26</span><span>27</span><span>28</span>
+        <span>29</span><span>30</span>
+      </div>
+      <div class="key"><i class="income">Receitas</i><i class="expense">Despesas</i></div>
+    </figure>
   </div>
   <div class="form-panel">
   <h1 id="titulo">Entrar na sua conta</h1>
