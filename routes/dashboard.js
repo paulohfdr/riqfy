@@ -5,6 +5,94 @@ const { authMiddleware } = require('../middleware/auth');
 
 router.use(authMiddleware);
 
+router.get('/calendario', async (req, res) => {
+  try {
+    const db = await getDb(req.tenantSlug);
+    const mes = Number(req.query.mes) || new Date().getMonth() + 1;
+    const ano = Number(req.query.ano) || new Date().getFullYear();
+    if (!Number.isInteger(mes) || mes < 1 || mes > 12 || !Number.isInteger(ano) || ano < 2000 || ano > 2100) {
+      return res.status(400).json({ erro: 'Mês ou ano inválido' });
+    }
+
+    const inicio = `${ano}-${String(mes).padStart(2, '0')}-01`;
+    const proximoMes = new Date(Date.UTC(ano, mes, 1));
+    const fim = `${proximoMes.getUTCFullYear()}-${String(proximoMes.getUTCMonth() + 1).padStart(2, '0')}-01`;
+    const dataSelecionada = req.query.data;
+
+    if (dataSelecionada) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dataSelecionada) || dataSelecionada < inicio || dataSelecionada >= fim) {
+        return res.status(400).json({ erro: 'Data inválida para o mês selecionado' });
+      }
+      const dataValida = new Date(`${dataSelecionada}T00:00:00Z`);
+      if (Number.isNaN(dataValida.getTime()) || dataValida.toISOString().slice(0, 10) !== dataSelecionada) {
+        return res.status(400).json({ erro: 'Data inválida para o mês selecionado' });
+      }
+
+      const [despesas, receitas] = await Promise.all([
+        db.all(
+          `SELECT d.id, d.descricao, d.valor, DATE_FORMAT(d.vencimento, '%Y-%m-%d') AS data,
+                  c.nome AS categoria_nome, c.cor AS categoria_cor
+           FROM despesas d LEFT JOIN categorias c ON d.categoria_id = c.id
+           WHERE d.tenant_id = ? AND d.vencimento = ?
+           ORDER BY d.criado_em DESC, d.id DESC`,
+          [db.tenantId, dataSelecionada]
+        ),
+        db.all(
+          `SELECT r.id, r.descricao, r.valor, DATE_FORMAT(r.data_recebimento, '%Y-%m-%d') AS data,
+                  c.nome AS categoria_nome, c.cor AS categoria_cor
+           FROM receitas r LEFT JOIN categorias c ON r.categoria_id = c.id
+           WHERE r.tenant_id = ? AND r.status = 'recebida' AND r.data_recebimento = ?
+           ORDER BY r.criado_em DESC, r.id DESC`,
+          [db.tenantId, dataSelecionada]
+        )
+      ]);
+
+      return res.json({ data: dataSelecionada, despesas, receitas });
+    }
+
+    const [despesasPorDia, receitasPorDia] = await Promise.all([
+      db.all(
+        `SELECT DATE_FORMAT(d.vencimento, '%Y-%m-%d') AS data, c.nome AS categoria_nome,
+                c.cor AS categoria_cor, COALESCE(SUM(d.valor), 0) AS total, COUNT(*) AS quantidade
+         FROM despesas d LEFT JOIN categorias c ON d.categoria_id = c.id
+         WHERE d.tenant_id = ? AND d.vencimento >= ? AND d.vencimento < ?
+         GROUP BY d.vencimento, c.nome, c.cor
+         ORDER BY data`,
+        [db.tenantId, inicio, fim]
+      ),
+      db.all(
+        `SELECT DATE_FORMAT(r.data_recebimento, '%Y-%m-%d') AS data,
+                COALESCE(SUM(r.valor), 0) AS total, COUNT(*) AS quantidade
+         FROM receitas r
+         WHERE r.tenant_id = ? AND r.status = 'recebida' AND r.data_recebimento >= ? AND r.data_recebimento < ?
+         GROUP BY r.data_recebimento
+         ORDER BY data`,
+        [db.tenantId, inicio, fim]
+      )
+    ]);
+
+    const dias = {};
+    for (const item of despesasPorDia) {
+      const dia = dias[item.data] || (dias[item.data] = { despesas: 0, receitas: 0, quantidadeDespesas: 0, quantidadeReceitas: 0, categorias: [] });
+      dia.despesas += Number(item.total || 0);
+      dia.quantidadeDespesas += Number(item.quantidade || 0);
+      if (item.categoria_nome) {
+        dia.categorias.push({ nome: item.categoria_nome, cor: item.categoria_cor || '#ef4444' });
+      }
+    }
+    for (const item of receitasPorDia) {
+      const dia = dias[item.data] || (dias[item.data] = { despesas: 0, receitas: 0, quantidadeDespesas: 0, quantidadeReceitas: 0, categorias: [] });
+      dia.receitas = Number(item.total || 0);
+      dia.quantidadeReceitas = Number(item.quantidade || 0);
+    }
+
+    res.json({ dias });
+  } catch (e) {
+    console.error('Erro no calendário financeiro:', e);
+    res.status(500).json({ erro: e.message });
+  }
+});
+
 router.get('/', async (req, res) => {
   try {
     const db = await getDb(req.tenantSlug);

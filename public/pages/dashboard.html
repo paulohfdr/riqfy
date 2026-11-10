@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/main.css?v=27">
+<link rel="stylesheet" href="/css/main.css?v=28">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 .areceber-card {
@@ -74,6 +74,47 @@
       <div class="summary-card"><div class="card-icon yellow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></div><div><div class="card-label">Parcelas</div><div class="card-value" id="cv-parcelas">—</div></div></div>
       <div class="summary-card"><div class="card-icon purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg></div><div><div class="card-label">Recorrências</div><div class="card-value" id="cv-recorrencias">—</div></div></div>
     </div>
+
+    <section class="finance-calendar" aria-labelledby="calendar-title">
+      <div class="finance-calendar-header">
+        <div>
+          <p class="calendar-eyebrow">Acompanhe seus lançamentos</p>
+          <h2 id="calendar-title">Calendário financeiro</h2>
+        </div>
+        <div class="calendar-month-controls" aria-label="Navegar entre meses">
+          <button class="calendar-nav" type="button" aria-label="Mês anterior" onclick="mudarMesCalendario(-1)">‹</button>
+          <span id="calendar-month-label" aria-live="polite">—</span>
+          <button class="calendar-nav" type="button" aria-label="Próximo mês" onclick="mudarMesCalendario(1)">›</button>
+        </div>
+      </div>
+      <div class="finance-calendar-body">
+        <div class="calendar-main">
+          <div class="calendar-weekdays" aria-hidden="true">
+            <span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span>
+          </div>
+          <div class="calendar-days" id="calendar-days" role="group" aria-label="Dias do mês"></div>
+          <div class="calendar-legend">
+            <span><i class="calendar-legend-dot expense"></i> Despesas</span>
+            <span><i class="calendar-legend-dot income"></i> Receitas recebidas</span>
+          </div>
+        </div>
+        <aside class="calendar-details" aria-live="polite" aria-label="Lançamentos da data selecionada">
+          <div class="calendar-detail-heading">
+            <div>
+              <p class="calendar-eyebrow">Resumo do dia</p>
+              <h3 id="calendar-selected-label">Selecione uma data</h3>
+            </div>
+          </div>
+          <div class="calendar-day-totals">
+            <div class="calendar-total expense"><span>Despesas</span><strong id="calendar-day-expenses">R$ 0,00</strong></div>
+            <div class="calendar-total income"><span>Receitas</span><strong id="calendar-day-income">R$ 0,00</strong></div>
+          </div>
+          <div id="calendar-transactions" class="calendar-transactions">
+            <div class="calendar-empty">Carregando lançamentos…</div>
+          </div>
+        </aside>
+      </div>
+    </section>
 
     <!-- Seção A Receber — aparece só quando há pendentes -->
     <div id="section-areceber" style="display:none">
@@ -154,6 +195,8 @@
 <script src="/js/app.js?v=21"></script>
 <script>
 let chartEvolucao, chartCat, chartDonut;
+let calendarDays = {};
+let selectedCalendarDate = '';
 const _receitasMap = {};
 
 (async () => {
@@ -188,7 +231,128 @@ async function carregar() {
     renderDonut(d.receitas, d.despesas);
     renderProximas(d.proximasContas);
     renderLancamentos(d.ultimosLancamentos);
+    await carregarCalendario(mes, ano);
   } catch(e) { toast(e.message, 'error'); }
+}
+
+function mudarMesCalendario(delta) {
+  const mesEl = document.getElementById('sel-mes');
+  const anoEl = document.getElementById('sel-ano');
+  const data = new Date(Number(anoEl.value), Number(mesEl.value) - 1 + delta, 1);
+  const ano = data.getFullYear();
+  if (![...anoEl.options].some(option => Number(option.value) === ano)) {
+    const option = document.createElement('option');
+    option.value = String(ano);
+    option.textContent = String(ano);
+    anoEl.add(option);
+  }
+  mesEl.value = String(data.getMonth() + 1);
+  anoEl.value = String(ano);
+  carregar();
+}
+
+async function carregarCalendario(mes, ano) {
+  const params = new URLSearchParams({ mes, ano });
+  const resposta = await apiFetch(`/dashboard/calendario?${params}`);
+  if (!resposta) return;
+  calendarDays = resposta.dias || {};
+
+  const mesAtual = Number(mes) - 1;
+  const primeiroDia = new Date(Number(ano), mesAtual, 1).getDay();
+  const quantidadeDias = new Date(Number(ano), mesAtual + 1, 0).getDate();
+  document.getElementById('calendar-month-label').textContent = new Intl.DateTimeFormat('pt-BR', {
+    month: 'long', year: 'numeric'
+  }).format(new Date(Number(ano), mesAtual, 1));
+
+  if (!selectedCalendarDate || !selectedCalendarDate.startsWith(`${ano}-${String(mes).padStart(2, '0')}-`)) {
+    const hoje = new Date();
+    const hojeIso = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+    const diasComLancamentos = Object.keys(calendarDays).sort();
+    selectedCalendarDate = hoje.getFullYear() === Number(ano) && hoje.getMonth() === mesAtual
+      ? hojeIso
+      : (diasComLancamentos[0] || `${ano}-${String(mes).padStart(2, '0')}-01`);
+  }
+
+  renderDiasCalendario(primeiroDia, quantidadeDias, ano, mes);
+  await carregarDetalheCalendario(selectedCalendarDate, false);
+}
+
+function renderDiasCalendario(primeiroDia, quantidadeDias, ano, mes) {
+  const grid = document.getElementById('calendar-days');
+  const blocos = Array(primeiroDia).fill('<span class="calendar-day-placeholder" aria-hidden="true"></span>');
+  for (let dia = 1; dia <= quantidadeDias; dia++) {
+    const data = `${ano}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+    const info = calendarDays[data] || { despesas: 0, receitas: 0, categorias: [] };
+    const dots = [];
+    const cores = [...new Set((info.categorias || []).map(item => corSegura(item.cor)).filter(Boolean))].slice(0, 3);
+    cores.forEach(cor => dots.push(`<i class="calendar-dot" style="--dot-color:${cor}"></i>`));
+    if (Number(info.receitas) > 0) dots.push('<i class="calendar-dot income"></i>');
+    const title = `${dia}: despesas ${fmtBRL(info.despesas)}, receitas ${fmtBRL(info.receitas)}`;
+    blocos.push(`<button type="button" class="calendar-day${data === selectedCalendarDate ? ' selected' : ''}${data === dataHojeLocal() ? ' today' : ''}" data-date="${data}" aria-pressed="${data === selectedCalendarDate}" aria-label="${escapeCalendarText(title)}" title="${escapeCalendarText(title)}" onclick="selecionarDiaCalendario('${data}')">
+      <span class="calendar-day-number">${dia}</span>
+      <span class="calendar-day-dots" aria-hidden="true">${dots.join('')}</span>
+      <span class="calendar-day-amount">${Number(info.despesas) > 0 ? fmtValorCompacto(info.despesas) : ''}</span>
+    </button>`);
+  }
+  while (blocos.length % 7 !== 0) blocos.push('<span class="calendar-day-placeholder" aria-hidden="true"></span>');
+  grid.innerHTML = blocos.join('');
+}
+
+function selecionarDiaCalendario(data) {
+  selectedCalendarDate = data;
+  const [ano, mes] = data.split('-');
+  renderDiasCalendario(new Date(Number(ano), Number(mes) - 1, 1).getDay(), new Date(Number(ano), Number(mes), 0).getDate(), ano, mes);
+  carregarDetalheCalendario(data, true);
+}
+
+async function carregarDetalheCalendario(data, mostrarErro = true) {
+  const [ano, mes] = data.split('-');
+  document.getElementById('calendar-selected-label').textContent = new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long', day: 'numeric', month: 'long'
+  }).format(new Date(`${data}T12:00:00`));
+  document.getElementById('calendar-transactions').innerHTML = '<div class="calendar-empty">Carregando lançamentos…</div>';
+  try {
+    const params = new URLSearchParams({ mes, ano, data });
+    const detalhe = await apiFetch(`/dashboard/calendario?${params}`);
+    if (!detalhe) return;
+    const despesaTotal = detalhe.despesas.reduce((total, item) => total + Number(item.valor || 0), 0);
+    const receitaTotal = detalhe.receitas.reduce((total, item) => total + Number(item.valor || 0), 0);
+    document.getElementById('calendar-day-expenses').textContent = fmtBRL(despesaTotal);
+    document.getElementById('calendar-day-income').textContent = fmtBRL(receitaTotal);
+    document.getElementById('calendar-transactions').innerHTML = renderTransacoesCalendario(detalhe.despesas, detalhe.receitas);
+  } catch (e) {
+    document.getElementById('calendar-transactions').innerHTML = '<div class="calendar-empty">Não foi possível carregar os lançamentos.</div>';
+    if (mostrarErro) toast(e.message, 'error');
+  }
+}
+
+function renderTransacoesCalendario(despesas, receitas) {
+  const linhas = [
+    ...despesas.map(item => ({ ...item, tipo: 'despesa' })),
+    ...receitas.map(item => ({ ...item, tipo: 'receita' }))
+  ].sort((a, b) => String(a.descricao).localeCompare(String(b.descricao), 'pt-BR'));
+  if (!linhas.length) return '<div class="calendar-empty"><span class="calendar-empty-icon">＋</span><strong>Nenhum lançamento neste dia</strong><span>Os registros dessa data aparecerão aqui.</span></div>';
+  return `<div class="calendar-list-heading">${linhas.length} ${linhas.length === 1 ? 'lançamento' : 'lançamentos'}</div>` + linhas.map(item => {
+    const despesa = item.tipo === 'despesa';
+    return `<div class="calendar-transaction ${despesa ? 'expense' : 'income'}">
+      <span class="calendar-transaction-icon" aria-hidden="true">${despesa ? '−' : '+'}</span>
+      <span class="calendar-transaction-copy"><strong>${escapeCalendarText(item.descricao)}</strong><small>${escapeCalendarText(item.categoria_nome || (despesa ? 'Despesa' : 'Receita'))}</small></span>
+      <strong class="calendar-transaction-value">${despesa ? '−' : '+'} ${fmtBRL(item.valor)}</strong>
+    </div>`;
+  }).join('');
+}
+
+function corSegura(cor) { return /^#[0-9a-f]{3,8}$/i.test(String(cor || '')) ? cor : '#ef4444'; }
+function escapeCalendarText(valor) {
+  return String(valor ?? '').replace(/[&<>"']/g, caractere => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[caractere]);
+}
+function dataHojeLocal() {
+  const hoje = new Date();
+  return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+}
+function fmtValorCompacto(valor) {
+  const n = Number(valor) || 0;
+  return n >= 1000 ? `R$ ${(n / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} mil` : `R$ ${n.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}`;
 }
 
 function renderAReceber(lista, total) {
