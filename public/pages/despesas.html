@@ -199,6 +199,10 @@ let escopoId = null; // usado apenas no fluxo de excluir parcelada
   const sel = document.getElementById('f-categoria');
   cats.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
   preencherFiltroMesAno('sel-mes', 'sel-ano', carregar);
+  if (location.hash === '#novo') {
+    history.replaceState(null, '', location.pathname + location.search);
+    abrirModal();
+  }
 
   document.getElementById('f-forma').addEventListener('change', function() {
     const gp = document.getElementById('grupo-parcelas');

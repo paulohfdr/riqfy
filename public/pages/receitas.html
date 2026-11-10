@@ -232,6 +232,10 @@ let dadosCarregados = { receitas_recebidas: [], receitas_pendentes: [] };
   const sel = document.getElementById('f-categoria');
   categorias.forEach(c => sel.innerHTML += `<option value="${c.id}">${esc(c.nome)}</option>`);
   preencherFiltroMesAno('sel-mes', 'sel-ano', carregar);
+  if (location.hash === '#novo') {
+    history.replaceState(null, '', location.pathname + location.search);
+    abrirModal();
+  }
 })();
 
 function esc(s) {

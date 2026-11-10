@@ -134,9 +134,10 @@ router.get('/', async (req, res) => {
     );
 
     const proximasContas = await db.all(
-      `SELECT d.*, DATE_FORMAT(d.vencimento, '%Y-%m-%d') as vencimento, c.nome as categoria_nome FROM despesas d
+      `SELECT DATEDIFF(d.vencimento, CURRENT_DATE) AS dias_ate, d.id, d.descricao, d.valor, DATE_FORMAT(d.vencimento, '%Y-%m-%d') as vencimento, c.nome as categoria_nome FROM despesas d
        LEFT JOIN categorias c ON d.categoria_id = c.id
-       WHERE d.tenant_id=? ORDER BY d.vencimento ASC LIMIT 5`,
+       WHERE d.tenant_id=? AND d.vencimento BETWEEN CURRENT_DATE AND DATE_ADD(CURRENT_DATE, INTERVAL 7 DAY)
+       ORDER BY d.vencimento ASC, d.id ASC`,
       [tid]
     );
 

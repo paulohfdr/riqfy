@@ -55,6 +55,9 @@
   border-radius: 10px; padding: 12px 14px; margin-bottom: 16px;
 }
 #areceber-qtd { background: #19402b !important; color: #86efac !important; }
+.acoes-dashboard { display:flex; gap:8px; margin-left:auto; flex-wrap:wrap; }
+.acoes-dashboard a { text-decoration:none; min-height:44px; align-items:center; color:#170d06 !important; }
+@media(max-width:600px){ .acoes-dashboard { width:100%; } .acoes-dashboard a { flex:1; justify-content:center; } }
 </style>
 </head>
 <body>
@@ -66,6 +69,10 @@
       <label>Mês e ano</label>
       <select id="sel-mes" onchange="carregar()"></select>
       <select id="sel-ano" onchange="carregar()"></select>
+      <nav class="acoes-dashboard" aria-label="Novo lançamento">
+        <a class="btn btn-primary" href="/receitas#novo">+ Receita</a>
+        <a class="btn btn-primary" href="/despesas#novo">+ Despesa</a>
+      </nav>
     </div>
 
     <div class="summary-cards cols-5" id="cards-resumo">
@@ -129,8 +136,8 @@
             </div>
           </div>
           <div class="calendar-day-totals">
-            <div class="calendar-total expense"><span>Despesas</span><strong id="calendar-day-expenses">R$ 0,00</strong></div>
-            <div class="calendar-total income"><span>Receitas</span><strong id="calendar-day-income">R$ 0,00</strong></div>
+            <div class="calendar-total expense"><span>Despesas com vencimento no dia</span><strong id="calendar-day-expenses">R$ 0,00</strong></div>
+            <div class="calendar-total income"><span>Receitas recebidas no dia</span><strong id="calendar-day-income">R$ 0,00</strong></div>
           </div>
           <div id="calendar-transactions" class="calendar-transactions">
             <div class="calendar-empty">Carregando lançamentos…</div>
@@ -157,7 +164,7 @@
 
     <div class="chart-grid" style="margin-top:0">
       <div class="table-card">
-        <div class="table-header"><h3>Próximas Contas</h3></div>
+        <div class="table-header"><h3>Próximas contas · Hoje e próximos 7 dias</h3></div>
         <table>
           <tbody id="tbody-proximas"></tbody>
         </table>
@@ -320,7 +327,7 @@ async function carregarDetalheCalendario(data, mostrarErro = true) {
   try {
     const params = new URLSearchParams({ mes, ano, data });
     const detalhe = await apiFetch(`/dashboard/calendario?${params}`);
-    if (!detalhe) return;
+    if (!detalhe || data !== selectedCalendarDate) return;
     const despesaTotal = detalhe.despesas.reduce((total, item) => total + Number(item.valor || 0), 0);
     const receitaTotal = detalhe.receitas.reduce((total, item) => total + Number(item.valor || 0), 0);
     document.getElementById('calendar-day-expenses').textContent = fmtBRL(despesaTotal);
@@ -469,10 +476,10 @@ function renderDonut(rec, desp) {
 
 function renderProximas(lista) {
   const tb = document.getElementById('tbody-proximas');
-  if (!lista.length) { tb.innerHTML = '<tr><td style="text-align:center;color:#94a3b8;padding:20px">Nenhuma conta próxima</td></tr>'; return; }
+  if (!lista.length) { tb.innerHTML = '<tr><td style="text-align:center;color:#94a3b8;padding:20px">Nenhuma conta com vencimento nesse período</td></tr>'; return; }
   tb.innerHTML = lista.map(d => `
     <tr>
-      <td><div style="font-weight:500">${d.descricao}</div><div style="font-size:12px;color:#64748b">${fmtDataCurta(d.vencimento)}</div></td>
+      <td><div style="font-weight:500">${escapeCalendarText(d.descricao)}</div><div style="font-size:12px;color:var(--muted)">${Number(d.dias_ate) === 0 ? "Hoje · " : Number(d.dias_ate) === 1 ? "Amanhã · " : ""}${fmtDataCurta(d.vencimento)}</div></td>
       <td style="text-align:right;color:#dc2626;font-weight:600">${fmtBRL(d.valor)}</td>
     </tr>
   `).join('');
