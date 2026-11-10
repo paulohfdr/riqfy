@@ -58,6 +58,13 @@
 .acoes-dashboard { display:flex; gap:8px; margin-left:auto; flex-wrap:wrap; }
 .acoes-dashboard a { text-decoration:none; min-height:44px; align-items:center; color:#170d06 !important; }
 @media(max-width:600px){ .acoes-dashboard { width:100%; } .acoes-dashboard a { flex:1; justify-content:center; } }
+#proximas-contas { margin-bottom:16px; padding:10px 16px; background:#191c21; border:1px solid #383b42; border-left:3px solid #ff873d; border-radius:10px; }
+.vencimento { display:flex; align-items:baseline; flex-wrap:wrap; gap:4px 12px; font-size:13px; }
+.vencimento strong { color:#ffc08f; }
+.vencimento span { overflow-wrap:anywhere; }
+.vencimento b { margin-left:auto; white-space:nowrap; }
+#proximas-contas summary { padding:6px 0; font-size:12px; cursor:pointer; color:var(--muted); }
+#proximas-contas details .vencimento { border-top:1px solid #34383e; padding:6px 0; }
 </style>
 </head>
 <body>
@@ -104,6 +111,8 @@
         </table>
       </div>
     </div>
+
+    <section id="proximas-contas" aria-label="Próximas contas" hidden></section>
 
     <section class="finance-calendar" aria-labelledby="calendar-title">
       <div class="finance-calendar-header">
@@ -162,20 +171,7 @@
       </div>
     </div>
 
-    <div class="chart-grid" style="margin-top:0">
-      <div class="table-card">
-        <div class="table-header"><h3>Próximas contas · Hoje e próximos 7 dias</h3></div>
-        <table>
-          <tbody id="tbody-proximas"></tbody>
-        </table>
-      </div>
-      <div class="table-card">
-        <div class="table-header"><h3>Últimos Lançamentos</h3></div>
-        <table>
-          <tbody id="tbody-lancamentos"></tbody>
-        </table>
-      </div>
-    </div>
+
   </div>
 </div>
 
@@ -242,7 +238,6 @@ async function carregar() {
     renderCategorias(d.porCategoria);
     renderDonut(d.receitas, d.despesas);
     renderProximas(d.proximasContas);
-    renderLancamentos(d.ultimosLancamentos);
     await carregarCalendario(mes, ano);
   } catch(e) { toast(e.message, 'error'); }
 }
@@ -474,26 +469,25 @@ function renderDonut(rec, desp) {
   });
 }
 
-function renderProximas(lista) {
-  const tb = document.getElementById('tbody-proximas');
-  if (!lista.length) { tb.innerHTML = '<tr><td style="text-align:center;color:#94a3b8;padding:20px">Nenhuma conta com vencimento nesse período</td></tr>'; return; }
-  tb.innerHTML = lista.map(d => `
-    <tr>
-      <td><div style="font-weight:500">${escapeCalendarText(d.descricao)}</div><div style="font-size:12px;color:var(--muted)">${Number(d.dias_ate) === 0 ? "Hoje · " : Number(d.dias_ate) === 1 ? "Amanhã · " : ""}${fmtDataCurta(d.vencimento)}</div></td>
-      <td style="text-align:right;color:#dc2626;font-weight:600">${fmtBRL(d.valor)}</td>
-    </tr>
-  `).join('');
+function linhaVencimento(conta) {
+  const dias = Number(conta.dias_ate);
+  const quando = dias === 0 ? 'Vence hoje' : dias === 1 ? 'Vence amanhã' : 'Vence em ' + fmtDataCurta(conta.vencimento);
+  return `<div class="vencimento"><strong>${quando}</strong><span>${escapeCalendarText(conta.descricao)}</span><b>${fmtBRL(conta.valor)}</b></div>`;
 }
 
-function renderLancamentos(lista) {
-  const tb = document.getElementById('tbody-lancamentos');
-  if (!lista.length) { tb.innerHTML = '<tr><td style="text-align:center;color:#94a3b8;padding:20px">Nenhum lançamento</td></tr>'; return; }
-  tb.innerHTML = lista.map(d => `
-    <tr>
-      <td><div style="font-weight:500">${d.descricao}</div><div style="font-size:12px;color:#64748b">${fmtDataCurta(d.vencimento)}</div></td>
-      <td style="text-align:right;color:#dc2626;font-weight:600">${fmtBRL(d.valor)}</td>
-    </tr>
-  `).join('');
+function renderProximas(lista = []) {
+  const faixa = document.getElementById('proximas-contas');
+  faixa.hidden = lista.length === 0;
+  if (faixa.hidden) {
+    faixa.replaceChildren();
+    return;
+  }
+  const [primeira, ...outras] = lista;
+  faixa.innerHTML = linhaVencimento(primeira);
+  if (outras.length) {
+    const rotulo = outras.length === 1 ? 'Mais 1 vencimento' : `Mais ${outras.length} vencimentos`;
+    faixa.insertAdjacentHTML('beforeend', `<details><summary>${rotulo} no período</summary>${outras.map(linhaVencimento).join('')}</details>`);
+  }
 }
 </script>
 <div id="bottom-nav-root"></div>
