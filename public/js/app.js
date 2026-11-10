@@ -139,21 +139,21 @@ function confirmarExclusao(nome, callback) {
   overlay.id = 'confirm-overlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
   overlay.innerHTML =
-    '<div style="background:#fff;border-radius:16px;padding:28px 28px 24px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3)">' +
+    '<div style="background:var(--bg-card);border:1px solid var(--borda);color:var(--texto);border-radius:16px;padding:28px 28px 24px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.45)">' +
       '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">' +
         '<div style="width:44px;height:44px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;flex-shrink:0">' +
           '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>' +
         '</div>' +
         '<div>' +
-          '<div style="font-size:16px;font-weight:700;color:#0f172a">Confirmar exclusão</div>' +
-          '<div style="font-size:13px;color:#64748b;margin-top:2px">Esta ação não pode ser desfeita.</div>' +
+          '<div style="font-size:16px;font-weight:700;color:var(--texto)">Confirmar exclusão</div>' +
+          '<div style="font-size:13px;color:var(--muted);margin-top:2px">Esta ação não pode ser desfeita.</div>' +
         '</div>' +
       '</div>' +
-      '<div style="background:#f8fafc;border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:13px;color:#374151;border-left:3px solid #dc2626">' +
+      '<div style="background:var(--surface-raised);border-radius:10px;padding:12px 14px;margin-bottom:20px;font-size:13px;color:var(--texto);border-left:3px solid #fb7185">' +
         'Tem certeza que deseja excluir <strong style="color:#0f172a">' + nome + '</strong>?' +
       '</div>' +
       '<div style="display:flex;gap:10px;justify-content:flex-end">' +
-        '<button onclick="document.getElementById(\'confirm-overlay\').remove()" style="padding:9px 20px;border-radius:8px;border:1.5px solid #e2e8f0;background:#fff;color:#475569;font-size:13px;font-weight:500;cursor:pointer">Cancelar</button>' +
+        '<button onclick="document.getElementById(\'confirm-overlay\').remove()" style="padding:9px 20px;border-radius:8px;border:1.5px solid var(--borda);background:var(--surface-raised);color:var(--texto);font-size:13px;font-weight:500;cursor:pointer">Cancelar</button>' +
         '<button id="confirm-btn-yes" style="padding:9px 20px;border-radius:8px;border:none;background:#dc2626;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Sim, excluir</button>' +
       '</div>' +
     '</div>';
@@ -181,7 +181,7 @@ function renderSidebar(ativo) {
   return (
     '<aside class="sidebar">' +
       '<div class="sidebar-logo">' +
-        '<a href="/dashboard"><img src="/img/logo_riqfy.svg" alt="RiqFy" style="cursor:pointer"></a>' +
+        '<a href="/dashboard"><img src="/img/logo_riqfy_noturno.svg" alt="RiqFy" style="cursor:pointer"></a>' +
       '</div>' +
       '<div onclick="window.location.href=\'/usuarios\'" style="padding:12px 16px 14px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:10px;cursor:pointer" title="Gerenciar usuários">' +
         '<div class="user-avatar" id="sidebar-avatar" style="width:36px;height:36px;font-size:14px;flex-shrink:0">?</div>' +
@@ -221,7 +221,7 @@ function renderTopbar() {
   return (
     '<div class="topbar">' +
       '<div class="topbar-logo">' +
-        '<img src="/img/logo_riqfy.svg" alt="RiqFy">' +
+        '<img src="/img/logo_riqfy_noturno.svg" alt="RiqFy">' +
       '</div>' +
       '<div class="user-badge" onclick="window.location.href=\'/usuarios\'" style="cursor:pointer" title="Gerenciar usuários">' +
         '<div class="user-avatar" id="user-avatar">?</div>' +
