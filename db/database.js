@@ -20,6 +20,15 @@ async function initTenantTables() {
     FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE
   ) CHARACTER SET utf8mb4`);
 
+  const [colunasSenha] = await pool.execute("SHOW COLUMNS FROM usuarios LIKE 'senha_provisoria'");
+  if (!colunasSenha.length) {
+    try {
+      await pool.execute('ALTER TABLE usuarios ADD COLUMN senha_provisoria TINYINT NOT NULL DEFAULT 0');
+    } catch (err) {
+      if (err.code !== 'ER_DUP_FIELDNAME') throw err;
+    }
+  }
+
   await pool.execute(`CREATE TABLE IF NOT EXISTS categorias (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tenant_id INT NOT NULL,

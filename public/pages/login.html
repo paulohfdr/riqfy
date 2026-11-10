@@ -286,7 +286,8 @@ body::before { display: none; }
 
       <div class="error-msg" id="error-msg"></div>
 
-<div class="form-group">
+<div id="credenciais">
+      <div class="form-group">
         <label>Usuário ou Email</label>
         <div class="input-wrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -302,6 +303,12 @@ body::before { display: none; }
         </div>
       </div>
 
+      </div>
+      <div id="primeiro-acesso" hidden>
+        <p style="margin-bottom:18px">Sua senha é provisória. Escolha uma nova senha com pelo menos 8 caracteres para acessar sua conta.</p>
+        <div class="form-group"><label for="nova-senha">Nova senha</label><div class="input-wrap"><input id="nova-senha" type="password" autocomplete="new-password"></div></div>
+        <div class="form-group"><label for="confirmacao">Confirme a nova senha</label><div class="input-wrap"><input id="confirmacao" type="password" autocomplete="new-password"></div></div>
+      </div>
       <button class="btn-login" id="btn-login" onclick="fazerLogin()">ENTRAR</button>
 
       <p class="hint">Demo: admin / admin123</p>
@@ -331,6 +338,10 @@ document.getElementById('senha').addEventListener('keydown', e => {
   if (e.key === 'Enter') fazerLogin();
 });
 
+document.getElementById('confirmacao').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !document.getElementById('btn-login').disabled) fazerLogin();
+});
+
 async function fazerLogin() {
   const username = document.getElementById('username').value.trim();
   const senha    = document.getElementById('senha').value;
@@ -342,26 +353,40 @@ async function fazerLogin() {
 
   if (!username || !senha) { showError('Preencha usuário e senha.'); return; }
 
-  btn.textContent = 'Entrando...';
+  const troca = !document.getElementById('primeiro-acesso').hidden;
+  const novaSenha = document.getElementById('nova-senha').value;
+  if (troca && novaSenha.length < 8) return showError('Use pelo menos 8 caracteres.');
+  if (troca && novaSenha !== document.getElementById('confirmacao').value) return showError('As senhas precisam ser iguais.');
+  btn.textContent = troca ? 'Salvando...' : 'Entrando...';
   btn.disabled = true;
 
   try {
     const r = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, senha })
+      body: JSON.stringify(troca ? { username, senha, novaSenha } : { username, senha })
     });
     const data = await r.json();
     if (!r.ok) {
       showError(data.erro || 'Usuário ou senha incorretos.');
-      btn.textContent = 'ENTRAR';
+      btn.textContent = troca ? 'Salvar e entrar' : 'ENTRAR';
       btn.disabled = false;
+      return;
+    }
+    if (data.trocarSenha) {
+      document.getElementById('credenciais').hidden = true;
+      document.getElementById('primeiro-acesso').hidden = false;
+      document.querySelector('.panel-left h1').textContent = 'Defina sua senha';
+      document.querySelector('.hint').hidden = true;
+      btn.textContent = 'Salvar e entrar';
+      btn.disabled = false;
+      document.getElementById('nova-senha').focus();
       return;
     }
     window.location.href = '/dashboard';
   } catch {
     showError('Erro de conexão. Verifique se o servidor está rodando.');
-    btn.textContent = 'ENTRAR';
+    btn.textContent = troca ? 'Salvar e entrar' : 'ENTRAR';
     btn.disabled = false;
   }
 }

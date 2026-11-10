@@ -35,6 +35,11 @@ router.post('/auth', masterAuthLimiter, (req, res) => {
   res.json({ ok: true });
 });
 
+const cadastro = require('../utils/cadastro');
+const { validate, schemas } = require('../middleware/validation');
+
+router.post('/tenants', authMaster, validate(schemas.register), cadastro(true));
+
 router.get('/tenants', authMaster, async (req, res) => {
   try {
     const masterDb = await getMasterDb();

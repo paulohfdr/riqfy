@@ -16,6 +16,10 @@ const validate = (schema) => (req, res, next) => {
 
 const schemas = {
   login: Joi.object({
+    novaSenha: Joi.string().min(8).max(72).optional().messages({
+      'string.min': 'A nova senha deve ter pelo menos 8 caracteres.',
+      'string.max': 'A nova senha deve ter até 72 caracteres.'
+    }),
     username: Joi.string().max(100).required().messages({ 'any.required': 'Usuário é obrigatório' }),
     senha: Joi.string().max(200).required().messages({ 'any.required': 'Senha é obrigatória' })
   }),

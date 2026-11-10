@@ -10,36 +10,36 @@
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'DM Sans',sans-serif;font-size:14px;color:#1e293b;background:#f1f5f9;min-height:100vh}
-.topbar{background:#00296b;color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
+body{font-family:'DM Sans',sans-serif;font-size:14px;color:#1e293b;background:#242830;min-height:100vh}
+.topbar{background:#f77b27;color:#fff;padding:0 24px;height:56px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100}
 .topbar img{height:32px}
 .topbar h1{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;letter-spacing:.02em}
 .topbar .badge{background:rgba(253,197,0,0.2);border:1px solid rgba(253,197,0,0.4);color:#fdc500;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.05em}
 .content{padding:24px;max-width:1200px;margin:0 auto}
 .auth-card{background:#fff;border-radius:16px;padding:40px;max-width:400px;margin:60px auto;box-shadow:0 4px 20px rgba(0,0,0,0.1);text-align:center}
-.auth-card h2{font-family:'Syne',sans-serif;font-size:20px;color:#00296b;margin-bottom:8px}
-.auth-card p{font-size:13px;color:#64748b;margin-bottom:24px}
-.auth-card input{width:100%;padding:12px 14px;border:1.5px solid #d1d5db;border-radius:10px;font-size:14px;outline:none;margin-bottom:12px;transition:border-color .2s}
-.auth-card input:focus{border-color:#00296b}
+.auth-card h2{font-family:'Syne',sans-serif;font-size:20px;color:#f77b27;margin-bottom:8px}
+.auth-card p{font-size:13px;color:#abb2bf;margin-bottom:24px}
+.auth-card input{width:100%;padding:12px 14px;border:1.5px solid #414650;border-radius:10px;font-size:14px;outline:none;margin-bottom:12px;transition:border-color .2s}
+.auth-card input:focus{border-color:#f77b27}
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:opacity .15s}
 .btn:hover{opacity:.88}
-.btn-primary{background:#00296b;color:#fff}
+.btn-primary{background:#f77b27;color:#fff}
 .btn-danger{background:#dc2626;color:#fff}
 .btn-warning{background:#f59e0b;color:#fff}
 .btn-success{background:#16a34a;color:#fff}
 .btn-sm{padding:5px 12px;font-size:12px}
 .btn-block{width:100%;justify-content:center;padding:12px}
 .stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
-.stat-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid #e2e8f0}
-.stat-label{font-size:12px;color:#64748b;margin-bottom:4px}
-.stat-value{font-size:24px;font-weight:700;color:#0f172a}
+.stat-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid #373d46}
+.stat-label{font-size:12px;color:#abb2bf;margin-bottom:4px}
+.stat-value{font-size:24px;font-weight:700;color:#f2f3f5}
 .stat-value.green{color:#16a34a} .stat-value.blue{color:#2563eb} .stat-value.yellow{color:#ca8a04}
-.table-card{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid #e2e8f0;overflow-x:auto}
-.table-header{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e2e8f0;gap:8px;flex-wrap:wrap}
+.table-card{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.08);border:1px solid #373d46;overflow-x:auto}
+.table-header{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #373d46;gap:8px;flex-wrap:wrap}
 .table-header h3{font-size:15px;font-weight:700}
 table{width:100%;border-collapse:collapse;min-width:700px}
-th{padding:10px 16px;text-align:left;font-size:11px;color:#64748b;font-weight:600;border-bottom:1px solid #e2e8f0;background:#f8fafc;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
-td{padding:12px 16px;font-size:13px;border-bottom:1px solid #f1f5f9;white-space:nowrap}
+th{padding:10px 16px;text-align:left;font-size:11px;color:#abb2bf;font-weight:600;border-bottom:1px solid #373d46;background:#f8fafc;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+td{padding:12px 16px;font-size:13px;border-bottom:1px solid #242830;white-space:nowrap}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:#fafbff}
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
@@ -47,7 +47,7 @@ tr:hover td{background:#fafbff}
 .badge-red{background:#fee2e2;color:#991b1b}
 .badge-blue{background:#dbeafe;color:#1e40af}
 .badge-yellow{background:#fef9c3;color:#854d0e}
-.badge-gray{background:#f1f5f9;color:#475569}
+.badge-gray{background:#242830;color:#475569}
 .actions{display:flex;gap:6px;align-items:center}
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px}
 .modal{position:relative;z-index:1001;overflow:hidden;max-height:90vh;overflow-y:auto}
@@ -55,23 +55,40 @@ tr:hover td{background:#fafbff}
 .modal{background:#fff;border-radius:16px;padding:28px;width:100%;max-width:440px}
 .modal h2{font-size:17px;font-weight:700;margin-bottom:20px}
 .form-group{margin-bottom:16px}
-.form-group label{display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px}
-.form-group select{width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none}
-.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #e2e8f0}
-.btn-cancel{background:#f1f5f9;color:#475569;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500}
+.form-group label{display:block;font-size:13px;font-weight:600;color:#d5d8de;margin-bottom:6px}
+.form-group select{width:100%;padding:10px 12px;border:1.5px solid #414650;border-radius:8px;font-size:14px;outline:none}
+.modal-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid #373d46}
+.btn-cancel{background:#242830;color:#475569;border:none;padding:9px 18px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500}
 .toast-container{position:fixed;top:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:8px}
 .toast{background:#1e293b;color:#fff;padding:12px 18px;border-radius:10px;font-size:13px;min-width:220px;display:flex;align-items:center;gap:8px;box-shadow:0 4px 12px rgba(0,0,0,.2);animation:slideIn .2s}
 .toast.success{background:#166534} .toast.error{background:#991b1b}
 @keyframes slideIn{from{transform:translateX(20px);opacity:0}to{transform:translateX(0);opacity:1}}
 #main-content{display:none}
+body{background:#0c0e11;color:#edeff2;color-scheme:dark}
+.topbar{background:#13161b;border-bottom:1px solid #30353d;height:66px}
+.topbar img{height:36px}.topbar h1{font-size:18px}
+.content{max-width:1480px;padding:clamp(16px,3vw,42px)}
+.stat-card,.table-card,.modal,.auth-card{background:#171a20;border:1px solid #30353d}
+.stat-card{padding:20px}.stat-value{font-size:30px}.stat-value.blue{color:#ff914d}
+.table-header{padding:20px}.table-header h3,.modal h2{font-size:20px}
+th{background:#1c2027}tr:hover td{background:#20242c}
+input:not([type=radio]),select{background:#101318;color:#f1f2f4}
+input:focus-visible,button:focus-visible{outline:2px solid #ff994f!important;outline-offset:2px}
+.btn-primary,.btn-cancel{background:#303641;color:#f1f2f4}
+.btn-success,.auth-card .btn-primary{background:#fb812f;color:#1a1008}
+.modal{box-shadow:0 20px 70px #0008}.modal table{min-width:0}
+#aviso-provisoria{padding:10px 12px;border-left:3px solid #fb812f;background:#2a211c;color:#f3cfb8;font-size:13px;line-height:1.5;margin:-4px 0 18px}
+#ne-plano-opcoes label:has(:checked){background:#30251e;border-color:#fb812f!important}
+.actions{flex-wrap:wrap}#search{max-width:100%}
+@media(max-width:650px){.stats-grid{gap:6px}.stat-card{padding:12px 8px}.topbar{padding:0 12px}.topbar #admin-info{display:none}.modal-overlay{padding:10px}.modal{padding:20px}.table-header{position:sticky;left:0}.table-card td{padding:10px}.table-header input{flex:1 1 100%}}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <img src="/img/logo_bg_azul.svg" alt="RiqFy">
+  <img src="/img/logo_riqfy_noturno.svg" alt="RiqFy">
   <h1>Admin Master</h1>
-  <span class="badge">PAINEL INTERNO</span>
+
   <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
     <span style="font-size:12px;color:rgba(255,255,255,.5)" id="admin-info"></span>
     <button onclick="sair()" style="background:#dc2626;color:#fff;border:none;padding:7px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500">Sair</button>
@@ -81,7 +98,7 @@ tr:hover td{background:#fafbff}
 <!-- Auth -->
 <div id="auth-section">
   <div class="auth-card">
-    <h2>🔐 Acesso restrito</h2>
+    <h2>Acesso administrativo</h2>
     <p>Este painel é exclusivo para administradores do sistema RiqFy.</p>
     <input type="text" id="master-user" placeholder="Usuário" autocomplete="off">
     <input type="password" id="master-pwd" placeholder="Senha" autocomplete="off">
@@ -97,9 +114,9 @@ tr:hover td{background:#fafbff}
 
     <div class="table-card">
       <div class="table-header">
-        <h3>Tenants cadastrados</h3>
+        <h3>Contas cadastradas</h3>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input type="text" id="search" placeholder="Buscar..." oninput="filtrar()" style="padding:8px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;outline:none;width:200px">
+          <input type="text" id="search" aria-label="Buscar conta" placeholder="Buscar nome, código ou email" oninput="filtrar()" style="padding:8px 12px;border:1.5px solid #414650;border-radius:8px;font-size:13px;outline:none;width:200px">
           <button class="btn btn-primary btn-sm" onclick="carregar()">↻ Atualizar</button>
           <button class="btn btn-success btn-sm" onclick="abrirNovaEmpresa()">+ Novo usuário</button>
         </div>
@@ -128,22 +145,23 @@ tr:hover td{background:#fafbff}
     <h2>Novo usuário</h2>
     <div id="nova-empresa-error" style="background:#fee2e2;color:#991b1b;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none"></div>
     <div class="form-group">
-      <label>Nome completo *</label>
-      <input type="text" id="ne-nome-admin" placeholder="João Silva" style="width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none">
+      <label for="ne-nome-admin">Nome completo *</label>
+      <input type="text" id="ne-nome-admin" placeholder="João Silva" style="width:100%;padding:10px 12px;border:1.5px solid #414650;border-radius:8px;font-size:14px;outline:none">
     </div>
     <div class="form-group">
-      <label>Email *</label>
-      <input type="email" id="ne-email" placeholder="joao@email.com" style="width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none">
+      <label for="ne-email">Email *</label>
+      <input type="email" id="ne-email" placeholder="joao@email.com" style="width:100%;padding:10px 12px;border:1.5px solid #414650;border-radius:8px;font-size:14px;outline:none">
     </div>
     <div class="form-group">
-      <label>Usuário *</label>
-      <input type="text" id="ne-username" placeholder="joao" oninput="previewSlug()" style="width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none">
-      <div id="ne-slug-preview" style="font-size:12px;color:#64748b;margin-top:4px"></div>
+      <label for="ne-username">Usuário *</label>
+      <input type="text" id="ne-username" placeholder="joao" oninput="previewSlug()" style="width:100%;padding:10px 12px;border:1.5px solid #414650;border-radius:8px;font-size:14px;outline:none">
+      <div id="ne-slug-preview" style="font-size:12px;color:#abb2bf;margin-top:4px"></div>
     </div>
     <div class="form-group">
-      <label>Senha *</label>
-      <input type="password" id="ne-senha" placeholder="Mínimo 6 caracteres" style="width:100%;padding:10px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:14px;outline:none">
+      <label for="ne-senha">Senha provisória *</label>
+      <input type="password" id="ne-senha" autocomplete="new-password" aria-describedby="aviso-provisoria" placeholder="Mínimo de 8 caracteres" style="width:100%;padding:10px 12px;border:1.5px solid #414650;border-radius:8px;font-size:14px;outline:none">
     </div>
+    <p id="aviso-provisoria">No primeiro acesso, a pessoa deverá escolher uma nova senha para entrar no sistema.</p>
     <div class="form-group">
       <label>Plano *</label>
       <div id="ne-plano-opcoes" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
@@ -162,8 +180,8 @@ tr:hover td{background:#fafbff}
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
     </div>
     <h2 style="font-size:16px;margin-bottom:8px">Apagar usuário</h2>
-    <p style="font-size:13px;color:#64748b;margin-bottom:8px">Tem certeza que deseja apagar</p>
-    <p style="font-size:14px;font-weight:700;color:#0f172a;margin-bottom:8px" id="apagar-nome"></p>
+    <p style="font-size:13px;color:#abb2bf;margin-bottom:8px">Tem certeza que deseja apagar</p>
+    <p style="font-size:14px;font-weight:700;color:#f2f3f5;margin-bottom:8px" id="apagar-nome"></p>
     <p style="font-size:12px;color:#dc2626;margin-bottom:24px">Todos os dados financeiros serão perdidos e esta ação não pode ser desfeita.</p>
     <div style="display:flex;gap:10px;justify-content:center">
       <button class="btn-cancel" onclick="document.getElementById('modal-apagar').classList.add('hidden')">Cancelar</button>
@@ -175,7 +193,7 @@ tr:hover td{background:#fafbff}
 <!-- Modal detalhes -->
 <div class="modal-overlay hidden" id="modal-detalhes">
   <div class="modal" style="max-width:500px">
-    <h2>Detalhes do tenant</h2>
+    <h2>Detalhes da conta</h2>
     <div id="detalhes-content" style="font-size:13px;line-height:1.8"></div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="document.getElementById('modal-detalhes').classList.add('hidden')">Fechar</button>
@@ -282,32 +300,42 @@ function planoBadge(p) {
 
 function fmtDate(d) {
   if (!d) return '—';
-  return d.split(' ')[0].split('-').reverse().join('/');
+  return String(d).slice(0, 10).split('-').reverse().join('/');
+}
+
+function escapar(valor) {
+  const texto = document.createElement('span');
+  texto.textContent = String(valor ?? '');
+  return texto.innerHTML;
+}
+
+function nomeConta(id) {
+  return todosOsTenants.find(t => t.id === id)?.nome || '';
 }
 
 function renderTabela(tenants) {
   const tbody = document.getElementById('tbody-tenants');
   if (!tenants.length) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:32px">Nenhum tenant cadastrado.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#94a3b8;padding:32px">Nenhuma conta encontrada.</td></tr>';
     return;
   }
   tbody.innerHTML = tenants.map(t => `
     <tr>
-      <td><strong>${t.nome}</strong></td>
-      <td><code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-size:12px">${t.slug}</code></td>
-      <td style="color:#64748b">${t.email_admin}</td>
+      <td><strong>${escapar(t.nome)}</strong></td>
+      <td><code style="background:#242830;padding:2px 6px;border-radius:4px;font-size:12px">${escapar(t.slug)}</code></td>
+      <td style="color:#abb2bf">${escapar(t.email_admin)}</td>
       <td>${planoBadge(t.plano_nome)}</td>
       <td>${statusBadge(t.status)}</td>
-      <td style="color:#64748b">${fmtDate(t.criado_em)}</td>
+      <td style="color:#abb2bf">${fmtDate(t.criado_em)}</td>
       <td>
         <div class="actions" style="justify-content:flex-end">
           <button class="btn btn-sm btn-primary" onclick="verDetalhes(${t.id})">Detalhes</button>
           <button class="btn btn-sm" style="background:#7c3aed;color:#fff" onclick="abrirAlterarPlano(${t.id},'${t.plano_nome}')">Plano</button>
           ${t.status === 'ativo'
-            ? `<button class="btn btn-sm btn-danger" onclick="mudarStatus(${t.id},'suspenso','${t.nome}')">Suspender</button>`
-            : `<button class="btn btn-sm btn-success" onclick="mudarStatus(${t.id},'ativo','${t.nome}')">Ativar</button>`
+            ? `<button class="btn btn-sm btn-danger" onclick="mudarStatus(${t.id},'suspenso',nomeConta(${t.id}))">Suspender</button>`
+            : `<button class="btn btn-sm btn-success" onclick="mudarStatus(${t.id},'ativo',nomeConta(${t.id}))">Ativar</button>`
           }
-          <button class="btn btn-sm btn-danger" onclick="apagarUsuario(${t.id},'${t.nome.replace(/'/g,"\\'")}')">Apagar</button>
+          <button class="btn btn-sm btn-danger" onclick="apagarUsuario(${t.id},nomeConta(${t.id}))">Apagar</button>
         </div>
       </td>
     </tr>
@@ -339,18 +367,18 @@ async function verDetalhes(id) {
     <table style="width:100%;border-collapse:collapse">
       ${[
         ['ID', t.id],
-        ['Nome', t.nome],
-        ['Slug', `<code style="background:#f1f5f9;padding:2px 6px;border-radius:4px">${t.slug}</code>`],
-        ['Email admin', t.email_admin],
+        ['Nome', escapar(t.nome)],
+        ['Slug', `<code style="background:#242830;padding:2px 6px;border-radius:4px">${escapar(t.slug)}</code>`],
+        ['Email admin', escapar(t.email_admin)],
         ['Plano', t.plano_nome + (t.max_lancamentos_mes === -1 ? ' (ilimitado)' : ` (${t.max_lancamentos_mes} lanç/mês)`)],
         ['Status', statusBadge(t.status)],
         ['Criado em', fmtDate(t.criado_em)],
         ['Expira em', t.expira_em ? fmtDate(t.expira_em) : '—'],
-        ['Preço', 'R$ ' + (t.preco || 0).toFixed(2) + '/mês'],
+        ['Preço', 'R$ ' + Number(t.preco || 0).toFixed(2) + '/mês'],
         ['Máx. usuários', t.max_usuarios === -1 ? 'Ilimitado' : t.max_usuarios],
       ].map(([k, v]) => `
-        <tr style="border-bottom:1px solid #f1f5f9">
-          <td style="padding:8px 0;color:#64748b;font-weight:500;width:140px">${k}</td>
+        <tr style="border-bottom:1px solid #242830">
+          <td style="padding:8px 0;color:#abb2bf;font-weight:500;width:140px">${k}</td>
           <td style="padding:8px 0">${v}</td>
         </tr>
       `).join('')}
@@ -371,7 +399,7 @@ function slugify(str) {
 function previewSlug() {
   const username = document.getElementById('ne-username').value;
   const el = document.getElementById('ne-slug-preview');
-  el.innerHTML = username ? 'Código de acesso: <code style="background:#f1f5f9;padding:1px 5px;border-radius:4px">' + slugify(username) + '</code>' : '';
+  el.innerHTML = username ? 'Código de acesso: <code style="background:#242830;padding:1px 5px;border-radius:4px">' + slugify(username) + '</code>' : '';
 }
 
 function abrirNovaEmpresa() {
@@ -380,11 +408,11 @@ function abrirNovaEmpresa() {
   document.getElementById('nova-empresa-error').style.display = 'none';
   const container = document.getElementById('ne-plano-opcoes');
   container.innerHTML = planosDisponiveis.map((p, i) => `
-    <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:2px solid ${i === 0 ? planoCores[p.nome] || '#64748b' : '#e2e8f0'};border-radius:10px;cursor:pointer;transition:border-color .15s" onclick="selecionarPlanoNovo(this,'${p.nome}')">
-      <input type="radio" name="ne-plano-radio" value="${p.id}" ${i === 0 ? 'checked' : ''} style="accent-color:${planoCores[p.nome] || '#64748b'}">
+    <label style="display:flex;align-items:center;gap:12px;padding:10px 14px;border:2px solid ${i === 0 ? planoCores[p.nome] || '#abb2bf' : '#373d46'};border-radius:10px;cursor:pointer;transition:border-color .15s" onclick="selecionarPlanoNovo(this,'${p.nome}')">
+      <input type="radio" name="ne-plano-radio" value="${p.id}" ${i === 0 ? 'checked' : ''} style="accent-color:${planoCores[p.nome] || '#abb2bf'}">
       <div>
-        <div style="font-weight:700;font-size:13px;color:#0f172a">${p.nome}</div>
-        <div style="font-size:11px;color:#64748b;margin-top:1px">${planoDescricoes[p.nome] || ''}</div>
+        <div style="font-weight:700;font-size:13px;color:#f2f3f5">${p.nome}</div>
+        <div style="font-size:11px;color:#abb2bf;margin-top:1px">${planoDescricoes[p.nome] || ''}</div>
       </div>
     </label>
   `).join('');
@@ -392,8 +420,8 @@ function abrirNovaEmpresa() {
 }
 
 function selecionarPlanoNovo(label, nome) {
-  document.querySelectorAll('#ne-plano-opcoes label').forEach(l => l.style.borderColor = '#e2e8f0');
-  label.style.borderColor = planoCores[nome] || '#64748b';
+  document.querySelectorAll('#ne-plano-opcoes label').forEach(l => l.style.borderColor = '#373d46');
+  label.style.borderColor = planoCores[nome] || '#abb2bf';
 }
 
 async function criarEmpresa() {
@@ -416,20 +444,19 @@ async function criarEmpresa() {
   btn.disabled = true;
 
   try {
-    const r = await fetch('/api/auth/register', {
+    const data = await api('/tenants', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nome, email, username, senha, plano_id: planoRadio ? parseInt(planoRadio.value) : undefined })
+      body: JSON.stringify({ nome, email, username, senha, plano_id: planoRadio ? Number(planoRadio.value) : undefined })
     });
-    const data = await r.json();
-    if (!r.ok) {
+    if (!data.ok) {
       errEl.textContent = data.erro || 'Erro ao criar acesso.';
       errEl.style.display = 'block';
       btn.textContent = 'Criar acesso';
       btn.disabled = false;
       return;
     }
-    toast('Usuário "' + nome + '" criado! Código: ' + data.slug);
+    document.getElementById('ne-senha').value = '';
+    toast('Acesso criado para ' + nome + '.');
     document.getElementById('modal-nova-empresa').classList.add('hidden');
     btn.textContent = 'Criar acesso';
     btn.disabled = false;
@@ -447,7 +474,7 @@ function toast(msg, tipo) {
   const c = document.getElementById('toast-container');
   const t = document.createElement('div');
   t.className = 'toast ' + tipo;
-  t.innerHTML = '<span>' + (tipo === 'success' ? '✓' : '✕') + '</span><span>' + msg + '</span>';
+  t.textContent = msg;
   c.appendChild(t);
   setTimeout(() => t.remove(), 3500);
 }
@@ -459,7 +486,7 @@ async function apagarUsuario(id, nome) {
   else toast(r.erro || 'Erro ao apagar', 'error');
 }
 
-const planoCores = { Free: '#64748b', Pro: '#2563eb', Family: '#ca8a04' };
+const planoCores = { Free: '#abb2bf', Pro: '#2563eb', Family: '#ca8a04' };
 const planoDescricoes = {
   Free:   '1 usuário · 50 lançamentos/mês · Gratuito',
   Pro:    'Até 5 usuários · Ilimitado · R$ 29,90/mês',
@@ -470,11 +497,11 @@ function abrirAlterarPlano(tenantId, planoAtual) {
   document.getElementById('plano-tenant-id').value = tenantId;
   const container = document.getElementById('plano-opcoes');
   container.innerHTML = planosDisponiveis.map(p => `
-    <label style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:2px solid ${p.nome === planoAtual ? planoCores[p.nome] || '#2563eb' : '#e2e8f0'};border-radius:10px;cursor:pointer;transition:border-color .15s" onclick="selecionarPlano(this,'${p.nome}')">
+    <label style="display:flex;align-items:center;gap:12px;padding:12px 14px;border:2px solid ${p.nome === planoAtual ? planoCores[p.nome] || '#2563eb' : '#373d46'};border-radius:10px;cursor:pointer;transition:border-color .15s" onclick="selecionarPlano(this,'${p.nome}')">
       <input type="radio" name="plano-radio" value="${p.id}" ${p.nome === planoAtual ? 'checked' : ''} style="accent-color:${planoCores[p.nome] || '#2563eb'}">
       <div>
-        <div style="font-weight:700;font-size:14px;color:#0f172a">${p.nome}</div>
-        <div style="font-size:12px;color:#64748b;margin-top:2px">${planoDescricoes[p.nome] || ''}</div>
+        <div style="font-weight:700;font-size:14px;color:#f2f3f5">${p.nome}</div>
+        <div style="font-size:12px;color:#abb2bf;margin-top:2px">${planoDescricoes[p.nome] || ''}</div>
       </div>
     </label>
   `).join('');
@@ -482,7 +509,7 @@ function abrirAlterarPlano(tenantId, planoAtual) {
 }
 
 function selecionarPlano(label, nome) {
-  document.querySelectorAll('#plano-opcoes label').forEach(l => l.style.borderColor = '#e2e8f0');
+  document.querySelectorAll('#plano-opcoes label').forEach(l => l.style.borderColor = '#373d46');
   label.style.borderColor = planoCores[nome] || '#2563eb';
 }
 
