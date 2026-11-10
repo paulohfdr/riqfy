@@ -28,7 +28,7 @@ router.get('/calendario', async (req, res) => {
         return res.status(400).json({ erro: 'Data inválida para o mês selecionado' });
       }
 
-      const [despesas, receitas] = await Promise.all([
+      const [despesas, receitas, pendentes] = await Promise.all([
         db.all(
           `SELECT d.id, d.descricao, d.valor, DATE_FORMAT(d.vencimento, '%Y-%m-%d') AS data,
                   c.nome AS categoria_nome, c.cor AS categoria_cor
@@ -44,13 +44,21 @@ router.get('/calendario', async (req, res) => {
            WHERE r.tenant_id = ? AND r.status = 'recebida' AND r.data_recebimento = ?
            ORDER BY r.criado_em DESC, r.id DESC`,
           [db.tenantId, dataSelecionada]
+        ),
+        db.all(
+          `SELECT r.id, r.descricao, r.valor, DATE_FORMAT(r.data, '%Y-%m-%d') AS data,
+                  c.nome AS categoria_nome, c.cor AS categoria_cor
+           FROM receitas r LEFT JOIN categorias c ON r.categoria_id = c.id
+           WHERE r.tenant_id = ? AND r.status = 'pendente' AND r.data = ?
+           ORDER BY r.criado_em DESC, r.id DESC`,
+          [db.tenantId, dataSelecionada]
         )
       ]);
 
-      return res.json({ data: dataSelecionada, despesas, receitas });
+      return res.json({ data: dataSelecionada, despesas, receitas, pendentes });
     }
 
-    const [despesasPorDia, receitasPorDia] = await Promise.all([
+    const [despesasPorDia, receitasPorDia, pendentesPorDia] = await Promise.all([
       db.all(
         `SELECT DATE_FORMAT(d.vencimento, '%Y-%m-%d') AS data, c.nome AS categoria_nome,
                 c.cor AS categoria_cor, COALESCE(SUM(d.valor), 0) AS total, COUNT(*) AS quantidade
@@ -68,12 +76,25 @@ router.get('/calendario', async (req, res) => {
          GROUP BY r.data_recebimento
          ORDER BY data`,
         [db.tenantId, inicio, fim]
+      ),
+      db.all(
+        `SELECT DATE_FORMAT(r.data, '%Y-%m-%d') AS data,
+                COALESCE(SUM(r.valor), 0) AS total, COUNT(*) AS quantidade
+         FROM receitas r
+         WHERE r.tenant_id = ? AND r.status = 'pendente' AND r.data >= ? AND r.data < ?
+         GROUP BY r.data
+         ORDER BY data`,
+        [db.tenantId, inicio, fim]
       )
     ]);
 
     const dias = {};
+    function obterDia(data) {
+      if (!dias[data]) dias[data] = { despesas: 0, receitas: 0, pendentes: 0, quantidadeDespesas: 0, quantidadeReceitas: 0, quantidadePendentes: 0, categorias: [] };
+      return dias[data];
+    }
     for (const item of despesasPorDia) {
-      const dia = dias[item.data] || (dias[item.data] = { despesas: 0, receitas: 0, quantidadeDespesas: 0, quantidadeReceitas: 0, categorias: [] });
+      const dia = obterDia(item.data);
       dia.despesas += Number(item.total || 0);
       dia.quantidadeDespesas += Number(item.quantidade || 0);
       if (item.categoria_nome) {
@@ -81,11 +102,16 @@ router.get('/calendario', async (req, res) => {
       }
     }
     for (const item of receitasPorDia) {
-      const dia = dias[item.data] || (dias[item.data] = { despesas: 0, receitas: 0, quantidadeDespesas: 0, quantidadeReceitas: 0, categorias: [] });
+      const dia = obterDia(item.data);
       dia.receitas = Number(item.total || 0);
       dia.quantidadeReceitas = Number(item.quantidade || 0);
     }
 
+    for (const item of pendentesPorDia) {
+      const dia = obterDia(item.data);
+      dia.pendentes = Number(item.total);
+      dia.quantidadePendentes = Number(item.quantidade);
+    }
     res.json({ dias });
   } catch (e) {
     console.error('Erro no calendário financeiro:', e);
