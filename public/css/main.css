@@ -309,6 +309,79 @@ tr:hover td { background: #fafafa; }
 .chart-full { grid-column: 1 / -1; }
 .chart-container { position: relative; }
 
+/* ===== CALENDÁRIO FINANCEIRO ===== */
+.finance-calendar {
+  background: var(--bg-card);
+  border: 1px solid var(--borda);
+  border-radius: var(--radius);
+  margin: 0 0 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.finance-calendar-header {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--borda);
+}
+.calendar-eyebrow { color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 4px; }
+.finance-calendar-header h2 { font-size: 18px; line-height: 1.3; font-weight: 800; }
+.calendar-month-controls { display: flex; align-items: center; gap: 12px; }
+.calendar-month-controls > span { min-width: 142px; text-align: center; text-transform: capitalize; font-size: 14px; font-weight: 700; }
+.calendar-nav {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 34px; height: 34px; border: 1px solid var(--borda); border-radius: 10px;
+  background: #fff; color: var(--texto); font: inherit; font-size: 23px; line-height: 1;
+  cursor: pointer; transition: all .15s;
+}
+.calendar-nav:hover { color: var(--primary); border-color: var(--primary); background: #fff7ed; }
+.finance-calendar-body { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(300px, .85fr); }
+.calendar-main { padding: 18px 22px 20px; min-width: 0; }
+.calendar-weekdays, .calendar-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.calendar-weekdays { margin-bottom: 8px; }
+.calendar-weekdays span { text-align: center; color: var(--muted); font-size: 11px; font-weight: 700; padding: 5px 0; }
+.calendar-day-placeholder { min-height: 70px; }
+.calendar-day {
+  min-width: 0; min-height: 70px; padding: 7px 5px 6px; border: 1px solid transparent; border-radius: 11px;
+  background: #fafafa; color: var(--texto); font: inherit; cursor: pointer; text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 3px;
+  transition: background .15s, border-color .15s, transform .15s;
+}
+.calendar-day:hover { background: #fff7ed; border-color: #fed7aa; transform: translateY(-1px); }
+.calendar-day.selected { background: #fff2e8; border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.calendar-day.today .calendar-day-number { color: var(--primary); font-weight: 800; }
+.calendar-day-number { font-size: 13px; font-weight: 600; line-height: 18px; }
+.calendar-day-dots { display: flex; align-items: center; justify-content: center; gap: 3px; min-height: 7px; }
+.calendar-dot, .calendar-legend-dot { display: inline-block; width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: var(--dot-color, #ef4444); }
+.calendar-dot.income, .calendar-legend-dot.income { background: #22c55e; }
+.calendar-day-amount { color: #64748b; font-size: 9px; font-weight: 600; line-height: 12px; white-space: nowrap; }
+.calendar-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 14px; color: var(--muted); font-size: 11px; }
+.calendar-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.calendar-legend-dot { width: 8px; height: 8px; flex-basis: 8px; }
+.calendar-legend-dot.expense { background: var(--primary); }
+.calendar-details { min-width: 0; padding: 20px 22px; background: #fafafa; border-left: 1px solid var(--borda); }
+.calendar-detail-heading h3 { text-transform: capitalize; font-size: 15px; font-weight: 800; }
+.calendar-day-totals { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 15px 0; }
+.calendar-total { min-width: 0; padding: 10px 12px; border: 1px solid var(--borda); border-radius: 10px; background: #fff; }
+.calendar-total span { display: block; color: var(--muted); font-size: 10px; margin-bottom: 4px; }
+.calendar-total strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.calendar-total.expense strong { color: #dc2626; }
+.calendar-total.income strong { color: #16a34a; }
+.calendar-transactions { display: flex; flex-direction: column; gap: 7px; max-height: 330px; overflow-y: auto; }
+.calendar-list-heading { color: var(--muted); font-size: 11px; font-weight: 700; margin: 1px 0 3px; }
+.calendar-transaction { display: flex; align-items: center; gap: 9px; min-width: 0; padding: 9px 10px; border: 1px solid var(--borda); border-radius: 10px; background: #fff; }
+.calendar-transaction-icon { display: flex; align-items: center; justify-content: center; width: 25px; height: 25px; flex: 0 0 25px; border-radius: 8px; font-size: 17px; font-weight: 700; }
+.calendar-transaction.expense .calendar-transaction-icon { background: #fff1f2; color: #dc2626; }
+.calendar-transaction.income .calendar-transaction-icon { background: #f0fdf4; color: #16a34a; }
+.calendar-transaction-copy { display: flex; flex-direction: column; min-width: 0; flex: 1; gap: 2px; }
+.calendar-transaction-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
+.calendar-transaction-copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--muted); font-size: 10px; }
+.calendar-transaction-value { white-space: nowrap; font-size: 11px; }
+.calendar-transaction.expense .calendar-transaction-value { color: #dc2626; }
+.calendar-transaction.income .calendar-transaction-value { color: #16a34a; }
+.calendar-empty { min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 16px; border: 1px dashed #d8d8d8; border-radius: 10px; color: var(--muted); font-size: 11px; text-align: center; }
+.calendar-empty strong { color: #475569; font-size: 12px; }
+.calendar-empty-icon { color: #94a3b8; font-size: 20px; }
+
 /* ===== SELETOR DE COR ===== */
 .color-swatches { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
 .color-swatch { width: 26px; height: 26px; border-radius: 6px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.15s; }
@@ -390,6 +463,31 @@ canvas { animation: canvasFade 0.5s ease; }
   .form-row { grid-template-columns: 1fr; }
   .toast-container { top: auto; bottom: 80px; right: 12px; left: 12px; }
   .toast { min-width: unset; }
+  .finance-calendar-body { grid-template-columns: 1fr; }
+  .calendar-main { padding: 14px 12px 16px; }
+  .calendar-details { border-left: 0; border-top: 1px solid var(--borda); padding: 16px 14px; }
+  .calendar-day { min-height: 58px; padding: 6px 2px; border-radius: 9px; }
+  .calendar-day-placeholder { min-height: 58px; }
+  .calendar-day-amount { font-size: 8px; }
+  .calendar-transactions { max-height: 280px; }
+}
+
+@media (max-width: 520px) {
+  .finance-calendar-header { align-items: flex-start; flex-direction: column; padding: 16px 14px; gap: 12px; }
+  .finance-calendar-header h2 { font-size: 16px; }
+  .calendar-month-controls { align-self: stretch; justify-content: space-between; }
+  .calendar-month-controls > span { flex: 1; }
+  .calendar-weekdays, .calendar-days { gap: 3px; }
+  .calendar-weekdays span { font-size: 10px; }
+  .calendar-day { min-height: 50px; padding: 5px 1px; gap: 2px; }
+  .calendar-day-placeholder { min-height: 50px; }
+  .calendar-day-number { font-size: 12px; }
+  .calendar-day-amount { display: none; }
+  .calendar-day-dots { gap: 2px; }
+  .calendar-dot { width: 5px; height: 5px; flex-basis: 5px; }
+  .calendar-day-totals { gap: 6px; }
+  .calendar-total { padding: 9px 8px; }
+  .calendar-total strong { font-size: 12px; }
 }
 
 /* ===== BOTTOM NAV ===== */
