@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getDb } = require('../db/database');
+const { getDb, pool } = require('../db/database');
 const { authMiddleware } = require('../middleware/auth');
 const { validate, schemas } = require('../middleware/validation');
 const { lancamentoLimitCheck } = require('../middleware/plano');
@@ -139,6 +139,47 @@ router.put('/:id', validate(schemas.despesa), async (req, res) => {
 
     res.json({ ok: true });
   } catch(err) { res.status(500).json({ erro: err.message }); }
+});
+
+router.delete('/minhas/atuais-e-futuras', async (req, res) => {
+  const mesAtual = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit'
+  }).format(new Date());
+  const inicio = mesAtual + '-01';
+  if (req.body?.confirmar !== true || req.body?.inicio !== inicio) {
+    return res.status(400).json({ erro: 'Confira o mês atual e confirme a exclusão novamente.' });
+  }
+
+  let conn;
+  try {
+    conn = await pool.getConnection();
+    await conn.beginTransaction();
+    const escopo = [req.tenantId, req.usuario.id];
+    const [ativos] = await conn.execute(
+      "SELECT u.id FROM usuarios u JOIN tenants t ON t.id=u.tenant_id WHERE u.tenant_id=? AND u.id=? AND u.status='ativo' AND t.status='ativo' FOR UPDATE",
+      escopo
+    );
+    if (!ativos.length) {
+      await conn.rollback();
+      return res.status(403).json({ erro: 'Acesso inativo.' });
+    }
+    // Encerra a série, preservando o lançamento que a originou em um mês anterior.
+    await conn.execute(
+      'UPDATE despesas SET recorrente=0 WHERE tenant_id=? AND usuario_id=? AND recorrente=1 AND despesa_recorrente_id IS NULL AND vencimento < ?',
+      [...escopo, inicio]
+    );
+    const [resultado] = await conn.execute(
+      'DELETE FROM despesas WHERE tenant_id=? AND usuario_id=? AND vencimento >= ?',
+      [...escopo, inicio]
+    );
+    await conn.commit();
+    res.json({ excluidas: resultado.affectedRows });
+  } catch (erro) {
+    if (conn) await conn.rollback();
+    res.status(500).json({ erro: 'Não foi possível confirmar a limpeza das despesas.' });
+  } finally {
+    if (conn) conn.release();
+  }
 });
 
 router.delete('/:id', async (req, res) => {
