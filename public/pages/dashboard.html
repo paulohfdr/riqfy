@@ -14,6 +14,11 @@
 .calendar-dot.pending, .calendar-legend-dot.pending { background:#facc15; }
 .calendar-total.pending strong, .calendar-transaction.pending .calendar-transaction-value { color:#facc15; }
 .calendar-transaction.pending .calendar-transaction-icon { color:#facc15; background:#383017; }
+.calendar-month-summary { margin-top:20px; padding-top:18px; border-top:1px solid var(--borda); }
+.calendar-month-summary dl { display:grid; grid-template-columns:1fr auto; gap:10px 12px; margin:14px 0 0; font-size:13px; }
+.calendar-month-summary dt { color:var(--muted); }
+.calendar-month-summary dd { margin:0; text-align:right; font-weight:700; font-variant-numeric:tabular-nums; }
+#month-expenses { color:#fb7185; } #month-income { color:#4ade80; } #month-pending { color:#facc15; }
 .calendar-total.pending { grid-column:1/-1; }
 
 .calendar-day.holiday .calendar-day-number, .calendar-holiday-label { color:#ff858e; }
@@ -149,7 +154,7 @@
             <span><i class="calendar-legend-dot income"></i> Receitas recebidas</span>
           </div>
         </div>
-        <aside class="calendar-details" aria-live="polite" aria-label="Lançamentos da data selecionada">
+        <aside class="calendar-details" aria-live="polite" aria-label="Resumos do dia e do mês">
           <div class="calendar-detail-heading">
             <div>
               <p class="calendar-eyebrow">Resumo do dia</p>
@@ -165,6 +170,15 @@
           <div id="calendar-transactions" class="calendar-transactions">
             <div class="calendar-empty">Carregando lançamentos…</div>
           </div>
+          <section class="calendar-month-summary calendar-detail-heading" aria-labelledby="month-summary-title" id="month-summary" hidden>
+            <p class="calendar-eyebrow">Resumo do mês</p>
+            <h3 id="month-summary-title"></h3>
+            <dl>
+              <dt>Despesas com vencimento no mês</dt><dd id="month-expenses"></dd>
+              <dt>Receitas recebidas no mês</dt><dd id="month-income"></dd>
+              <dt>A receber no mês</dt><dd id="month-pending"></dd>
+            </dl>
+          </section>
         </aside>
       </div>
     </section>
@@ -214,6 +228,7 @@
 <script>
 let chartEvolucao, chartCat, chartDonut;
 let calendarDays = {};
+let dashboardRequest = 0;
 let selectedCalendarDate = '';
 const _receitasMap = {};
 Chart.defaults.color = '#a1a1aa';
@@ -232,12 +247,14 @@ Chart.defaults.scale.grid.color = 'rgba(161, 161, 170, 0.12)';
 })();
 
 async function carregar() {
+  const request = ++dashboardRequest;
+  document.getElementById('month-summary').hidden = true;
   const mes = document.getElementById('sel-mes').value;
   const ano = document.getElementById('sel-ano').value;
   document.getElementById('ano-chart').textContent = ano;
   try {
     const d = await apiFetch(`/dashboard?mes=${mes}&ano=${ano}`);
-    if (!d) return;
+    if (!d || request !== dashboardRequest) return;
 
     const saldo = d.saldo;
     document.getElementById('cv-saldo').textContent = fmtBRL(saldo);
@@ -252,7 +269,7 @@ async function carregar() {
     renderCategorias(d.porCategoria);
     renderDonut(d.receitas, d.despesas);
     renderProximas(d.proximasContas);
-    await carregarCalendario(mes, ano);
+    await carregarCalendario(mes, ano, request);
   } catch(e) { toast(e.message, 'error'); }
 }
 
@@ -272,10 +289,10 @@ function mudarMesCalendario(delta) {
   carregar();
 }
 
-async function carregarCalendario(mes, ano) {
+async function carregarCalendario(mes, ano, request) {
   const params = new URLSearchParams({ mes, ano });
   const resposta = await apiFetch(`/dashboard/calendario?${params}`);
-  if (!resposta) return;
+  if (!resposta || request !== dashboardRequest) return;
   calendarDays = resposta.dias || {};
 
   const mesAtual = Number(mes) - 1;
@@ -284,6 +301,15 @@ async function carregarCalendario(mes, ano) {
   document.getElementById('calendar-month-label').textContent = new Intl.DateTimeFormat('pt-BR', {
     month: 'long', year: 'numeric'
   }).format(new Date(Number(ano), mesAtual, 1));
+
+  const dias = Object.values(calendarDays);
+  const totalMes = campo => dias.reduce((centavos, dia) =>
+    centavos + Math.round(Number(dia[campo] || 0) * 100), 0) / 100;
+  document.getElementById('month-summary-title').textContent = document.getElementById('calendar-month-label').textContent;
+  document.getElementById('month-expenses').textContent = fmtBRL(totalMes('despesas'));
+  document.getElementById('month-income').textContent = fmtBRL(totalMes('receitas'));
+  document.getElementById('month-pending').textContent = fmtBRL(totalMes('pendentes'));
+  document.getElementById('month-summary').hidden = false;
 
   if (!selectedCalendarDate || !selectedCalendarDate.startsWith(`${ano}-${String(mes).padStart(2, '0')}-`)) {
     const hoje = new Date();
