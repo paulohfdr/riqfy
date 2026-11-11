@@ -76,9 +76,10 @@ async function gerarRecorrenciasTenant(slug) {
         `INSERT INTO despesas
          (tenant_id, descricao, valor, vencimento, categoria_id, usuario_id,
           forma_pagamento, recorrente, total_parcelas, parcela_atual, despesa_recorrente_id)
-         VALUES (?,?,?,?,?,?,?,0,1,1,?)`,
+         SELECT ?,?,?,?,?,?,?,0,1,1,? FROM despesas origem
+         WHERE origem.tenant_id = ? AND origem.id = ? AND origem.recorrente = 1`,
         [db.tenantId, mae.descricao, mae.valor, novaData,
-         mae.categoria_id, mae.usuario_id, mae.forma_pagamento, mae.id]
+         mae.categoria_id, mae.usuario_id, mae.forma_pagamento, mae.id, db.tenantId, mae.id]
       );
     }
   }

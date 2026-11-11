@@ -75,6 +75,11 @@
 .vencimento b { margin-left:auto; white-space:nowrap; }
 #proximas-contas summary { padding:6px 0; font-size:12px; cursor:pointer; color:var(--muted); }
 #proximas-contas details .vencimento { border-top:1px solid #34383e; padding:6px 0; }
+#limpeza { margin:auto; padding:24px; width:min(440px,94vw); color:var(--texto); background:var(--bg-card); border:1px solid var(--borda); border-radius:14px; }
+#limpeza::backdrop { background:#000a; }
+#limpeza p { margin:14px 0; line-height:1.5; }
+.limpeza-acoes { display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
+#confirmar-limpeza { background:#ab283c; color:white; }
 </style>
 </head>
 <body>
@@ -86,9 +91,10 @@
       <label>Mês e ano</label>
       <select id="sel-mes" onchange="carregar()"></select>
       <select id="sel-ano" onchange="carregar()"></select>
-      <nav class="acoes-dashboard" aria-label="Novo lançamento">
+      <nav class="acoes-dashboard" aria-label="Ações dos lançamentos">
         <a class="btn btn-primary" href="/receitas#novo">+ Receita</a>
         <a class="btn btn-primary" href="/despesas#novo">+ Despesa</a>
+        <button type="button" class="btn" onclick="abrirLimpeza()">Zerar meus lançamentos</button>
       </nav>
     </div>
 
@@ -189,6 +195,17 @@
   </div>
 </div>
 
+<dialog id="limpeza" aria-labelledby="titulo-limpeza">
+  <h2 id="titulo-limpeza">Apagar meus lançamentos?</h2>
+  <p>Isso apaga seus lançamentos de todos os meses, incluindo despesas parceladas e recorrentes. A exclusão é permanente.</p>
+  <label><input id="manter-pendentes" type="checkbox" checked onchange="atualizarAvisoLimpeza()"> Manter minhas receitas a receber</label>
+  <p id="aviso-limpeza" role="status"></p>
+  <div class="limpeza-acoes">
+    <button type="button" class="btn" id="cancelar-limpeza" onclick="document.getElementById('limpeza').close()" autofocus>Cancelar</button>
+    <button type="button" class="btn" id="confirmar-limpeza" onclick="confirmarLimpeza()">Confirmar exclusão</button>
+  </div>
+</dialog>
+
 <!-- Modal Marcar Como Recebida -->
 <div class="modal-overlay hidden" id="modal-receber">
   <div class="modal">
@@ -230,6 +247,41 @@ Chart.defaults.scale.grid.color = 'rgba(161, 161, 170, 0.12)';
   renderUserBadge(u);
   preencherFiltroMesAno('sel-mes', 'sel-ano', carregar);
 })();
+
+function atualizarAvisoLimpeza() {
+  document.getElementById('aviso-limpeza').textContent = document.getElementById('manter-pendentes').checked
+    ? 'Serão apagadas suas despesas e suas receitas já recebidas.'
+    : 'Serão apagadas todas as suas despesas e receitas, inclusive as que ainda estão a receber.';
+}
+
+function abrirLimpeza() {
+  document.getElementById('manter-pendentes').checked = true;
+  atualizarAvisoLimpeza();
+  document.getElementById('limpeza').showModal();
+}
+
+async function confirmarLimpeza() {
+  const dialog = document.getElementById('limpeza');
+  const confirmar = document.getElementById('confirmar-limpeza');
+  const cancelar = document.getElementById('cancelar-limpeza');
+  const manter = document.getElementById('manter-pendentes');
+  if (!dialog.open || confirmar.disabled) return;
+  confirmar.disabled = cancelar.disabled = manter.disabled = true;
+  try {
+    const resultado = await apiFetch('/tenant/meus-lancamentos', {
+      method: 'DELETE',
+      body: JSON.stringify({ confirmar: true, manterPendentes: manter.checked })
+    });
+    if (!resultado) return;
+    dialog.close();
+    toast(`Exclusão concluída: ${resultado.despesas} despesa(s) e ${resultado.receitas} receita(s).`);
+    await carregar();
+  } catch {
+    document.getElementById('aviso-limpeza').textContent = 'Não foi possível confirmar o resultado. Atualize a página para conferir seus lançamentos.';
+  } finally {
+    confirmar.disabled = cancelar.disabled = manter.disabled = false;
+  }
+}
 
 async function carregar() {
   const mes = document.getElementById('sel-mes').value;
