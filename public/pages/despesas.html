@@ -91,7 +91,6 @@
         <div class="table-actions">
           <button class="btn btn-danger" onclick="abrirModal()">+ Nova Despesa</button>
           <button class="btn btn-warning" onclick="apagarSelecionados()">🗑 Apagar em massa</button>
-          <button type="button" class="btn btn-danger" onclick="zerarDespesas(this)">Zerar minhas despesas atuais e futuras</button>
         </div>
       </div>
       <table style="table-layout:fixed;min-width:900px">
@@ -391,31 +390,6 @@ function setRecorrente(val) {
 
 function toggleRecorrente() {
   setRecorrente(document.getElementById('f-recorrente').value !== 'true');
-}
-
-async function zerarDespesas(botao) {
-  const mes = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit'
-  }).format(new Date());
-  const inicio = mes + '-01';
-  const aviso = 'Apagar permanentemente todas as suas despesas com vencimento a partir de ' + fmtDataCurta(inicio) +
-    ', incluindo parcelas futuras? As suas recorrências serão encerradas. As receitas e os valores dos meses anteriores serão preservados.';
-  if (!window.confirm(aviso)) return;
-  botao.disabled = true;
-  try {
-    const resultado = await apiFetch('/despesas/minhas/atuais-e-futuras', {
-      method: 'DELETE',
-      body: JSON.stringify({ confirmar: true, inicio })
-    });
-    if (!resultado) return;
-    document.getElementById('chk-all').checked = false;
-    toast('Despesas excluídas: ' + resultado.excluidas);
-    await carregar();
-  } catch (erro) {
-    toast(erro.message, 'error');
-  } finally {
-    botao.disabled = false;
-  }
 }
 
 async function apagarSelecionados() {

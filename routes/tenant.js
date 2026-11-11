@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { getMasterDb } = require('../db/master');
-const { getDb, pool } = require('../db/database');
+const { getDb } = require('../db/database');
 const { authMiddleware } = require('../middleware/auth');
 
 router.use(authMiddleware);
@@ -50,37 +50,6 @@ router.get('/uso', async (req, res) => {
       max_lancamentos_mes: tenant?.max_lancamentos_mes ?? 50
     });
   } catch(e) { res.status(500).json({ erro: e.message }); }
-});
-
-router.delete('/meus-lancamentos', async (req, res) => {
-  const { confirmar, manterPendentes } = req.body || {};
-  if (confirmar !== true || typeof manterPendentes !== 'boolean') {
-    return res.status(400).json({ erro: 'Confirme a exclusão e escolha o destino das receitas pendentes.' });
-  }
-  const escopo = [req.tenantId, req.usuario.id];
-  let conn;
-  try {
-    conn = await pool.getConnection();
-    await conn.beginTransaction();
-    const [ativos] = await conn.execute(
-      "SELECT u.id FROM usuarios u JOIN tenants t ON t.id=u.tenant_id WHERE u.tenant_id=? AND u.id=? AND u.status='ativo' AND t.status='ativo' FOR UPDATE",
-      escopo
-    );
-    if (!ativos.length) {
-      await conn.rollback();
-      return res.status(403).json({ erro: 'Acesso inativo.' });
-    }
-    const [despesas] = await conn.execute('DELETE FROM despesas WHERE tenant_id=? AND usuario_id=?', escopo);
-    const filtroReceitas = manterPendentes ? " AND status='recebida'" : '';
-    const [receitas] = await conn.execute('DELETE FROM receitas WHERE tenant_id=? AND usuario_id=?' + filtroReceitas, escopo);
-    await conn.commit();
-    res.json({ despesas: despesas.affectedRows, receitas: receitas.affectedRows });
-  } catch (erro) {
-    if (conn) await conn.rollback();
-    res.status(500).json({ erro: 'Falha ao limpar seus lançamentos. Atualize a página e confira os dados.' });
-  } finally {
-    if (conn) conn.release();
-  }
 });
 
 module.exports = router;

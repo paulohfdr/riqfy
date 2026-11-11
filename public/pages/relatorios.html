@@ -66,62 +66,6 @@
   transition: opacity 0.15s;
 }
 .btn-apply:hover { opacity: 0.88; }
-.export-wrap {
-  position: relative;
-  display: inline-flex;
-}
-.btn-export {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  background: #f8fafc;
-  color: #374151;
-  border: 1.5px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-  white-space: nowrap;
-}
-.btn-export:hover { background: #e2e8f0; border-color: #94a3b8; }
-.btn-export .chevron { margin-left: 2px; opacity: 0.55; transition: transform 0.15s; }
-.export-wrap.open .btn-export { background: #e2e8f0; border-color: #94a3b8; }
-.export-wrap.open .chevron { transform: rotate(180deg); }
-.export-dropdown {
-  display: none;
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  background: #fff;
-  border: 1.5px solid #e2e8f0;
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  min-width: 170px;
-  z-index: 50;
-  overflow: hidden;
-}
-.export-wrap.open .export-dropdown { display: block; }
-.export-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 11px 16px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #1e293b;
-  cursor: pointer;
-  transition: background 0.1s;
-  border: none;
-  background: none;
-  width: 100%;
-  text-align: left;
-}
-.export-option:hover { background: #f1f5f9; }
-.export-option + .export-option { border-top: 1px solid #f1f5f9; }
-.export-option svg { flex-shrink: 0; color: #64748b; }
-
 /* ===== PRINT / PDF ===== */
 .pdf-header { display: none; }
 .report-heading h2 { color: var(--texto); font-size: 20px; }
@@ -135,7 +79,10 @@
   body .main, body .content { display:block; width:auto; max-width:none; min-height:0; overflow:visible; margin:0!important; padding:0!important; }
   .pdf-header { display:flex; justify-content:space-between; gap:15mm; align-items:flex-start; padding-bottom:5mm; border-bottom:2pt solid #ed762d; margin-bottom:6mm; }
   .pdf-header h1 { font-size:22pt; line-height:1.2; margin:1mm 0 2mm; }
-  .pdf-header strong { color:#a74312; letter-spacing:.08em; }
+  .pdf-brand { text-align:right; }
+  .pdf-brand img { display:inline-block; width:32mm; height:16mm; object-fit:contain; padding:1mm 3mm; background:#15181c; border-radius:2mm; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+  .pdf-header p { margin:1mm 0; color:#444c55; }
+  .pdf-header { break-inside:avoid; }
   #pdf-meta { text-align:right; color:#525c67; font-size:9pt; }
   .summary-cards.cols-4 { display:grid!important; grid-template-columns:repeat(4,1fr)!important; gap:4mm; margin:0 0 6mm; }
   body .summary-card,body .table-card { background:#fff!important; color:#20252b!important; box-shadow:none!important; min-width:0; }
@@ -192,8 +139,8 @@ th.sortable:not(.asc):not(.desc) .si::after { content: '⇅'; }
 
     <!-- Cabeçalho visível apenas no PDF -->
     <header class="pdf-header">
-      <div><strong>RiqFy</strong><h1>Relatório de despesas</h1><p id="pdf-periodo"></p><p id="pdf-filtros"></p></div>
-      <div id="pdf-meta"></div>
+      <div><h1>Relatório de despesas</h1><p id="pdf-periodo"></p><p id="pdf-filtros"></p></div>
+      <div class="pdf-brand"><img src="/img/logo_riqfy_noturno.svg" alt="RiqFy"><div id="pdf-meta"></div></div>
     </header>
     <div class="report-heading">
       <h2>Relatório de despesas</h2>
@@ -296,23 +243,8 @@ th.sortable:not(.asc):not(.desc) .si::after { content: '⇅'; }
       <div class="table-header">
         <h3>Lançamentos do Período</h3>
         <div class="table-actions">
-          <div class="export-wrap" id="export-wrap">
-            <button class="btn-export" onclick="toggleExportMenu()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Exportar
-              <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="export-dropdown">
-              <button class="export-option" onclick="exportarCSV()">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
-                Exportar CSV
-              </button>
-              <button class="export-option" onclick="exportarPDF()">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-                Exportar PDF
-              </button>
-            </div>
-          </div>
+          <button type="button" class="btn btn-info" onclick="exportarCSV()">Exportar CSV</button>
+          <button type="button" class="btn btn-primary" onclick="exportarPDF()">Exportar PDF</button>
         </div>
       </div>
       <div style="overflow-x:auto">
@@ -592,18 +524,7 @@ function renderTabela(lista) {
   `;
 }
 
-function toggleExportMenu() {
-  document.getElementById('export-wrap').classList.toggle('open');
-}
-
-document.addEventListener('click', e => {
-  if (!e.target.closest('#export-wrap')) {
-    document.getElementById('export-wrap')?.classList.remove('open');
-  }
-});
-
 function exportarCSV() {
-  document.getElementById('export-wrap').classList.remove('open');
   if (!filtrados.length) { toast('Nenhum dado para exportar.', 'error'); return; }
   const headers = ['Data/Vencimento','Descrição','Categoria','Forma','Parcela','Recorrente','Valor'];
   const rows = ordenar(filtrados).map(d => [
@@ -631,8 +552,7 @@ function exportarCSV() {
 }
 
 function exportarPDF() {
-  document.getElementById('export-wrap').classList.remove('open');
-  if (!filtrados.length) { toast('Nenhum dado para exportar.', 'error'); return; }
+  if (!dataIniAtiva) { toast('Carregue um período antes de exportar o PDF.', 'error'); return; }
   prepararImpressao();
   window.print();
 }
