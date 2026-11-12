@@ -1,0 +1,88 @@
+/* Cores de interface. Receitas, despesas e pendências mantêm suas cores de status. */
+:root {
+  --bg: #15120f;
+  --bg-card: #231f1b;
+  --surface-raised: #2c2621;
+  --surface-hover: #393028;
+  --sidebar-bg: #1a1613;
+  --sidebar-border: #4a3a2c;
+  --texto: #fff2df;
+  --dark: #fff2df;
+  --muted: #c2b4a5;
+  --borda: #534337;
+  --primary: #ff914d;
+  --primary-hover: #ffac72;
+  --copper-surface: linear-gradient(135deg, #342b24, #231f1b 62%);
+  --copper-light: #ffc397;
+  --dk: var(--bg);
+  --dk2: var(--bg-card);
+  --dk3: var(--surface-raised);
+  --o: var(--primary);
+  --o3: var(--primary-hover);
+  --t1: var(--texto);
+}
+
+body {
+  color: var(--texto);
+  background-color: var(--bg);
+}
+body:has(.main), body:has(.auth-card), body:has(.slug-preview) {
+  background-image: radial-gradient(ellipse 75% 400px at 80% 0, #3a291d, transparent);
+}
+:is(.sidebar, .bottom-nav, .more-menu, .topbar) {
+  background-color: var(--sidebar-bg);
+  border-color: var(--sidebar-border);
+}
+.nav-item.active, .more-menu-item.active {
+  background: #462d1e;
+  color: var(--copper-light);
+  box-shadow: inset 3px 0 #ef8844;
+}
+:is(.summary-card, .chart-card, .table-card, .finance-calendar, .stat-card, .auth-card, .modal, .filter-bar, .feat-card) {
+  background: var(--copper-surface);
+  border-color: var(--borda);
+}
+:is(.table-header, .finance-calendar-header) {
+  background: linear-gradient(100deg, #35291f, #241e19 75%);
+  border-color: var(--borda);
+}
+:is(.summary-card, .chart-card, .table-card):hover { border-color: #77583f; }
+:is(.content, .login-card, .auth-card, .modal) :is(h1, h2, h3) {
+  color: var(--texto);
+  letter-spacing: -.035em;
+  font-weight: 800;
+}
+.calendar-details { background: #1c1815; }
+.calendar-eyebrow { color: var(--copper-light); }
+.calendar-empty { border-color: var(--borda); }
+.calendar-day.selected { background: #4c3020; }
+.calendar-day.holiday .calendar-day-number { color: #ff939a; }
+body :is(.btn-primary, .btn-warning, .btn-apply), .btn-primary:hover {
+  background: var(--primary);
+  color: #22170e;
+}
+:focus-visible { outline: 2px solid var(--primary-hover); outline-offset: 2px; }
+input, select, textarea { accent-color: var(--primary); }
+
+/* Telas independentes de autenticação e administração. */
+.login-card, body:has(.slug-preview) .card {
+  background: linear-gradient(150deg, #513827ed, #28221ef2 45%, #201b18f5);
+  border: 1px solid #906847;
+  box-shadow: 0 18px 55px #09060370, inset 0 1px #efba8c44;
+}
+.login-card :is(input, button), body:has(.slug-preview) .form-group input { border-radius: 10px; }
+.login-card input, body:has(.slug-preview) .form-group input,
+body:has(.auth-card) :is(input, select, textarea) {
+  color: var(--texto); background-color: #211c18; border-color: #705744;
+}
+.login-card button[type=submit], body:has(.slug-preview) .btn {
+  background-color: var(--primary); color: #24170e;
+}
+body:has(.auth-card) :is(.auth-card, .stat-card, .table-card, .modal) {
+  background: var(--copper-surface); border-color: var(--borda);
+}
+body:has(.auth-card) .topbar { background: #211a15; border-bottom: 1px solid #755132; }
+body:has(.auth-card) th { background: #2c231c; color: var(--muted); }
+body:has(.auth-card) tr:hover td { background: var(--surface-hover); }
+body:has(.auth-card) .btn-primary { background: var(--primary); color: #22170e; }
+body .main :is(h1,h2,h3)[style*="color:#0f172a"] { color: var(--texto) !important; }
