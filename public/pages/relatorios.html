@@ -73,7 +73,6 @@
 .report-heading p { color: var(--muted); font-size: 13px; }
 @page { size: A4 landscape; margin: 14mm; }
 @media print {
-  .tema-barra { display:none!important; }
   body { --texto:#20252b; --muted:#525c67; --bg:#fff; --bg-card:#fff; --borda:#d4d8dc;
     color-scheme:light; background:white!important; color:#20252b; display:block; font:10pt Arial,sans-serif; }
   #sidebar-root,#topbar-root,#bottom-nav-root,.filter-panel,.table-actions,.toast-container,.report-heading,.card-icon,.si { display:none!important; }
@@ -131,14 +130,11 @@ th.sortable:not(.asc):not(.desc) .si::after { content: '⇅'; }
   .filter-panel { padding: 14px; gap: 10px; }
 }
 </style>
-<link rel="stylesheet" href="/css/aparencia.css?v=1" media="screen">
-<script src="/js/aparencia.js?v=1"></script>
 </head>
 <body>
 <div id="sidebar-root"></div>
 <div class="main">
   <div id="topbar-root"></div>
-  <div class="tema-barra"><button type="button" class="tema-botao" aria-label="Ativar modo claro" title="Ativar modo claro">☀</button></div>
   <div class="content">
 
     <!-- Cabeçalho visível apenas no PDF -->

@@ -81,14 +81,11 @@
 #proximas-contas summary { padding:6px 0; font-size:12px; cursor:pointer; color:var(--muted); }
 #proximas-contas details .vencimento { border-top:1px solid #34383e; padding:6px 0; }
 </style>
-<link rel="stylesheet" href="/css/aparencia.css?v=1" media="screen">
-<script src="/js/aparencia.js?v=1"></script>
 </head>
 <body>
 <div id="sidebar-root"></div>
 <div class="main">
   <div id="topbar-root"></div>
-  <div class="tema-barra"><button type="button" class="tema-botao" aria-label="Ativar modo claro" title="Ativar modo claro">☀</button></div>
   <div class="content">
     <div class="filter-bar">
       <label>Mês e ano</label>
@@ -234,10 +231,10 @@ let calendarDays = {};
 let dashboardRequest = 0;
 let selectedCalendarDate = '';
 const _receitasMap = {};
-Chart.defaults.color = '#4b5563';
-Chart.defaults.borderColor = '#d9dee4';
+Chart.defaults.color = '#a1a1aa';
+Chart.defaults.borderColor = '#292e37';
 Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
-Chart.defaults.scale.grid.color = '#e4e7eb';
+Chart.defaults.scale.grid.color = 'rgba(161, 161, 170, 0.12)';
 
 (async () => {
   const u = await checkAuth();
